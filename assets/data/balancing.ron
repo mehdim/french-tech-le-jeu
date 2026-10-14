@@ -1,0 +1,56 @@
+// Gameplay balancing knobs (see crates/game-core/src/balancing.rs for meanings).
+// Payroll figures approximate French employer costs for gameplay only.
+(
+    start_cash: 30000.0,
+    start_reputation: 10.0,
+    start_accuracy: 53.0,
+    start_fpr: 14.0,
+    start_tech_debt: 5.0,
+
+    employer_contrib: 0.45,
+    jei_contrib: 0.20,
+    tools_per_employee: 60.0,
+    severance_months_per_year: 0.25,
+
+    hosting_base: 120.0,
+    hosting_per_customer: 1.2,
+    inference_cost_per_k: 5.0,
+    incident_base: 0.002,
+    incident_per_debt: 0.00012,
+    incident_per_kcustomer: 0.002,
+
+    accuracy_ceiling: 97.0,
+    drift_per_day: 0.025,
+    drift_growth_per_level: 0.12,
+
+    output_per_skill: 0.1,
+    fatigue_work: 3.2,
+    fatigue_weekend_recovery: 4.0,
+    fatigue_crunch: 3.0,
+    morale_base: 58.0,
+    morale_drift: 0.06,
+    onboarding_days: 14,
+    tech_debt_drag: 0.006,
+    tech_debt_daily_per_engineer: 0.012,
+
+    organic_leads: 1.2,
+    self_serve_rate: 0.10,
+    lead_decay: 0.04,
+    churn_quality_slope: 0.14,
+    churn_fpr_slope: 0.30,
+    competition_base: 0.08,
+    competition_per_level: 0.03,
+
+    event_chance_per_day: 0.10,
+    event_min_gap_days: 5,
+
+    bankruptcy_grace_days: 14,
+    bankruptcy_floor: -50000.0,
+    resign_morale_threshold: 25.0,
+
+    valuation_arr_multiple: 6.0,
+    valuation_floor: 350000.0,
+    valuation_per_engineer: 60000.0,
+    // Customers use the product a bit more every day (~+2 %/month).
+    usage_creep_per_day: 0.0007,
+)

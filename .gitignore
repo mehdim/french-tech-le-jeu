@@ -1,0 +1,5 @@
+target/
+dist/
+smoke-shots/
+__pycache__/
+*.pyc

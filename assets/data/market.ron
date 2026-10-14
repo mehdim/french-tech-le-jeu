@@ -1,0 +1,96 @@
+// Customer segments, geographic markets and campaign endings.
+(
+    segments: [
+        (
+            segment: Smb, name: "PME, écoles & freelances",
+            default_price: 49.0, reference_price: 49.0, min_price: 9.0, max_price: 299.0,
+            elasticity: 1.2, base_conversion: 0.22, sales_effort: 1.0, base_churn: 5.5,
+            usage: 4000.0, cost_per_lead: 35.0, requires_unlock: None,
+            required_features: ["mvp_text"], tam_per_market: 7000.0,
+        ),
+        (
+            segment: Mid, name: "Médias & universités",
+            default_price: 490.0, reference_price: 490.0, min_price: 99.0, max_price: 2990.0,
+            elasticity: 1.0, base_conversion: 0.12, sales_effort: 5.0, base_churn: 3.2,
+            usage: 40000.0, cost_per_lead: 250.0, requires_unlock: Some("segmentation"),
+            required_features: ["api_keys", "batch"], tam_per_market: 1800.0,
+        ),
+        (
+            segment: Enterprise, name: "Grands comptes & administrations",
+            default_price: 6000.0, reference_price: 6000.0, min_price: 1500.0, max_price: 30000.0,
+            elasticity: 0.8, base_conversion: 0.11, sales_effort: 28.0, base_churn: 1.1,
+            usage: 400000.0, cost_per_lead: 3000.0, requires_unlock: Some("enterprise"),
+            required_features: ["sso", "audit_logs", "gdpr"], tam_per_market: 350.0,
+        ),
+    ],
+
+    markets: [
+        (id: "fr", name: "France", flag: "FR", cost: 0.0, languages_required: 1, lead_mult: 1.0,
+         description: "Le marché domestique. 67 millions d'habitants, 12 000 startups d'IA."),
+        (id: "de", name: "Allemagne", flag: "DE", cost: 60000.0, languages_required: 3, lead_mult: 0.7,
+         description: "Grands comptes exigeants, procurement interminable, Datenschutz partout."),
+        (id: "es", name: "Espagne", flag: "ES", cost: 40000.0, languages_required: 3, lead_mult: 0.45,
+         description: "Universités nombreuses, médias très actifs, budgets plus serrés."),
+        (id: "benelux", name: "Benelux", flag: "BE", cost: 35000.0, languages_required: 1, lead_mult: 0.4,
+         description: "Francophones, néerlandophones, et des institutions européennes à Bruxelles."),
+        (id: "it", name: "Italie", flag: "IT", cost: 45000.0, languages_required: 6, lead_mult: 0.45,
+         description: "Un marché éditorial énorme et des PME très attachées au fax."),
+        (id: "nordics", name: "Pays nordiques", flag: "SE", cost: 50000.0, languages_required: 6, lead_mult: 0.35,
+         description: "Adoption rapide, salaires élevés, et des clients qui lisent vraiment les CGU."),
+    ],
+
+    endings: [
+        (
+            id: "unicorn", title: "La Licorne",
+            requires: [Unlocked("series_b"), ReputationAtLeast(45.0)],
+            requirement_text: "Série B débloquée et réputation ≥ 45",
+            headline: "« Veridix lève 180 M€ à une valorisation d'un milliard pour résoudre un problème dont personne ne connaît la définition. »",
+            art: "ending_unicorn",
+            epilogue: [
+                (speaker: "Les Échos", text: "Veridix devient la 33e licorne française. Le communiqué contient 14 fois le mot « souveraineté » et 0 fois le mot « rentabilité »."),
+                (speaker: "Vous", text: "On va recruter 400 personnes, ouvrir Singapour et sponsoriser une équipe de e-sport. Pourquoi ? Parce qu'on peut."),
+                (speaker: "Le board", text: "Excellent. Maintenant, il faut tripler l'ARR en 18 mois pour justifier la valorisation."),
+                (speaker: "Narrateur", text: "Deux ans plus tard, Veridix publie un post LinkedIn : « Nous avons pris la décision difficile de nous recentrer. » Les ingénieurs, eux, fondent trois startups excellentes."),
+            ],
+        ),
+        (
+            id: "profitable", title: "La Boîte Rentable",
+            requires: [NetBurnAtMost(0.0)],
+            requirement_text: "Être rentable (burn net ≤ 0)",
+            headline: "« Veridix, rentable et indépendante, ne fait la une d'aucun média. Elle s'en porte très bien. »",
+            art: "ending_profitable",
+            epilogue: [
+                (speaker: "Vous", text: "On a décidé de ne plus lever. On vend un produit, des clients le paient, on paie nos salaires. Révolutionnaire."),
+                (speaker: "Bernard EBITDA", text: "Enfin ! Un EBITDA positif ! Je… je crois que je vais pleurer."),
+                (speaker: "Les VC", text: "« Ce n'est pas venture scale. » (Ils ont raison. Personne ne se plaint.)"),
+                (speaker: "Narrateur", text: "Veridix emploie 80 personnes à Paris, paie ses impôts en France, et sa machine à café a enfin un contrat de maintenance. Fièrement européenne."),
+            ],
+        ),
+        (
+            id: "acquisition", title: "Le Rachat",
+            requires: [],
+            requirement_text: "Toujours possible",
+            headline: "« Un géant américain rachète Veridix. Le produit sera « intégré à notre écosystème » (traduction : arrêté en 2028). »",
+            art: "ending_acquisition",
+            epilogue: [
+                (speaker: "Le géant américain", text: "We're thrilled to welcome the Veridix team! Their technology will power our trust & safety initiatives."),
+                (speaker: "Vous", text: "Earn-out de quatre ans, bureau à Dublin, badge bleu. La cafetière italienne est restée à Belleville."),
+                (speaker: "Narrateur", text: "Un ministre déplore « la fuite de nos pépites ». Le même ministre avait refusé de vous recevoir en niveau 3."),
+                (speaker: "Narrateur", text: "Vous êtes riche, un peu triste, et vous avez déjà un nouveau projet de startup sur un coin de nappe."),
+            ],
+        ),
+        (
+            id: "commons", title: "Les Communs",
+            requires: [ReputationAtLeast(60.0)],
+            requirement_text: "Réputation ≥ 60",
+            headline: "« Veridix ouvre son benchmark et ses modèles sous licence libre. Le monde de la recherche applaudit. Le CFO respire dans un sac en papier. »",
+            art: "ending_commons",
+            epilogue: [
+                (speaker: "Vous", text: "La détection universelle n'existe pas. Alors on publie tout : le benchmark, les modèles, les échecs. Et on vend le support, l'hébergement souverain et le service."),
+                (speaker: "La communauté", text: "Deux cents contributeurs en un mois. Un chercheur de Tampere corrige un bug vieux de trois ans en une ligne."),
+                (speaker: "Narrateur", text: "Veridix devient l'infrastructure de confiance de l'écosystème européen. Modèle commercial durable, communauté vivante, et un stand au FOSDEM."),
+                (speaker: "Narrateur", text: "Finalement, peut-être que la vraie licorne, c'était les ingénieurs qu'on a rencontrés en chemin."),
+            ],
+        ),
+    ],
+)

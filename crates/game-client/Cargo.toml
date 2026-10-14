@@ -1,0 +1,55 @@
+[package]
+name = "game-client"
+description = "French Tech Tycoon — Bevy presentation layer (office, HUD, menus, audio)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "french-tech-tycoon"
+path = "src/main.rs"
+
+[features]
+default = ["webgl2", "audio"]
+# Exactly one of `webgl2` / `webgpu` should be enabled for a browser build.
+# On native targets both are irrelevant (wgpu picks Vulkan/Metal/DX12).
+webgl2 = ["bevy/webgl2"]
+webgpu = ["bevy/webgpu"]
+audio = ["bevy/bevy_audio", "bevy/vorbis"]
+
+[dependencies]
+game-core.workspace = true
+game-content.workspace = true
+platform.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+bevy = { version = "=0.19.1", default-features = false, features = [
+    "std",
+    "async_executor",
+    "multi_threaded",
+    "bevy_asset",
+    "bevy_log",
+    "bevy_state",
+    "bevy_window",
+    "bevy_winit",
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_camera",
+    "bevy_color",
+    "bevy_image",
+    "bevy_sprite",
+    "bevy_sprite_render",
+    "bevy_text",
+    "default_font",
+    "png",
+    "touch",
+    "x11",
+    "web",
+] }
+bevy_egui = { version = "=0.42.0", default-features = false, features = ["render", "default_fonts"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlElement", "Location"] }

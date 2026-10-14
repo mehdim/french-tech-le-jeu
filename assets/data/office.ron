@@ -1,0 +1,134 @@
+// Office tiers (rent is monthly, euros) and placeable furniture.
+// The entrance is the cell (width/2, height-1); it must stay free and every
+// item must remain reachable from it.
+(
+    tiers: [
+        (
+            id: 0, name: "Appartement à Belleville",
+            description: "40 m², vue sur les toits en zinc, deux laptops sur la table du salon. Le loyer, c'est votre problème, pas celui de la boîte.",
+            width: 7, height: 6, rent: 0.0, deposit_months: 0.0, requires_unlock: None, floor: Parquet,
+            morale_bonus: 2.0,
+            wall_decor: ["window_roofs", "poster_disrupt", "bookshelf"],
+            starter: [(1, 1, "desk"), (4, 1, "desk"), (0, 4, "sofa"), (6, 0, "coffee_moka"), (6, 3, "plant")],
+        ),
+        (
+            id: 1, name: "Coworking « Le Garage »",
+            description: "1 400 €/mois pour deux bureaux, un baby-foot et du kombucha à volonté. Le Wi-Fi tombe à 15h.",
+            width: 9, height: 7, rent: 1400.0, deposit_months: 2.0, requires_unlock: Some("recruitment"), floor: Concrete,
+            morale_bonus: 2.0, reputation_bonus: 1.0,
+            wall_decor: ["window_large", "poster_works", "poster_disrupt", "neon_sign"],
+            starter: [(1, 4, "desk"), (6, 0, "coffee_machine")],
+        ),
+        (
+            id: 2, name: "Incubateur « La Pépinière Numérique »",
+            description: "Un programme de 6 mois, des mentors, et des ateliers « pitch » tous les jeudis.",
+            width: 11, height: 8, rent: 3200.0, deposit_months: 2.0, requires_unlock: Some("office_t2"), floor: Tiles,
+            morale_bonus: 4.0, reputation_bonus: 2.0,
+            wall_decor: ["window_large", "poster_works", "poster_disrupt", "whiteboard_wall", "flag_aws"],
+            starter: [(5, 0, "meeting_table")],
+        ),
+        (
+            id: 3, name: "Bureaux rue du Faubourg (Paris 10e)",
+            description: "Parquet point de Hongrie, moulures, et un ascenseur de 1902 qui tient à peine trois personnes.",
+            width: 13, height: 9, rent: 9000.0, deposit_months: 3.0, requires_unlock: Some("office_t3"), floor: Wood,
+            morale_bonus: 6.0, reputation_bonus: 4.0,
+            wall_decor: ["window_haussmann", "flag_aws", "poster_works", "hype_cycle", "poster_disrupt", "whiteboard_wall"],
+            starter: [(10, 0, "coffee_machine")],
+        ),
+        (
+            id: 4, name: "Campus « Station Effe »",
+            description: "Une halle ferroviaire géante, 1 000 startups, un ministre qui passe tous les mardis.",
+            width: 15, height: 11, rent: 18000.0, deposit_months: 3.0, requires_unlock: Some("office_t4"), floor: Concrete,
+            morale_bonus: 8.0, reputation_bonus: 6.0,
+            wall_decor: ["window_hall", "neon_sign", "flag_aws", "hype_cycle", "poster_works", "poster_disrupt", "whiteboard_wall"],
+            starter: [(12, 0, "coffee_machine"), (0, 8, "pingpong")],
+        ),
+        (
+            id: 5, name: "QG européen « Le Hub »",
+            description: "Trois étages, une salle « Ada Lovelace », une salle « Grace Hopper » et une salle « Minitel ».",
+            width: 18, height: 12, rent: 38000.0, deposit_months: 3.0, requires_unlock: Some("office_t5"), floor: Marble,
+            morale_bonus: 10.0, reputation_bonus: 8.0,
+            wall_decor: ["window_hall", "neon_sign", "flag_aws", "hype_cycle", "poster_works", "whiteboard_wall", "poster_disrupt", "eu_flag"],
+            starter: [(15, 0, "coffee_machine")],
+        ),
+    ],
+
+    furniture: [
+        (
+            id: "desk", name: "Bureau + laptop", sprite: "desk",
+            description: "Un bureau IKEA et un laptop. Une place assise.",
+            cost: 450.0, size: (2, 1), effects: (seats: 1),
+        ),
+        (
+            id: "workstation", name: "Poste de travail pro", sprite: "workstation",
+            description: "Écran 4K, clavier mécanique, chaise qui ne grince pas. +4 % de production technique. Les ex-GAFAM l'exigent.",
+            cost: 1800.0, size: (2, 1), max_effective: 30, effects: (seats: 1, eng_bonus: 0.04),
+        ),
+        (
+            id: "plant", name: "Monstera", sprite: "plant",
+            description: "Moral +1,5. Survit mieux que la plupart des side-projects. (6 max)",
+            cost: 60.0, size: (1, 1), max_effective: 6, effects: (morale: 1.5),
+        ),
+        (
+            id: "coffee_moka", name: "Cafetière italienne", sprite: "coffee_moka",
+            description: "Le carburant des fondateurs. Fatigue -0,3/jour.",
+            cost: 30.0, size: (1, 1), max_effective: 1, effects: (fatigue_recovery: 0.3, morale: 1.0),
+        ),
+        (
+            id: "coffee_machine", name: "Machine à café (uptime 99,99 %)", sprite: "coffee_machine",
+            description: "Meilleure disponibilité que la prod. Fatigue -0,6/jour, moral +2. (3 max)",
+            cost: 900.0, monthly: 40.0, size: (1, 1), max_effective: 3, effects: (fatigue_recovery: 0.6, morale: 2.0),
+        ),
+        (
+            id: "sofa", name: "Canapé", sprite: "sofa",
+            description: "Pour les siestes « de réflexion stratégique ». Fatigue -0,4/jour.",
+            cost: 500.0, size: (2, 1), max_effective: 2, effects: (fatigue_recovery: 0.4, morale: 1.5),
+        ),
+        (
+            id: "whiteboard", name: "Tableau blanc", sprite: "whiteboard",
+            description: "Couvert de diagrammes d'architecture que personne n'efface. Recherche +5 %. (3 max)",
+            cost: 250.0, size: (1, 1), max_effective: 3, effects: (research_bonus: 0.05),
+        ),
+        (
+            id: "meeting_table", name: "Table de réunion", sprite: "meeting_table",
+            description: "Démos clients et rétros qui débordent. Ventes +8 %. (2 max)",
+            cost: 2500.0, size: (2, 2), max_effective: 2, effects: (sales_bonus: 0.08, morale: 1.0),
+        ),
+        (
+            id: "server_rack", name: "Baie de serveurs", sprite: "server_rack",
+            description: "Héberger une partie de l'inférence soi-même : coût -6 %, mais +350 €/mois d'électricité et un peu plus d'incidents. (4 max)",
+            cost: 6000.0, monthly: 350.0, size: (1, 1), max_effective: 4, effects: (inference_cost: 0.06, incident_risk: 0.08),
+        ),
+        (
+            id: "gpu_server", name: "Serveur GPU (d'occasion)", sprite: "gpu_server",
+            description: "Des H100 rachetés à une startup crypto. Inférence -10 %, recherche +8 %. 900 €/mois de courant. (4 max)",
+            cost: 28000.0, monthly: 900.0, size: (1, 1), max_effective: 4, requires_unlock: Some("research"),
+            effects: (inference_cost: 0.10, research_bonus: 0.08, incident_risk: 0.05),
+        ),
+        (
+            id: "k8s_cluster", name: "Cluster Kubernetes artisanal", sprite: "k8s_cluster",
+            description: "Une machine inutilement compliquée qui clignote. Incidents -10 %, +600 €/mois. Les DevOps l'adorent.",
+            cost: 4000.0, monthly: 600.0, size: (2, 1), max_effective: 1, effects: (incident_risk: -0.10, morale: 1.0),
+        ),
+        (
+            id: "pingpong", name: "Table de ping-pong (cassée)", sprite: "pingpong",
+            description: "Moral +3, productivité -2 %. Le filet a disparu en 2023.",
+            cost: 700.0, size: (2, 2), max_effective: 1, effects: (morale: 3.0, productivity: -0.02),
+        ),
+        (
+            id: "beanbag", name: "Pouf géant", sprite: "beanbag",
+            description: "Moral +1, fatigue -0,2/jour. Impossible d'en sortir avec dignité. (4 max)",
+            cost: 150.0, size: (1, 1), max_effective: 4, effects: (morale: 1.0, fatigue_recovery: 0.2),
+        ),
+        (
+            id: "arcade", name: "Borne d'arcade", sprite: "arcade",
+            description: "Moral +2,5, productivité -1 %. Le high score appartient au stagiaire.",
+            cost: 2000.0, size: (1, 1), max_effective: 1, effects: (morale: 2.5, productivity: -0.01),
+        ),
+        (
+            id: "bookshelf", name: "Bibliothèque technique", sprite: "bookshelf_item",
+            description: "SICP, le Dragon Book et trois livres de growth hacking jamais ouverts. Recherche +3 %.",
+            cost: 300.0, size: (1, 1), max_effective: 2, effects: (research_bonus: 0.03, morale: 0.5),
+        ),
+    ],
+)

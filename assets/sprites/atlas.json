@@ -1,0 +1,1289 @@
+{
+ "characters": {
+  "anchor": [
+   8,
+   25
+  ],
+  "anims": {
+   "coffee": [
+    8,
+    2
+   ],
+   "idle": [
+    0,
+    2
+   ],
+   "panic": [
+    14,
+    2
+   ],
+   "talk": [
+    10,
+    2
+   ],
+   "tired": [
+    12,
+    2
+   ],
+   "walk": [
+    2,
+    4
+   ],
+   "work": [
+    6,
+    2
+   ]
+  },
+  "frame": [
+   16,
+   26
+  ],
+  "frames_per_row": 16,
+  "looks": 8,
+  "roles": [
+   "Founder",
+   "Backend",
+   "Frontend",
+   "AiResearcher",
+   "DevOps",
+   "Sales",
+   "Growth",
+   "ProductManager",
+   "Hr",
+   "Cfo",
+   "Intern",
+   "Consultant"
+  ]
+ },
+ "decor": {
+  "bookshelf_L": {
+   "anchor": [
+    18,
+    0
+   ],
+   "rect": [
+    58,
+    52,
+    18,
+    33
+   ]
+  },
+  "bookshelf_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    77,
+    52,
+    18,
+    33
+   ]
+  },
+  "bpi_certificate_L": {
+   "anchor": [
+    27,
+    0
+   ],
+   "rect": [
+    188,
+    0,
+    27,
+    37
+   ]
+  },
+  "bpi_certificate_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    216,
+    0,
+    27,
+    37
+   ]
+  },
+  "eu_flag_L": {
+   "anchor": [
+    17,
+    0
+   ],
+   "rect": [
+    194,
+    52,
+    17,
+    22
+   ]
+  },
+  "eu_flag_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    212,
+    52,
+    17,
+    22
+   ]
+  },
+  "flag_aws_L": {
+   "anchor": [
+    33,
+    0
+   ],
+   "rect": [
+    0,
+    0,
+    33,
+    51
+   ]
+  },
+  "flag_aws_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    34,
+    0,
+    33,
+    51
+   ]
+  },
+  "hype_cycle_L": {
+   "anchor": [
+    27,
+    0
+   ],
+   "rect": [
+    132,
+    0,
+    27,
+    38
+   ]
+  },
+  "hype_cycle_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    160,
+    0,
+    27,
+    38
+   ]
+  },
+  "neon_sign_L": {
+   "anchor": [
+    30,
+    0
+   ],
+   "rect": [
+    132,
+    52,
+    30,
+    23
+   ]
+  },
+  "neon_sign_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    163,
+    52,
+    30,
+    23
+   ]
+  },
+  "poster_disrupt_L": {
+   "anchor": [
+    17,
+    0
+   ],
+   "rect": [
+    96,
+    52,
+    17,
+    29
+   ]
+  },
+  "poster_disrupt_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    114,
+    52,
+    17,
+    29
+   ]
+  },
+  "poster_works_L": {
+   "anchor": [
+    31,
+    0
+   ],
+   "rect": [
+    68,
+    0,
+    31,
+    43
+   ]
+  },
+  "poster_works_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    100,
+    0,
+    31,
+    43
+   ]
+  },
+  "whiteboard_wall_L": {
+   "anchor": [
+    28,
+    0
+   ],
+   "rect": [
+    0,
+    52,
+    28,
+    34
+   ]
+  },
+  "whiteboard_wall_R": {
+   "anchor": [
+    0,
+    0
+   ],
+   "rect": [
+    29,
+    52,
+    28,
+    34
+   ]
+  }
+ },
+ "furniture": {
+  "arcade": {
+   "anchor": [
+    12,
+    33
+   ],
+   "rect": [
+    134,
+    0,
+    25,
+    49
+   ]
+  },
+  "beanbag": {
+   "anchor": [
+    10,
+    5
+   ],
+   "rect": [
+    50,
+    64,
+    21,
+    16
+   ]
+  },
+  "bookshelf_item": {
+   "anchor": [
+    11,
+    32
+   ],
+   "rect": [
+    160,
+    0,
+    23,
+    47
+   ]
+  },
+  "bubble_alert": {
+   "anchor": [
+    3,
+    10
+   ],
+   "rect": [
+    195,
+    64,
+    11,
+    11
+   ]
+  },
+  "bubble_heart": {
+   "anchor": [
+    3,
+    10
+   ],
+   "rect": [
+    231,
+    64,
+    11,
+    11
+   ]
+  },
+  "bubble_idea": {
+   "anchor": [
+    3,
+    10
+   ],
+   "rect": [
+    207,
+    64,
+    11,
+    11
+   ]
+  },
+  "bubble_money": {
+   "anchor": [
+    3,
+    10
+   ],
+   "rect": [
+    219,
+    64,
+    11,
+    11
+   ]
+  },
+  "coffee_machine": {
+   "anchor": [
+    17,
+    28
+   ],
+   "rect": [
+    184,
+    0,
+    35,
+    46
+   ]
+  },
+  "coffee_moka": {
+   "anchor": [
+    12,
+    15
+   ],
+   "rect": [
+    24,
+    64,
+    25,
+    28
+   ]
+  },
+  "desk": {
+   "anchor": [
+    17,
+    17
+   ],
+   "rect": [
+    392,
+    0,
+    51,
+    41
+   ]
+  },
+  "doormat": {
+   "anchor": [
+    11,
+    -2
+   ],
+   "rect": [
+    171,
+    64,
+    23,
+    13
+   ]
+  },
+  "fx_euro": {
+   "anchor": [
+    3,
+    4
+   ],
+   "rect": [
+    243,
+    64,
+    7,
+    9
+   ]
+  },
+  "fx_place_bad": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    138,
+    64,
+    32,
+    16
+   ]
+  },
+  "fx_place_ok": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    105,
+    64,
+    32,
+    16
+   ]
+  },
+  "fx_select": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    72,
+    64,
+    32,
+    16
+   ]
+  },
+  "fx_shadow": {
+   "anchor": [
+    7,
+    2
+   ],
+   "rect": [
+    273,
+    64,
+    14,
+    5
+   ]
+  },
+  "fx_smoke": {
+   "anchor": [
+    4,
+    4
+   ],
+   "rect": [
+    251,
+    64,
+    9,
+    9
+   ]
+  },
+  "fx_spark": {
+   "anchor": [
+    2,
+    2
+   ],
+   "rect": [
+    267,
+    64,
+    5,
+    5
+   ]
+  },
+  "fx_steam": {
+   "anchor": [
+    2,
+    6
+   ],
+   "rect": [
+    261,
+    64,
+    5,
+    7
+   ]
+  },
+  "gpu_server": {
+   "anchor": [
+    14,
+    27
+   ],
+   "rect": [
+    310,
+    0,
+    29,
+    43
+   ]
+  },
+  "k8s_cluster": {
+   "anchor": [
+    17,
+    37
+   ],
+   "rect": [
+    0,
+    0,
+    51,
+    63
+   ]
+  },
+  "meeting_table": {
+   "anchor": [
+    35,
+    9
+   ],
+   "rect": [
+    220,
+    0,
+    71,
+    45
+   ]
+  },
+  "pingpong": {
+   "anchor": [
+    30,
+    11
+   ],
+   "rect": [
+    444,
+    0,
+    61,
+    41
+   ]
+  },
+  "plant": {
+   "anchor": [
+    11,
+    23
+   ],
+   "rect": [
+    0,
+    64,
+    23,
+    37
+   ]
+  },
+  "server_rack": {
+   "anchor": [
+    14,
+    37
+   ],
+   "rect": [
+    52,
+    0,
+    29,
+    53
+   ]
+  },
+  "sofa": {
+   "anchor": [
+    17,
+    16
+   ],
+   "rect": [
+    340,
+    0,
+    51,
+    42
+   ]
+  },
+  "whiteboard": {
+   "anchor": [
+    8,
+    33
+   ],
+   "rect": [
+    292,
+    0,
+    17,
+    44
+   ]
+  },
+  "workstation": {
+   "anchor": [
+    17,
+    27
+   ],
+   "rect": [
+    82,
+    0,
+    51,
+    51
+   ]
+  }
+ },
+ "icons": {
+  "accuracy": {
+   "rect": [
+    96,
+    0,
+    12,
+    12
+   ]
+  },
+  "cash": {
+   "rect": [
+    0,
+    0,
+    12,
+    12
+   ]
+  },
+  "churn": {
+   "rect": [
+    60,
+    0,
+    12,
+    12
+   ]
+  },
+  "customers": {
+   "rect": [
+    48,
+    0,
+    12,
+    12
+   ]
+  },
+  "day": {
+   "rect": [
+    72,
+    0,
+    12,
+    12
+   ]
+  },
+  "debt": {
+   "rect": [
+    108,
+    0,
+    12,
+    12
+   ]
+  },
+  "fatigue": {
+   "rect": [
+    132,
+    0,
+    12,
+    12
+   ]
+  },
+  "leads": {
+   "rect": [
+    180,
+    0,
+    12,
+    12
+   ]
+  },
+  "morale": {
+   "rect": [
+    120,
+    0,
+    12,
+    12
+   ]
+  },
+  "mrr": {
+   "rect": [
+    12,
+    0,
+    12,
+    12
+   ]
+  },
+  "people": {
+   "rect": [
+    36,
+    0,
+    12,
+    12
+   ]
+  },
+  "quality": {
+   "rect": [
+    84,
+    0,
+    12,
+    12
+   ]
+  },
+  "reputation": {
+   "rect": [
+    144,
+    0,
+    12,
+    12
+   ]
+  },
+  "research": {
+   "rect": [
+    168,
+    0,
+    12,
+    12
+   ]
+  },
+  "runway": {
+   "rect": [
+    24,
+    0,
+    12,
+    12
+   ]
+  },
+  "valuation": {
+   "rect": [
+    156,
+    0,
+    12,
+    12
+   ]
+  }
+ },
+ "office": {
+  "floor_Carpet_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    264,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Carpet_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    297,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Concrete_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    0,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Concrete_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    33,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Marble_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    198,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Marble_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    231,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Parquet_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    432,
+    0,
+    32,
+    16
+   ]
+  },
+  "floor_Parquet_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    465,
+    0,
+    32,
+    16
+   ]
+  },
+  "floor_Tiles_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    66,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Tiles_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    99,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Wood_0": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    132,
+    73,
+    32,
+    16
+   ]
+  },
+  "floor_Wood_1": {
+   "anchor": [
+    16,
+    0
+   ],
+   "rect": [
+    165,
+    73,
+    32,
+    16
+   ]
+  },
+  "wall_0_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    0,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_0_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    18,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_0_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    36,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_0_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    54,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_1_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    72,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_1_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    90,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_1_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    108,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_1_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    126,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_2_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    144,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_2_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    162,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_2_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    180,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_2_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    198,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_3_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    216,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_3_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    234,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_3_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    252,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_3_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    270,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_4_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    288,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_4_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    306,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_4_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    324,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_4_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    342,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_5_L_plain": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    360,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_5_L_window": {
+   "anchor": [
+    16,
+    63
+   ],
+   "rect": [
+    378,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_5_R_plain": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    396,
+    0,
+    17,
+    72
+   ]
+  },
+  "wall_5_R_window": {
+   "anchor": [
+    0,
+    63
+   ],
+   "rect": [
+    414,
+    0,
+    17,
+    72
+   ]
+  }
+ },
+ "portraits": {
+  "advisor": {
+   "rect": [
+    40,
+    0,
+    40,
+    40
+   ]
+  },
+  "bernard": {
+   "rect": [
+    200,
+    0,
+    40,
+    40
+   ]
+  },
+  "bpi": {
+   "rect": [
+    80,
+    0,
+    40,
+    40
+   ]
+  },
+  "cfo": {
+   "rect": [
+    360,
+    0,
+    40,
+    40
+   ]
+  },
+  "founder": {
+   "rect": [
+    0,
+    0,
+    40,
+    40
+   ]
+  },
+  "generic": {
+   "rect": [
+    480,
+    0,
+    40,
+    40
+   ]
+  },
+  "jm": {
+   "rect": [
+    120,
+    0,
+    40,
+    40
+   ]
+  },
+  "narrator": {
+   "rect": [
+    280,
+    0,
+    40,
+    40
+   ]
+  },
+  "official": {
+   "rect": [
+    400,
+    0,
+    40,
+    40
+   ]
+  },
+  "patrick": {
+   "rect": [
+    160,
+    0,
+    40,
+    40
+   ]
+  },
+  "researcher": {
+   "rect": [
+    320,
+    0,
+    40,
+    40
+   ]
+  },
+  "sophie": {
+   "rect": [
+    240,
+    0,
+    40,
+    40
+   ]
+  },
+  "vc": {
+   "rect": [
+    440,
+    0,
+    40,
+    40
+   ]
+  }
+ },
+ "tile": [
+  32,
+  16
+ ],
+ "wall_height": 60
+}

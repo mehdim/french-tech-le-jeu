@@ -1,0 +1,50 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/game-core",
+    "crates/game-content",
+    "crates/platform",
+    "crates/game-client",
+]
+default-members = [
+    "crates/game-core",
+    "crates/game-content",
+    "crates/platform",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2024"
+# Bevy 0.19 requires rustc >= 1.95. Verified with rustc 1.97.0.
+rust-version = "1.95"
+license = "MIT OR Apache-2.0"
+authors = ["French Tech Tycoon contributors"]
+
+[workspace.dependencies]
+game-core = { path = "crates/game-core" }
+game-content = { path = "crates/game-content" }
+platform = { path = "crates/platform" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+ron = "0.12"
+rand = { version = "0.9", default-features = false, features = ["std"] }
+rand_chacha = { version = "0.9", default-features = false, features = ["std", "serde"] }
+
+# Fast-ish debug builds: our crates lightly optimised, dependencies fully.
+[profile.dev]
+opt-level = 1
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 2
+debug = false
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+
+# Size-oriented profile for the browser build (see tools/build-web.sh).
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+strip = "debuginfo"

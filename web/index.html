@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>French Tech Tycoon — From France Travail to Unicorn</title>
+  <meta name="description" content="Jeu de gestion satirique : faites de Veridix, startup française de détection de contenus IA, une licorne… ou un poney.">
+  <meta name="theme-color" content="#101412">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="stage">
+    <canvas id="game-canvas" tabindex="0" aria-label="French Tech Tycoon"></canvas>
+
+    <section id="boot" aria-live="polite">
+      <div class="boot-card">
+        <p class="kicker">VERIDIX SAS · capital social 1 000 €</p>
+        <h1><span class="g">FRENCH TECH</span><br>TYCOON</h1>
+        <p class="tagline">« La France est une startup nation. À vous de payer l'URSSAF. »</p>
+
+        <div id="progress" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="bar"><div class="fill" id="fill"></div></div>
+          <p class="status" id="status">Vérification de votre navigateur…</p>
+        </div>
+
+        <div id="incompatible" class="incompatible" hidden>
+          <h2>Navigateur non éligible au dispositif</h2>
+          <p id="incompatible-reason"></p>
+          <p>Le jeu a besoin de <b>WebAssembly</b> et de <b>WebGPU</b> ou <b>WebGL2</b>.
+            Navigateurs compatibles : Chrome / Edge 113+, Firefox 115+, Safari 17+ (desktop).
+            Vérifiez aussi que l'accélération matérielle est activée.</p>
+          <p class="small">Pièce justificative manquante : un GPU. Merci de renouveler votre demande.</p>
+        </div>
+
+        <div id="crash" class="incompatible" hidden>
+          <h2>Incident de production</h2>
+          <p>Le jeu a rencontré une erreur. Rechargez la page ; vos sauvegardes sont conservées.</p>
+          <pre id="crash-detail"></pre>
+          <button type="button" onclick="location.reload()">Recharger</button>
+        </div>
+
+        <p class="renderer small" id="renderer"></p>
+      </div>
+    </section>
+  </main>
+  <noscript><p class="noscript">French Tech Tycoon a besoin de JavaScript pour charger son moteur WebAssembly.</p></noscript>
+  <script type="module" src="loader.js"></script>
+</body>
+</html>

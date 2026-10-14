@@ -1,0 +1,13 @@
+[package]
+name = "game-core"
+description = "French Tech Tycoon — deterministic, engine-agnostic company simulation."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
