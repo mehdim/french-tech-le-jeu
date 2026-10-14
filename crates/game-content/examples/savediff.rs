@@ -7,7 +7,7 @@ fn main() {
     let mut l = from_save_string(&data, &c).unwrap();
     let a0 = serde_json::to_string(&s).unwrap();
     let b0 = serde_json::to_string(&l).unwrap();
-    println!("identical right after load: {}", a0 == b0);
+    println!("identique juste après le chargement : {}", a0 == b0);
     for step in 0..150 {
         game_content::autopilot::step(&mut s, &c);
         game_content::autopilot::step(&mut l, &c);
@@ -15,7 +15,7 @@ fn main() {
         let b = serde_json::to_string(&l).unwrap();
         if a != b {
             let i = a.bytes().zip(b.bytes()).position(|(x, y)| x != y).unwrap_or(0);
-            println!("diverged at step {step} day {}: ...{}...\n vs ...{}...", s.day, &a[i.saturating_sub(150)..(i + 80).min(a.len())], &b[i.saturating_sub(150)..(i + 80).min(b.len())]);
+            println!("divergence à l'étape {step}, jour {} : ...{}...\n contre ...{}...", s.day, &a[i.saturating_sub(150)..(i + 80).min(a.len())], &b[i.saturating_sub(150)..(i + 80).min(b.len())]);
             break;
         }
     }

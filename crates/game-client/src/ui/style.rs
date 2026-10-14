@@ -1,4 +1,4 @@
-//! Visual identity: À la French black / green / off-white, pixel headings.
+//! Identité visuelle : noir / vert / blanc cassé à la À la French, titres en pixel.
 
 use bevy_egui::egui::{self, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Margin, Stroke, TextStyle};
 use std::sync::Arc;
@@ -33,7 +33,7 @@ pub fn install(ctx: &egui::Context) {
     fonts.font_data.insert("pixel".into(), Arc::new(FontData::from_static(PIXEL)));
     fonts.font_data.insert("body".into(), Arc::new(FontData::from_static(BODY)));
     fonts.font_data.insert("body_bold".into(), Arc::new(FontData::from_static(BODY_BOLD)));
-    // Keep egui's bundled fonts (emoji, symbols) as fallbacks.
+    // On garde les polices fournies avec egui (émojis, symboles) en secours.
     let fallbacks: Vec<String> = fonts.families.get(&FontFamily::Proportional).cloned().unwrap_or_default();
     let mut prop = vec!["body".to_string()];
     prop.extend(fallbacks.iter().cloned());
@@ -93,8 +93,8 @@ pub fn install(ctx: &egui::Context) {
         v.widgets.active.bg_fill = Color32::from_rgb(60, 160, 90);
         v.widgets.active.weak_bg_fill = DEEP_GREEN;
         v.widgets.active.bg_stroke = Stroke::new(1.0, GREEN);
-        // egui also uses the active text colour for `RichText::strong()`
-        // labels, so it must stay light: dark text vanished on dark cards.
+        // egui utilise aussi la couleur du texte actif pour les libellés `RichText::strong()` :
+        // elle doit rester claire, sinon le texte sombre disparaît sur les cartes sombres.
         v.widgets.active.fg_stroke = Stroke::new(2.0, OFFWHITE);
         v.widgets.active.corner_radius = r;
         v.widgets.open.bg_fill = GRAPHITE_3;

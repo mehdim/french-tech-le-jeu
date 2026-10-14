@@ -1,16 +1,16 @@
-"""Generate every visual asset and pack them into atlases.
+"""Génère tous les éléments visuels et les regroupe en atlas.
 
-Usage: python3 tools/art/gen_all.py   (run from the repository root)
-Outputs (all committed, so the game builds without Python):
-  assets/tilesets/office.png        floors, walls, doormat
-  assets/sprites/furniture.png      furniture (+ fx sprites)
-  assets/sprites/decor.png          wall decorations, sheared for both walls
-  assets/characters/characters.png  16x26 frames, 16 per row
-  assets/ui/portraits.png           40x40 dialogue portraits
-  assets/ui/icons.png               12x12 HUD icons
-  assets/backgrounds/*.png          title + endings
-  assets/fonts/VeridixPixel.ttf     original pixel font
-  assets/sprites/atlas.json         rects and anchors for everything above
+Usage : python3 tools/art/gen_all.py   (à lancer depuis la racine du dépôt)
+Sorties (toutes versionnées, pour que le jeu se compile sans Python) :
+  assets/tilesets/office.png        sols, murs, paillasson
+  assets/sprites/furniture.png      mobilier (+ sprites d'effets)
+  assets/sprites/decor.png          décorations murales, déformées pour chaque mur
+  assets/characters/characters.png  images de 16x26, 16 par ligne
+  assets/ui/portraits.png           portraits de dialogue en 40x40
+  assets/ui/icons.png               icônes du HUD en 12x12
+  assets/backgrounds/*.png          écran titre + fins
+  assets/fonts/VeridixPixel.ttf     police pixel originale
+  assets/sprites/atlas.json         rectangles et ancres de tout ce qui précède
 """
 import json
 import os
@@ -31,7 +31,7 @@ A = os.path.join(ROOT, "assets")
 
 
 def pack(items, width=512, pad=1):
-    """Shelf-pack {name: (img, anchor)} -> (sheet, {name: {rect, anchor}})."""
+    """Range {nom: (img, ancre)} en étagères -> (planche, {nom: {rect, ancre}})."""
     order = sorted(items.items(), key=lambda kv: -kv[1][0].height)
     x = y = shelf_h = 0
     placed = {}
@@ -69,7 +69,7 @@ def shear_right(flat):
 
 def fx_sprites():
     out = {}
-    # selection diamond outline (one tile)
+    # contour de sélection en losange (une case)
     sel = new(TW, TH)
     for y, xs, xe in T.diamond_rows():
         px(sel, xs, y, GREEN); px(sel, xe, y, GREEN)
@@ -120,7 +120,7 @@ def fx_sprites():
 def main():
     manifest = {"tile": [TW, TH], "wall_height": T.WALL_H}
 
-    # --- office tileset -----------------------------------------------------
+    # --- tileset du bureau -------------------------------------------------
     tiles = {}
     for name, pat in T.FLOORS.items():
         for v in range(2):
@@ -129,21 +129,21 @@ def main():
         for side in ("L", "R"):
             for kind in ("plain", "window"):
                 img = T.wall_segment(tier, side, kind)
-                # anchor = floor point at the back-corner end of the segment
+                # ancre = point au sol à l'extrémité du segment côté coin du fond
                 anchor = (16, img.height - 9) if side == "L" else (0, img.height - 9)
                 tiles[f"wall_{tier}_{side}_{kind}"] = (img, anchor)
     sheet, meta = pack(tiles, 512)
     sheet.save(os.path.join(A, "tilesets", "office.png"))
     manifest["office"] = meta
 
-    # --- furniture + fx -----------------------------------------------------
+    # --- mobilier + effets --------------------------------------------------
     furn = {name: fn() for name, fn in F.FURNITURE.items()}
     furn.update(fx_sprites())
     sheet, meta = pack(furn, 512)
     sheet.save(os.path.join(A, "sprites", "furniture.png"))
     manifest["furniture"] = meta
 
-    # --- wall decorations (pre-sheared for each wall) -----------------------
+    # --- décorations murales (pré-déformées pour chaque mur) ----------------
     decor = {}
     for name, img in T.decor_images().items():
         decor[f"{name}_L"] = (T.shear_left(img, 17), (img.width, 0))
@@ -152,7 +152,7 @@ def main():
     sheet.save(os.path.join(A, "sprites", "decor.png"))
     manifest["decor"] = meta
 
-    # --- characters ---------------------------------------------------------
+    # --- personnages --------------------------------------------------------
     chars = C.atlas()
     chars.save(os.path.join(A, "characters", "characters.png"))
     manifest["characters"] = {
@@ -162,7 +162,7 @@ def main():
         "anchor": [C.FW // 2, C.FH - 1],
     }
 
-    # --- portraits & icons --------------------------------------------------
+    # --- portraits et icônes ------------------------------------------------
     ps = P.portraits()
     sheet = new(P.P * len(ps), P.P)
     pm = {}
@@ -180,13 +180,13 @@ def main():
     sheet.save(os.path.join(A, "ui", "icons.png"))
     manifest["icons"] = im
 
-    # --- backgrounds --------------------------------------------------------
+    # --- fonds --------------------------------------------------------------
     S.title_background().save(os.path.join(A, "backgrounds", "title.png"))
     for name, fn in (("ending_unicorn", S.ending_unicorn), ("ending_profitable", S.ending_profitable),
                      ("ending_acquisition", S.ending_acquisition), ("ending_commons", S.ending_commons)):
         fn().save(os.path.join(A, "backgrounds", f"{name}.png"))
 
-    # --- fonts --------------------------------------------------------------
+    # --- polices ------------------------------------------------------------
     FONT.build(os.path.join(A, "fonts", "VeridixPixel.ttf"))
     for src, dst in (("DejaVuSans.ttf", "DejaVuSans-Subset.ttf"), ("DejaVuSans-Bold.ttf", "DejaVuSans-Bold-Subset.ttf")):
         path = f"/usr/share/fonts/truetype/dejavu/{src}"
@@ -196,7 +196,7 @@ def main():
 
     with open(os.path.join(A, "sprites", "atlas.json"), "w") as f:
         json.dump(manifest, f, indent=1, sort_keys=True)
-    print("assets generated")
+    print("éléments générés")
 
 
 if __name__ == "__main__":

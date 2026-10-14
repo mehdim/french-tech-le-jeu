@@ -1,7 +1,7 @@
-//! Animated employees. The simulation decides *what* each person does
-//! (working, meeting, exhausted, idle, panicking); this module decides
-//! *how it looks*: walking a grid path to their desk, coffee breaks,
-//! meetings around the table, wandering, and the sprite animation itself.
+//! Salariés animés. La simulation décide *ce que* fait chaque personne
+//! (travail, réunion, épuisement, inactivité, panique) ; ce module décide
+//! *à quoi ça ressemble* : trajet en grille jusqu'au bureau, pauses café,
+//! réunions autour de la table, flânerie, et l'animation des sprites elle-même.
 
 use crate::assets::{Atlas, depth_z, iso};
 use crate::rendering::{OfficeSignature, Selection, anchored_sprite, furniture_z};
@@ -56,7 +56,7 @@ pub enum Poi {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Mode {
-    /// Walking somewhere; `then` is what to do on arrival.
+    /// En chemin vers quelque part ; `then` indique quoi faire à l'arrivée.
     Walking(Arrive),
     Seated,
     AtPoi(Poi),
@@ -76,7 +76,7 @@ enum Arrive {
 pub struct EmployeeSprite {
     pub id: u32,
     pub row: u32,
-    /// Continuous grid position of the feet.
+    /// Position continue des pieds sur la grille.
     pub pos: Vec2,
     path: VecDeque<Vec2>,
     mode: Mode,
@@ -84,7 +84,7 @@ pub struct EmployeeSprite {
     frame: u32,
     frame_t: f32,
     flip: bool,
-    /// Seconds left before the current break/wander ends.
+    /// Secondes restantes avant la fin de la pause ou de la flânerie en cours.
     mode_t: f32,
     next_break: f32,
     pub bubble: Option<(&'static str, f32)>,
@@ -107,7 +107,7 @@ pub struct Seat {
     pub z: f32,
 }
 
-/// Navigation data rebuilt with the office.
+/// Données de navigation reconstruites avec le bureau.
 #[derive(Resource, Default)]
 pub struct Nav {
     pub sig: u64,
@@ -142,7 +142,7 @@ impl Nav {
         }
         best.1
     }
-    /// Breadth-first path between walkable cells (grids are tiny: ≤ 18×12).
+    /// Chemin en largeur d'abord entre cases praticables (les grilles sont minuscules : ≤ 18×12).
     fn path(&self, from: IVec2, to: IVec2) -> Option<Vec<IVec2>> {
         if !self.ok(from) || !self.ok(to) {
             return None;
@@ -212,7 +212,7 @@ fn rebuild_nav(game: Res<Game>, content: Res<GameContent>, sig: Res<OfficeSignat
     nav.walk = walkable(c, &game.0.office);
     let d = door(tier);
     nav.door = IVec2::new(d.0, d.1);
-    // Seats (desks and workstations) in uid order.
+    // Places assises (bureaux et postes de travail) dans l'ordre des uid.
     let mut items: Vec<_> = game.0.office.items.iter().collect();
     items.sort_by_key(|i| i.uid);
     nav.seats.clear();
@@ -294,7 +294,7 @@ fn sync_employees(
         if present.contains_key(&e.id) {
             continue;
         }
-        // The founder starts at their desk; newcomers walk in from the door.
+        // Le fondateur commence à son bureau ; les nouveaux arrivent par la porte.
         let start = if game.0.day < 2 || i == 0 {
             nav.seats.get(i).map(|s| s.point).unwrap_or(nav.door.as_vec2() + 0.5)
         } else {
@@ -353,7 +353,7 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
         let emp = &game.0.employees[idx];
         let activity = emp.activity;
         let seat = nav.seats.get(idx).copied();
-        // Away (on leave): hide.
+        // Absent (en congé) : caché.
         if activity == Activity::OnLeave {
             *vis = Visibility::Hidden;
             s.mode = Mode::Away;
@@ -365,7 +365,7 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
             s.mode = Mode::Wandering;
             s.path.clear();
         }
-        // Panic overrides everything.
+        // La panique passe avant tout.
         if activity == Activity::Panic && s.mode != Mode::Panic {
             s.mode = Mode::Panic;
             s.path.clear();
@@ -375,11 +375,11 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
             s.path.clear();
         }
         if tempo == 0.0 {
-            // Game paused: freeze in place (keep animating idle poses).
+            // Jeu en pause : figé sur place (les poses d'attente restent animées).
             continue;
         }
         let speed = if s.mode == Mode::Panic { 2.8 } else { 1.7 } * tempo;
-        // Follow the current path.
+        // Suit le chemin en cours.
         if let Some(next) = s.path.front().copied() {
             let d = next - s.pos;
             let step = speed * dt;
@@ -396,7 +396,7 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
             s.anim = if s.mode == Mode::Panic { Anim::Panic } else { Anim::Walk };
             continue;
         }
-        // Arrived somewhere / decide what to do next.
+        // Arrivé quelque part / décide de la suite.
         s.mode_t -= dt * tempo;
         s.next_break -= dt * tempo;
         let mut seed = s.seed;
@@ -444,7 +444,7 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
             } else if wants_seat && seat.is_some() {
                 seat.map(|st| (st.access, Arrive::Seat))
             } else {
-                // Idle: wander between points of interest.
+                // Inactif : flâne entre les points d'intérêt.
                 let r = rng(&mut seed);
                 let p = if r < 0.35 { Some(Poi::Coffee) } else if r < 0.55 { Some(Poi::Sofa) } else if r < 0.7 { Some(Poi::Fun) } else { None };
                 match p.and_then(|p| poi_target(&nav, p, &mut seed).map(|c| (c, Arrive::Poi(p)))) {
@@ -467,7 +467,7 @@ fn behave(time: Res<Time>, clock: Res<SimClock>, game: Res<Game>, nav: Res<Nav>,
                         s.mode = if s.mode == Mode::Panic { Mode::Panic } else { Mode::Walking(arrive) };
                     }
                     None => {
-                        // Unreachable: just teleport to keep the office alive.
+                        // Inaccessible : téléportation, pour que le bureau reste vivant.
                         if arrive == Arrive::Seat {
                             if let Some(st) = seat {
                                 s.pos = st.point;
@@ -568,7 +568,7 @@ fn place_sprites(
             *vis = if *show { Visibility::Visible } else { Visibility::Hidden };
         }
     }
-    // Bubbles are cheap: rebuild each frame for the few that exist.
+    // Les bulles ne coûtent rien : on reconstruit à chaque image les quelques bulles présentes.
     for (e, _) in &bubbles {
         commands.entity(e).despawn();
     }
@@ -600,7 +600,7 @@ fn update_marker(
     }
 }
 
-/// Make an employee show a speech bubble (used by cues: sales, shipping...).
+/// Fait afficher une bulle à un salarié (utilisé par les signaux : ventes, livraisons...).
 pub fn show_bubble(q: &mut Query<&mut EmployeeSprite>, id: u32, key: &'static str) {
     for mut s in q.iter_mut() {
         if s.id == id {

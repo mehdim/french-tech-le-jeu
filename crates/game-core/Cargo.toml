@@ -1,6 +1,6 @@
 [package]
 name = "game-core"
-description = "French Tech Tycoon — deterministic, engine-agnostic company simulation."
+description = "French Tech Tycoon — simulation d'entreprise déterministe, indépendante du moteur."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

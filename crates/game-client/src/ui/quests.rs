@@ -1,4 +1,4 @@
-//! Left panel: level, quests with progress bars, and alerts.
+//! Panneau de gauche : niveau, objectifs avec barres de progression, et alertes.
 
 use super::style::*;
 use super::widgets::*;
@@ -157,7 +157,7 @@ fn alerts(ui: &mut egui::Ui, c: &mut Ctx) {
     }
 }
 
-/// Contextual first-steps guidance (the first ten minutes).
+/// Conseils contextuels pour les premiers pas (les dix premières minutes).
 fn hints(ui: &mut egui::Ui, c: &mut Ctx) {
     let g = &c.game.0;
     let tip = if g.campaign.level == 1 && g.tasks.is_empty() && !g.product.has("mvp_text") {

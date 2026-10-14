@@ -1,5 +1,5 @@
-//! Isometric office rendering. The office is rebuilt from the simulation
-//! whenever its layout changes (move, placement, decor unlocked).
+//! Rendu isométrique du bureau. Le bureau est reconstruit depuis la simulation
+//! dès que son agencement change (déménagement, placement, décoration débloquée).
 
 use crate::assets::{Atlas, depth_z, iso};
 use crate::sim::{Game, GameContent};
@@ -9,32 +9,32 @@ use game_core::office::footprint;
 #[derive(Component)]
 pub struct OfficeEntity;
 
-/// A furniture sprite, linked to its simulation instance.
+/// Un sprite de meuble, lié à son instance dans la simulation.
 #[derive(Component)]
 pub struct FurnitureSprite {
     pub uid: u32,
     pub item: String,
 }
 
-/// Fingerprint of everything that affects the office's appearance.
+/// Empreinte de tout ce qui influe sur l'apparence du bureau.
 #[derive(Resource, Default, PartialEq)]
 pub struct OfficeSignature(pub u64);
 
-/// Furniture placement mode (driven by the Bureau panel and input).
+/// Mode de placement du mobilier (piloté par le panneau Bureau et les entrées).
 #[derive(Resource, Default)]
 pub struct Placement {
-    /// Item being placed (new purchase) or moved (existing uid).
+    /// Objet en cours de placement (nouvel achat) ou de déplacement (uid existant).
     pub item: Option<String>,
     pub moving_uid: Option<u32>,
     pub stored_index: Option<usize>,
     pub rotated: bool,
-    /// Grid cell under the cursor.
+    /// Case de la grille sous le curseur.
     pub hover: Option<IVec2>,
     pub valid: bool,
     pub reason: String,
 }
 
-/// Currently selected things (shown with a highlight).
+/// Éléments actuellement sélectionnés (affichés en surbrillance).
 #[derive(Resource, Default)]
 pub struct Selection {
     pub employee: Option<u32>,
@@ -44,7 +44,7 @@ pub struct Selection {
 #[derive(Component)]
 pub struct PlacementPreview;
 
-/// Office (re)building runs before employee animation.
+/// La (re)construction du bureau passe avant l'animation des salariés.
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RenderingSet;
 
@@ -70,7 +70,7 @@ fn signature(game: &Game) -> u64 {
     h.finish()
 }
 
-/// Sprite placed so that its manifest anchor lands on `anchor_world`.
+/// Sprite placé pour que l'ancre de son manifeste tombe sur `anchor_world`.
 pub fn anchored_sprite(image: Handle<Image>, meta: &crate::assets::SpriteMeta, anchor_world: Vec2, z: f32, flip: bool) -> (Sprite, Transform) {
     let sprite = Sprite { image, rect: Some(meta.bevy_rect()), flip_x: flip, ..default() };
     let pos = anchor_world + meta.center_offset(flip);
@@ -102,7 +102,7 @@ fn sync_office(
     let Some(tier) = c.office(game.0.office.tier) else { return };
     let (w, h) = (tier.width, tier.height);
 
-    // Floor.
+    // Sol.
     let floor = format!("{:?}", tier.floor);
     for y in 0..h {
         for x in 0..w {
@@ -113,13 +113,13 @@ fn sync_office(
             }
         }
     }
-    // Doormat at the entrance.
+    // Paillasson à l'entrée.
     let door = game_core::office::door(tier);
     if let Some(meta) = atlas.furniture("doormat") {
         let (spr, tf) = anchored_sprite(atlas.furniture.clone(), meta, iso(door.0 as f32, door.1 as f32), 0.5, false);
         commands.spawn((spr, tf, OfficeEntity));
     }
-    // Back walls: left wall along x = 0, right wall along y = 0.
+    // Murs du fond : mur gauche le long de x = 0, mur droit le long de y = 0.
     let wall_tier = tier.id.min(5);
     let is_window = |i: i32| i % 3 == 1;
     for y in 0..h {
@@ -136,7 +136,7 @@ fn sync_office(
             commands.spawn((spr, tf, OfficeEntity));
         }
     }
-    // Wall decorations on segments without windows, alternating walls.
+    // Décorations murales sur les pans sans fenêtre, en alternant les murs.
     let mut decor: Vec<String> = tier.wall_decor.clone();
     if game.0.flags.contains("bpi_certificate") {
         decor.push("bpi_certificate".into());
@@ -154,7 +154,7 @@ fn sync_office(
         let Some(slot) = slot else { continue };
         let key = format!("{name}_{}", if on_left { "L" } else { "R" });
         let Some(meta) = atlas.decor(&key) else { continue };
-        // Anchor: top of the decoration, hung ~44 px above the floor line.
+        // Ancre : haut de la décoration, accrochée ~44 px au-dessus de la ligne du sol.
         let base = if on_left {
             iso(0.0, slot as f32 + 0.1)
         } else {
@@ -164,7 +164,7 @@ fn sync_office(
         let (spr, tf) = anchored_sprite(atlas.decor.clone(), meta, base + Vec2::new(0.0, 46.0), z, false);
         commands.spawn((spr, tf, OfficeEntity));
     }
-    // Furniture.
+    // Mobilier.
     for it in &game.0.office.items {
         let Some(def) = c.furniture(&it.item) else { continue };
         let Some(meta) = atlas.furniture(&def.sprite) else { continue };

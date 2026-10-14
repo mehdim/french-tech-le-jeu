@@ -1,4 +1,4 @@
-//! Finance tab: run-rate P&L, unit economics, monthly reports, charts.
+//! Onglet Finances : compte de résultat au rythme actuel, unit economics, bilans mensuels, graphiques.
 
 use super::style::*;
 use super::widgets::*;

@@ -1,16 +1,16 @@
-// French Tech Tycoon — browser loader.
+// French Tech Tycoon — chargeur pour le navigateur.
 //
-// 1. Detects WebAssembly and a usable GPU API (WebGPU first, then WebGL2).
-// 2. Downloads the matching wasm build with a progress bar.
-// 3. Starts Bevy and fades the boot screen out when the game signals
-//    `ftt-ready` (textures loaded, first frames drawn).
+// 1. Détecte WebAssembly et une API GPU utilisable (WebGPU d'abord, puis WebGL2).
+// 2. Télécharge le build wasm correspondant, avec une barre de progression.
+// 3. Démarre Bevy et fait disparaître l'écran de chargement quand le jeu envoie
+//    `ftt-ready` (textures chargées, premières images affichées).
 //
-// Override the renderer with ?renderer=webgl2 or ?renderer=webgpu.
+// Forcer le rendu : ?renderer=webgl2 ou ?renderer=webgpu.
 //
-// WebGPU fallback: if the WebGPU build fails to start (device lost, no
-// adapter, or not ready in time), the failure is remembered and the page
-// reloads with the WebGL2 build. A forced ?renderer=webgpu reports the error
-// instead, for debugging.
+// Repli WebGPU : si le build WebGPU ne démarre pas (périphérique perdu, pas
+// d'adaptateur, ou pas prêt à temps), l'échec est mémorisé et la page se
+// recharge avec le build WebGL2. Un ?renderer=webgpu forcé affiche l'erreur
+// à la place, pour le débogage.
 
 const $ = (id) => document.getElementById(id);
 const fill = $("fill");
@@ -41,7 +41,7 @@ function showCrash(detail) {
   $("crash-detail").textContent = String(detail || "").slice(0, 2000);
 }
 
-// winit uses a JS exception to hand control to the browser event loop.
+// winit utilise une exception JS pour rendre la main à la boucle d'événements du navigateur.
 function isControlFlowException(e) {
   const msg = String((e && e.message) || e || "");
   return msg.includes("Using exceptions for control flow");
@@ -63,8 +63,8 @@ window.addEventListener("unhandledrejection", (ev) => {
   }
 });
 
-// Browsers keep AudioContexts suspended until a user gesture. Track every
-// context the engine creates and resume them on the first interaction.
+// Les navigateurs suspendent les AudioContext jusqu'à un geste de l'utilisateur. On suit
+// chaque contexte créé par le moteur et on les relance à la première interaction.
 (function unlockAudio() {
   const Ctx = window.AudioContext || window.webkitAudioContext;
   if (!Ctx) return;
@@ -152,8 +152,8 @@ async function fetchWithProgress(url, onProgress) {
   return out.buffer;
 }
 
-// Bevy reports fatal GPU problems through its logger (console.*). Watch for
-// them so a dead canvas never sits behind a finished loading screen.
+// Bevy signale les erreurs GPU fatales via son logger (console.*). On les surveille
+// pour qu'un canvas mort ne reste jamais caché derrière un écran de chargement terminé.
 const FATAL = /DeviceLost|Quitting the application due to|Unable to find a GPU|Failed to create (the )?(device|adapter|surface)/i;
 let activeRenderer = null;
 let gameReady = false;
@@ -161,14 +161,14 @@ let fallingBack = false;
 
 function fallbackToWebGL2(reason) {
   if (fallingBack) return;
-  console.warn("[loader] WebGPU failed, falling back to WebGL2:", reason);
+  console.warn("[chargeur] Échec de WebGPU, repli sur WebGL2 :", reason);
   let remembered = false;
   try {
     localStorage.setItem(WEBGPU_FAILED_KEY, "1");
     remembered = localStorage.getItem(WEBGPU_FAILED_KEY) === "1";
   } catch {}
-  // Some hosts drop the query string on reload; without a stored flag the
-  // page would pick WebGPU again and loop. Ask the player instead.
+  // Certains hébergeurs perdent la query string au rechargement ; sans indicateur stocké,
+  // la page reprendrait WebGPU et bouclerait. On demande plutôt au joueur.
   if (!remembered && !location.search.includes("renderer=")) {
     showCrash("WebGPU n'a pas pu démarrer sur cet appareil (" + reason + "). Ajoutez ?renderer=webgl2 à l'adresse pour utiliser le mode compatibilité.");
     return;
@@ -259,8 +259,8 @@ async function main() {
   let wasm;
   const onWasmProgress = (f) => setProgress(5 + f * 75, `${QUIPS[quip]} ${Math.round(f * 100)} %`);
   try {
-    // Hosts with a per-file size cap can serve the module as numbered parts
-    // listed in parts.json (see tools/split-wasm.sh); otherwise one file.
+    // Les hébergeurs qui limitent la taille par fichier peuvent servir le module en morceaux
+    // numérotés listés dans parts.json (voir tools/split-wasm.sh) ; sinon un seul fichier.
     const parts = await fetchPartsList(base);
     wasm = parts
       ? await fetchParts(base, parts, onWasmProgress)
@@ -289,8 +289,8 @@ async function main() {
     }
   }
 
-  // If the ready signal never arrives: WebGPU → retry with WebGL2;
-  // WebGL2 → reveal the canvas anyway after a generous delay.
+  // Si le signal « prêt » n'arrive jamais : WebGPU → nouvel essai en WebGL2 ;
+  // WebGL2 → on affiche quand même le canvas après un long délai.
   const timeoutMs = renderer === "webgpu" ? 25000 : 30000;
   const timedOut = await Promise.race([
     ready.then(() => false),

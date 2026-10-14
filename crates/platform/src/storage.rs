@@ -1,4 +1,4 @@
-//! Key/value storage used for save slots and settings.
+//! Stockage clé/valeur utilisé pour les emplacements de sauvegarde et les paramètres.
 
 use std::collections::BTreeMap;
 
@@ -17,15 +17,15 @@ impl std::fmt::Display for StorageError {
     }
 }
 
-/// Minimal persistent key/value store. Keys are short ASCII identifiers
-/// (`save_slot_1`, `settings`); values are UTF-8 strings (JSON).
+/// Stockage persistant clé/valeur minimal. Les clés sont de courts identifiants ASCII
+/// (`save_slot_1`, `settings`) ; les valeurs sont des chaînes UTF-8 (JSON).
 pub trait Storage: Send + Sync {
     fn get(&self, key: &str) -> Result<Option<String>, StorageError>;
     fn set(&mut self, key: &str, value: &str) -> Result<(), StorageError>;
     fn remove(&mut self, key: &str) -> Result<(), StorageError>;
 }
 
-/// In-memory storage (tests, or when nothing else is available).
+/// Stockage en mémoire (tests, ou quand rien d'autre n'est disponible).
 #[derive(Default)]
 pub struct MemoryStorage {
     map: BTreeMap<String, String>,
@@ -45,7 +45,7 @@ impl Storage for MemoryStorage {
     }
 }
 
-/// Desktop storage: one file per key in a directory.
+/// Stockage desktop : un fichier par clé dans un dossier.
 #[cfg(not(target_arch = "wasm32"))]
 pub struct FileStorage {
     dir: std::path::PathBuf,
@@ -73,7 +73,7 @@ impl Storage for FileStorage {
     }
     fn set(&mut self, key: &str, value: &str) -> Result<(), StorageError> {
         std::fs::create_dir_all(&self.dir).map_err(|e| StorageError::Io(e.to_string()))?;
-        // Write to a temp file then rename, so a crash never leaves half a save.
+        // Écrit dans un fichier temporaire puis renomme, pour qu'un crash ne laisse jamais une demi-sauvegarde.
         let tmp = self.path(&format!("{key}_tmp"));
         std::fs::write(&tmp, value).map_err(|e| StorageError::Io(e.to_string()))?;
         std::fs::rename(&tmp, self.path(key)).map_err(|e| StorageError::Io(e.to_string()))
@@ -87,7 +87,7 @@ impl Storage for FileStorage {
     }
 }
 
-/// The best storage for the current platform.
+/// Le meilleur stockage pour la plateforme courante.
 pub fn default_storage() -> Box<dyn Storage> {
     #[cfg(target_arch = "wasm32")]
     {

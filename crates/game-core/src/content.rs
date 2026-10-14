@@ -1,18 +1,18 @@
-//! Definitions loaded from data files. The simulation only ever *reads*
-//! these; everything mutable lives in [`crate::simulation::GameState`].
+//! Définitions chargées depuis les fichiers de données. La simulation ne fait que les
+//! *lire* ; tout ce qui change vit dans [`crate::simulation::GameState`].
 
 use crate::balancing::Balancing;
 use crate::types::{Condition, Effect, Role, Segment, Seniority};
 use serde::{Deserialize, Serialize};
 
-/// One spoken line in a story scene.
+/// Une réplique dans une scène de l'histoire.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Line {
     pub speaker: String,
     pub text: String,
 }
 
-/// Category of a development task (product tree branch).
+/// Catégorie d'un chantier de développement (branche de l'arbre produit).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskCategory {
     Mvp,
@@ -37,19 +37,19 @@ pub struct TaskDef {
     #[serde(default)]
     pub requires_unlock: Option<String>,
     pub effects: Vec<Effect>,
-    /// Technical debt added on completion (Standard approach).
+    /// Dette technique ajoutée à la livraison (approche Standard).
     #[serde(default)]
     pub debt: f64,
-    /// Probability (0..1) of a complication on completion.
+    /// Probabilité (0..1) d'une complication à la livraison.
     #[serde(default)]
     pub risk: f64,
-    /// Can be run again after completion (maintenance tasks).
+    /// Peut être relancé après livraison (chantiers de maintenance).
     #[serde(default)]
     pub repeatable: bool,
-    /// Counts toward "ship N meaningful improvements".
+    /// Compte pour « livrer N améliorations significatives ».
     #[serde(default)]
     pub meaningful: bool,
-    /// Short "expected benefit" text for the UI.
+    /// Court texte « bénéfice attendu » pour l'interface.
     #[serde(default)]
     pub benefit: String,
 }
@@ -63,7 +63,7 @@ pub struct SkillRange {
     pub ops: (f64, f64),
 }
 
-/// Personality traits with mechanical consequences (see `employees.rs`).
+/// Traits de personnalité avec des conséquences mécaniques (voir `employees.rs`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Trait {
     Standard,
@@ -89,10 +89,10 @@ pub struct ArchetypeDef {
     pub skills: SkillRange,
     pub salary: (f64, f64),
     pub seniority: Vec<Seniority>,
-    /// Fixed contract length in days (consultants, interns).
+    /// Durée de contrat fixe en jours (consultants, stagiaires).
     #[serde(default)]
     pub contract_days: Option<u32>,
-    /// Daily rate billed instead of a salary (ESN consultants).
+    /// Taux journalier facturé à la place d'un salaire (consultants d'ESN).
     #[serde(default)]
     pub day_rate: Option<f64>,
     #[serde(default)]
@@ -105,22 +105,22 @@ pub struct ChannelDef {
     pub name: String,
     pub description: String,
     pub cost: f64,
-    /// Fee as a fraction of the hire's annual gross salary (recruiters).
+    /// Frais en fraction du salaire brut annuel de la recrue (cabinets de recrutement).
     #[serde(default)]
     pub fee_pct: f64,
     pub delay: (u32, u32),
     pub candidates: (u32, u32),
-    /// Archetype ids this channel can surface.
+    /// Identifiants des profils que ce canal peut proposer.
     pub archetypes: Vec<String>,
     #[serde(default)]
     pub requires: Vec<Condition>,
-    /// Salary subsidy fraction for the first months (France Travail aid).
+    /// Part du salaire subventionnée pendant les premiers mois (aide France Travail).
     #[serde(default)]
     pub subsidy: f64,
-    /// Bonus paid on hire (referral bonus).
+    /// Prime versée à l'embauche (prime de cooptation).
     #[serde(default)]
     pub hire_bonus: f64,
-    /// Quality multiplier on rolled skills.
+    /// Multiplicateur de qualité sur les compétences tirées.
     #[serde(default = "one")]
     pub quality: f64,
 }
@@ -150,15 +150,15 @@ pub struct OfficeTierDef {
     pub deposit_months: f64,
     pub requires_unlock: Option<String>,
     pub floor: FloorStyle,
-    /// Hosting/ops base cost added by the bigger infrastructure footprint.
+    /// Coût de base d'hébergement/ops ajouté par une infrastructure plus grande.
     #[serde(default)]
     pub morale_bonus: f64,
     #[serde(default)]
     pub reputation_bonus: f64,
-    /// Wall decorations displayed in this office.
+    /// Décorations murales affichées dans ce bureau.
     #[serde(default)]
     pub wall_decor: Vec<String>,
-    /// Furniture added for free on move-in (layout x, y, item).
+    /// Mobilier offert à l'emménagement (agencement x, y, objet).
     #[serde(default)]
     pub starter: Vec<(i32, i32, String)>,
 }
@@ -195,12 +195,12 @@ pub struct FurnitureDef {
     pub monthly: f64,
     pub size: (i32, i32),
     pub effects: FurnitureEffects,
-    /// Diminishing returns: only this many of the item count fully.
+    /// Rendement décroissant : seuls ce nombre d'exemplaires comptent pleinement.
     #[serde(default = "max_eff")]
     pub max_effective: u32,
     #[serde(default)]
     pub requires_unlock: Option<String>,
-    /// Sprite name in the client atlas.
+    /// Nom du sprite dans l'atlas du client.
     pub sprite: String,
 }
 
@@ -211,14 +211,14 @@ fn max_eff() -> u32 {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProgramKind {
     Grant,
-    /// Half grant, half repayable advance.
+    /// Moitié subvention, moitié avance remboursable.
     Advance,
     Loan,
-    /// Research tax credit computed from research payroll.
+    /// Crédit d'impôt recherche calculé sur la masse salariale de recherche.
     TaxCredit,
-    /// A status that lowers employer contributions for R&D staff.
+    /// Un statut qui réduit les cotisations patronales du personnel R&D.
     Status,
-    /// Founder support (France Travail).
+    /// Accompagnement des créateurs (France Travail).
     FounderSupport,
 }
 
@@ -235,11 +235,11 @@ pub struct ProgramDef {
     pub admin_points: f64,
     pub wait_days: u32,
     pub amount: f64,
-    /// (delay after approval in days, fraction of amount)
+    /// (délai après l'accord en jours, fraction du montant)
     pub tranches: Vec<(u32, f64)>,
     pub base_success: f64,
     pub cooldown_days: u32,
-    /// Loans/advances: monthly repayment months after a grace period.
+    /// Prêts/avances : remboursements mensuels après un différé.
     #[serde(default)]
     pub repay_months: u32,
     #[serde(default)]
@@ -268,22 +268,22 @@ pub struct InvestorDef {
     pub firm: String,
     pub bio: String,
     pub rounds: Vec<RoundKind>,
-    /// Ticket size range in euros.
+    /// Fourchette du ticket en euros.
     pub ticket: (f64, f64),
-    /// Valuation multiplier relative to the market model (<1 = tough).
+    /// Multiplicateur de valorisation par rapport au modèle de marché (<1 = exigeant).
     pub valuation_mult: f64,
-    /// Metric this investor cares about (shown in UI).
+    /// Indicateur qui compte pour cet investisseur (affiché dans l'interface).
     pub favourite_metric: String,
-    /// Conditions for this investor to make an offer.
+    /// Conditions pour que cet investisseur fasse une offre.
     #[serde(default)]
     pub requires: Vec<Condition>,
-    /// Applied when the player accepts the offer.
+    /// Appliqué quand le joueur accepte l'offre.
     #[serde(default)]
     pub on_accept: Vec<Effect>,
     pub pitch_line: String,
     pub accept_line: String,
     pub reject_line: String,
-    /// Investor demand displayed with the offer.
+    /// Exigence de l'investisseur affichée avec l'offre.
     #[serde(default)]
     pub demand: String,
 }
@@ -294,7 +294,7 @@ pub struct RoundDef {
     pub name: String,
     pub requires_unlock: Option<String>,
     pub pitch_points: f64,
-    /// Typical dilution range sought by investors in %.
+    /// Fourchette de dilution typique visée par les investisseurs, en %.
     pub dilution: (f64, f64),
     pub description: String,
 }
@@ -310,7 +310,7 @@ pub struct EventChoice {
     pub effects: Vec<Effect>,
     #[serde(default)]
     pub delayed: Vec<DelayedDef>,
-    /// Text shown after choosing.
+    /// Texte affiché après le choix.
     #[serde(default)]
     pub outcome: String,
 }
@@ -336,26 +336,26 @@ pub struct EventDef {
     pub weight: f64,
     #[serde(default)]
     pub cooldown: u32,
-    /// Can only fire once per campaign.
+    /// Ne peut se déclencher qu'une fois par campagne.
     #[serde(default)]
     pub once: bool,
-    /// Boss/scripted events are never picked randomly.
+    /// Les événements majeurs/scénarisés ne sont jamais tirés au hasard.
     #[serde(default)]
     pub scripted: bool,
     pub choices: Vec<EventChoice>,
-    /// Effects applied as soon as the event fires (before choosing).
+    /// Effets appliqués dès que l'événement se déclenche (avant le choix).
     #[serde(default)]
     pub immediate: Vec<Effect>,
-    /// Sprite/illustration key for the client.
+    /// Clé de sprite/illustration pour le client.
     #[serde(default)]
     pub art: String,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum QuestKind {
-    /// Latches once reached.
+    /// Reste acquis une fois atteint.
     Reach,
-    /// Must hold at the moment the level is evaluated.
+    /// Doit être vrai au moment où le niveau est évalué.
     Maintain,
 }
 
@@ -391,7 +391,7 @@ pub struct LevelDef {
     pub start_effects: Vec<Effect>,
     pub failure_risk: String,
     pub outro: Vec<Line>,
-    /// Office tier the story moves you to when this level starts (if lower).
+    /// Niveau de bureau vers lequel l'histoire vous fait déménager au début de ce niveau (s'il est inférieur).
     #[serde(default)]
     pub min_office: Option<u32>,
 }
@@ -424,7 +424,7 @@ pub struct NamePools {
     pub last: Vec<String>,
 }
 
-/// Default prices and the segment profile.
+/// Prix par défaut et profil du segment.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SegmentDef {
     pub segment: Segment,
@@ -437,16 +437,16 @@ pub struct SegmentDef {
     pub base_conversion: f64,
     pub sales_effort: f64,
     pub base_churn: f64,
-    /// Monthly analyses per customer.
+    /// Analyses mensuelles par client.
     pub usage: f64,
     pub cost_per_lead: f64,
     pub requires_unlock: Option<String>,
-    /// Shipped features required to sell properly in this segment.
+    /// Fonctionnalités livrées nécessaires pour bien vendre dans ce segment.
     pub required_features: Vec<String>,
     pub tam_per_market: f64,
 }
 
-/// All static game content.
+/// Tout le contenu statique du jeu.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Content {
     pub balancing: Balancing,
@@ -507,6 +507,6 @@ impl Content {
         self.segments
             .iter()
             .find(|d| d.segment == s)
-            .expect("every segment must be defined in content")
+            .expect("chaque segment doit être défini dans le contenu")
     }
 }

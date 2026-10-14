@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Déployer sur GitHub Pages
 
-# Builds the browser version and publishes it at
-# https://<owner>.github.io/<repo>/ on every push to main.
-# One-time setup: repository Settings → Pages → Source: "GitHub Actions".
+# Compile la version navigateur et la publie sur
+# https://<propriétaire>.github.io/<dépôt>/ à chaque push sur main.
+# Réglage unique : Settings du dépôt → Pages → Source : « GitHub Actions ».
 
 on:
   push:
@@ -29,17 +29,17 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: pages
-      - name: Install wasm-bindgen-cli (version from Cargo.lock)
+      - name: Installer wasm-bindgen-cli (version de Cargo.lock)
         run: |
           V=$(grep -A1 'name = "wasm-bindgen"$' Cargo.lock | sed -n 's/version = "\(.*\)"/\1/p')
           cargo install wasm-bindgen-cli --version "$V" --locked
-      - name: Install wasm-opt (native binaryen release)
+      - name: Installer wasm-opt (version native de binaryen)
         run: |
           curl -sSL https://github.com/WebAssembly/binaryen/releases/download/version_123/binaryen-version_123-x86_64-linux.tar.gz | tar xz
           echo "$PWD/binaryen-version_123/bin" >> "$GITHUB_PATH"
       - run: tools/build-web.sh
-      # GitHub Pages has no _headers support; it already serves .wasm as
-      # application/wasm. Disable Jekyll so every file is served as-is.
+      # GitHub Pages ignore _headers ; il sert déjà les .wasm en
+      # application/wasm. On désactive Jekyll pour servir chaque fichier tel quel.
       - run: rm -f dist/_headers && touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

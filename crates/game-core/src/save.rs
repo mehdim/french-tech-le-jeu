@@ -1,10 +1,10 @@
-//! Versioned, checksummed save format.
+//! Format de sauvegarde versionné, avec somme de contrôle.
 //!
-//! A save is a small JSON envelope around the serialized [`GameState`].
-//! The checksum (FNV-1a 64) detects truncated or hand-edited saves; the
-//! schema version rejects saves from incompatible builds instead of
-//! loading garbage. Only authoritative simulation state is stored —
-//! rendering entities are rebuilt from it.
+//! Une sauvegarde est une petite enveloppe JSON autour du [`GameState`] sérialisé.
+//! La somme de contrôle (FNV-1a 64) détecte les sauvegardes tronquées ou modifiées à la main ;
+//! la version du schéma rejette les sauvegardes de builds incompatibles au lieu de
+//! charger n'importe quoi. Seul l'état de référence de la simulation est stocké :
+//! les entités de rendu sont reconstruites à partir de lui.
 
 use crate::content::Content;
 use crate::simulation::{GameState, SAVE_SCHEMA};
@@ -56,7 +56,7 @@ pub fn fnv1a(data: &[u8]) -> u64 {
 }
 
 pub fn to_save_string(state: &GameState, label: &str) -> String {
-    let body = serde_json::to_string(state).expect("game state is always serializable");
+    let body = serde_json::to_string(state).expect("l'état du jeu est toujours sérialisable");
     let file = SaveFile {
         schema: SAVE_SCHEMA,
         game_version: env!("CARGO_PKG_VERSION").to_string(),
@@ -71,10 +71,10 @@ pub fn to_save_string(state: &GameState, label: &str) -> String {
         checksum: format!("{:016x}", fnv1a(body.as_bytes())),
         state: body,
     };
-    serde_json::to_string(&file).expect("save envelope is always serializable")
+    serde_json::to_string(&file).expect("l'enveloppe de sauvegarde est toujours sérialisable")
 }
 
-/// Read only the envelope (for save-slot listings).
+/// Lit seulement l'enveloppe (pour la liste des emplacements de sauvegarde).
 pub fn read_meta(data: &str) -> Result<SaveMeta, SaveError> {
     let file: SaveFile = serde_json::from_str(data).map_err(|e| SaveError::Parse(e.to_string()))?;
     if file.schema != SAVE_SCHEMA {

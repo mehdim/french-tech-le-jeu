@@ -1,4 +1,4 @@
-//! Product & R&D tab: detection metrics, task queue, product/research tree.
+//! Onglet Produit & R&D : indicateurs de détection, file des chantiers, arbre produit/recherche.
 
 use super::style::*;
 use super::widgets::*;
@@ -174,7 +174,7 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
                 let status = task_availability(&def, &c.game.0.product, &c.game.0.campaign.unlocks, &c.game.0.tasks, c.game.0.finance.cash);
                 let shipped = c.game.0.product.has(&def.id);
                 if matches!(status, Err(TaskBlock::Locked(_))) && !shipped {
-                    continue; // hidden until its level unlocks it
+                    continue; // caché jusqu'à ce que son niveau le débloque
                 }
                 let frame = if shipped && !def.repeatable { card().fill(GRAPHITE) } else { card() };
                 frame.show(ui, |ui| {

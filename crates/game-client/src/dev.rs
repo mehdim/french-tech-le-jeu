@@ -1,12 +1,12 @@
-//! Automation hooks for smoke tests, screenshots and CI (native only).
+//! Points d'automatisation pour les tests de fumée, les captures d'écran et la CI (natif uniquement).
 //!
-//! Environment variables:
-//!   FTT_START=new | auto:<days>   skip the menu; `auto` lets the autopilot
-//!                                 play <days> days first (big offices)
-//!   FTT_SHOTS=<sec>:<path>,...    take screenshots at the given times
-//!   FTT_EXIT=<sec>                quit after this many seconds
-//!   FTT_TAB=team|product|sales|funding|finance|office   open a panel
-//!   FTT_SPEED=0|1|2|4             initial simulation speed
+//! Variables d'environnement :
+//!   FTT_START=new | auto:<jours>  saute le menu ; `auto` laisse l'autopilote
+//!                                 jouer <jours> jours d'abord (grands bureaux)
+//!   FTT_SHOTS=<sec>:<chemin>,...  prend des captures aux instants donnés
+//!   FTT_EXIT=<sec>                quitte après ce nombre de secondes
+//!   FTT_TAB=team|product|sales|funding|finance|office   ouvre un panneau
+//!   FTT_SPEED=0|1|2|4             vitesse initiale de la simulation
 
 use crate::sim::{DemoMode, Game, GameContent, SimClock};
 use crate::states::AppState;
@@ -113,7 +113,7 @@ fn dev_shots(mut commands: Commands, time: Res<Time>, mut cfg: ResMut<DevConfig>
     }
 }
 
-/// 30 FPS "low power" mode for slower devices (Settings → Performances).
+/// Mode « basse consommation » à 30 FPS pour les appareils plus lents (Paramètres → Performances).
 fn frame_pacing(settings: Res<crate::saves::Settings>, mut winit: ResMut<WinitSettings>) {
     if !settings.is_changed() {
         return;

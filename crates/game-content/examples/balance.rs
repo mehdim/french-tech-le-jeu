@@ -1,5 +1,5 @@
-//! Balancing report: plays the campaign with the autopilot and prints a
-//! monthly trace. Usage: cargo run -p game-content --example balance -- [seed] [quiet]
+//! Rapport d'équilibrage : joue la campagne avec l'autopilote et affiche un
+//! suivi mensuel. Usage : cargo run -p game-content --example balance -- [graine] [quiet]
 use game_content::{autopilot, dialogue};
 use game_core::missions::Phase;
 use game_core::types::Segment;
@@ -14,7 +14,7 @@ fn main() {
     let mut log_seen = 0;
     while s.day < 3000 && autopilot::step(&mut s, &c) {
         if s.campaign.level != last_level {
-            println!("=== day {:4}  LEVEL {} {}", s.day, s.campaign.level, c.level(s.campaign.level).unwrap().title);
+            println!("=== jour {:4}  NIVEAU {} {}", s.day, s.campaign.level, c.level(s.campaign.level).unwrap().title);
             last_level = s.campaign.level;
         }
         if !quiet {
@@ -37,15 +37,15 @@ fn main() {
             );
         }
     }
-    println!("END day {} phase {:?} level {} ending {:?}", s.day, s.campaign.phase, s.campaign.level, s.campaign.ending);
+    println!("FIN jour {} phase {:?} niveau {} fin {:?}", s.day, s.campaign.phase, s.campaign.level, s.campaign.ending);
     for r in &s.campaign.results {
-        println!("  level {:2}: {:4} days  cash {:>10}  mrr {:>10}", r.level, r.days, dialogue::money(r.cash_end), dialogue::money(r.mrr_end));
+        println!("  niveau {:2} : {:4} jours  trésorerie {:>10}  mrr {:>10}", r.level, r.days, dialogue::money(r.cash_end), dialogue::money(r.mrr_end));
     }
     if s.campaign.phase != Phase::Victory {
         let lvl = c.level(s.campaign.level).unwrap();
         for (i, q) in lvl.quests.iter().enumerate() {
-            println!("  quest {:30} done={} now={}", q.label, s.campaign.quests_done[i], s.check(&q.condition));
+            println!("  objectif {:30} atteint={} maintenant={}", q.label, s.campaign.quests_done[i], s.check(&q.condition));
         }
     }
-    println!("stats {:?}", s.stats);
+    println!("statistiques {:?}", s.stats);
 }

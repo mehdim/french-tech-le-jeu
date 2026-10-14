@@ -1,4 +1,4 @@
-//! Application of [`Effect`]s to the game state.
+//! Application des [`Effect`] à l'état du jeu.
 
 use crate::content::Content;
 use crate::economy::Income;

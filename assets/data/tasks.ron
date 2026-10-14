@@ -1,7 +1,7 @@
-// Product & R&D tree for VERIDIX.
-// eng / research = effort points; cost = euros paid at start (compute, licences, datasets).
-// debt = technical debt added on completion (x2.2 "Vite fait", x0.3 "Propre").
-// Accuracy gains shrink near the 97 % ceiling: universal AI detection is not solvable.
+// Arbre Produit & R&D de VERIDIX.
+// eng / research = points d'effort ; cost = euros payés au lancement (calcul, licences, jeux de données).
+// debt = dette technique ajoutée à la livraison (x2,2 « Vite fait », x0,3 « Propre »).
+// Les gains de précision s'amenuisent près du plafond de 97 % : la détection universelle de l'IA n'est pas soluble.
 [
     // ------------------------------------------------------------------ MVP
     (
@@ -40,7 +40,7 @@
         benefit: "Les clients commencent à payer. Réputation +5, 20 leads.",
     ),
 
-    // ---------------------------------------------------------- ENGINEERING
+    // ------------------------------------------------------------ INGÉNIERIE
     (
         id: "auth", name: "Authentification", category: Engineering,
         description: "Login, mot de passe oublié, et le débat éternel : magic link ou pas ?",
@@ -162,7 +162,7 @@
         benefit: "Conversion PME +8 %, prix +5 %.",
     ),
 
-    // ---------------------------------------------------------- AI RESEARCH
+    // ---------------------------------------------------------- RECHERCHE IA
     (
         id: "eval_dataset", name: "Jeux d'évaluation propres", category: AiResearch,
         description: "Arrêter d'évaluer sur le jeu d'entraînement. Le score chute. C'est sain.",
@@ -269,7 +269,7 @@
         benefit: "Coût d'inférence -28 %, mais +2 500 €/mois de serveurs.",
     ),
 
-    // ----------------------------------------------------------- ENTERPRISE
+    // ----------------------------------------------------------- ENTREPRISE
     (
         id: "audit_logs", name: "Journaux d'audit", category: Enterprise,
         description: "Qui a analysé quoi, quand, et pourquoi le DSI a analysé son propre mail de démission.",
@@ -313,7 +313,7 @@
         benefit: "Grands comptes ++ (conversion +25 %, rétention +10 %). +3 000 €/mois.",
     ),
 
-    // ------------------------------------------------------------ AI-NATIVE
+    // ------------------------------------------------------------ IA NATIVE
     (
         id: "agent_analysis", name: "Analyse documentaire par agents", category: AiNative,
         description: "Des agents qui lisent un dossier entier, croisent les sources et rédigent un rapport. Ironie : le rapport est écrit par une IA.",

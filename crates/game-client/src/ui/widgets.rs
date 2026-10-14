@@ -1,4 +1,4 @@
-//! Reusable UI pieces.
+//! Éléments d'interface réutilisables.
 
 use super::style::*;
 use super::{Ctx, Toasts, UiTextures};
@@ -44,7 +44,7 @@ pub fn portrait(ui: &mut egui::Ui, tex: &UiTextures, atlas: Option<&Atlas>, key:
         }
 }
 
-/// An employee's idle sprite as a tiny avatar.
+/// Le sprite d'attente d'un salarié, en mini-avatar.
 pub fn avatar(ui: &mut egui::Ui, tex: &UiTextures, atlas: Option<&Atlas>, role: game_core::types::Role, look: u8, size: f32) {
     let Some(atlas) = atlas else { return };
     let m = &atlas.manifest.characters;
@@ -74,11 +74,11 @@ fn furniture_atlas_height(atlas: &Atlas) -> f32 {
     h
 }
 
-/// Horizontal progress bar with an optional label.
+/// Barre de progression horizontale avec un libellé facultatif.
 pub fn bar(ui: &mut egui::Ui, frac: f32, color: Color32, text: impl Into<String>, width: f32) -> egui::Response {
     let frac = frac.clamp(0.0, 1.0);
-    // The label starts at the bar's left edge: once a bright fill covers it,
-    // switch to dark text so it stays readable.
+    // Le libellé commence au bord gauche de la barre : dès qu'un remplissage clair le
+    // recouvre, on passe en texte sombre pour qu'il reste lisible.
     let luminance = 0.2126 * color.r() as f32 + 0.7152 * color.g() as f32 + 0.0722 * color.b() as f32;
     let text_color = if frac >= 0.35 && luminance > 140.0 { NEAR_BLACK } else { OFFWHITE };
     ui.add(
@@ -91,7 +91,7 @@ pub fn bar(ui: &mut egui::Ui, frac: f32, color: Color32, text: impl Into<String>
     )
 }
 
-/// Colour for a 0..100 value where high is good.
+/// Couleur pour une valeur 0..100 où haut = bien.
 pub fn good_color(v: f64) -> Color32 {
     if v >= 60.0 {
         GREEN
@@ -102,7 +102,7 @@ pub fn good_color(v: f64) -> Color32 {
     }
 }
 
-/// Colour for a 0..100 value where high is bad.
+/// Couleur pour une valeur 0..100 où haut = mal.
 pub fn bad_color(v: f64) -> Color32 {
     good_color(100.0 - v)
 }
@@ -129,7 +129,7 @@ pub fn muted(ui: &mut egui::Ui, text: impl Into<String>) {
     ui.label(RichText::new(text.into()).size(12.5).color(MUTED));
 }
 
-/// Key/value line with a tooltip explaining the metric.
+/// Ligne clé/valeur avec une infobulle qui explique l'indicateur.
 pub fn kv(ui: &mut egui::Ui, k: &str, v: impl Into<String>, color: Color32, help: &str) {
     ui.horizontal(|ui| {
         let r = ui.label(RichText::new(k).color(LIGHTGRAY));
@@ -142,7 +142,7 @@ pub fn kv(ui: &mut egui::Ui, k: &str, v: impl Into<String>, color: Color32, help
     });
 }
 
-/// List the consequences of a set of effects (green good / red bad).
+/// Liste les conséquences d'un ensemble d'effets (vert = bon / rouge = mauvais).
 pub fn effects_list(ui: &mut egui::Ui, effects: &[Effect]) {
     for e in effects {
         if let Some((text, good)) = dialogue::effect_text(e) {
@@ -155,7 +155,7 @@ pub fn effects_inline(effects: &[Effect]) -> Vec<(String, bool)> {
     effects.iter().filter_map(dialogue::effect_text).collect()
 }
 
-/// Requirement text, resolving task ids to their names.
+/// Texte d'une condition requise, avec les noms des chantiers à la place de leurs ids.
 pub fn cond_text(c: &Ctx, cond: &Condition) -> String {
     match cond {
         Condition::Shipped(t) => {
@@ -167,7 +167,7 @@ pub fn cond_text(c: &Ctx, cond: &Condition) -> String {
     }
 }
 
-/// Requirement list with ✓ / ✗ marks. Returns true when all are met.
+/// Liste de conditions avec des ✓ / ✗. Renvoie true quand toutes sont remplies.
 pub fn requirements(ui: &mut egui::Ui, c: &Ctx, reqs: &[Condition]) -> bool {
     let mut all = true;
     for r in reqs {
@@ -226,7 +226,7 @@ pub fn placement_hint(ctx: &egui::Context, c: &Ctx, item: &str, rect: egui::Rect
         });
 }
 
-/// A big clickable card-like button used in menus and event choices.
+/// Un grand bouton cliquable en forme de carte, pour les menus et les choix d'événements.
 pub fn big_button(ui: &mut egui::Ui, text: &str, enabled: bool, width: f32) -> egui::Response {
     let b = egui::Button::new(RichText::new(text).font(pixel(22.0)).color(if enabled { OFFWHITE } else { MUTED }))
         .min_size(egui::vec2(width, 40.0))
@@ -234,7 +234,7 @@ pub fn big_button(ui: &mut egui::Ui, text: &str, enabled: bool, width: f32) -> e
     ui.add_enabled(enabled, b)
 }
 
-/// Dim the whole screen behind a modal.
+/// Assombrit tout l'écran derrière une fenêtre modale.
 pub fn dim(ctx: &egui::Context, alpha: u8) {
     let painter = ctx.layer_painter(egui::LayerId::new(egui::Order::Middle, egui::Id::new("dim")));
     painter.rect_filled(ctx.content_rect(), 0.0, Color32::from_black_alpha(alpha));

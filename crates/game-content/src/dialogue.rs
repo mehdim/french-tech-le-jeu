@@ -1,9 +1,9 @@
-//! Turns structured simulation messages into French text.
+//! Transforme les messages structurés de la simulation en texte français.
 
 use crate::characters::{role_name, segment_name};
 use game_core::messages::Msg;
 
-/// "12 345 €", "1,25 M€", "-3 400 €".
+/// « 12 345 € », « 1,25 M€ », « -3 400 € ».
 pub fn money(v: f64) -> String {
     let neg = v < 0.0;
     let a = v.abs();
@@ -17,7 +17,7 @@ pub fn money(v: f64) -> String {
     if neg { format!("-{body}") } else { body }
 }
 
-/// Integer with French thousands separators (no-break space).
+/// Entier avec séparateurs de milliers à la française (espace insécable).
 pub fn thousands(v: f64) -> String {
     let n = v.round() as i64;
     let s = n.abs().to_string();
@@ -31,7 +31,7 @@ pub fn thousands(v: f64) -> String {
     if n < 0 { format!("-{out}") } else { out }
 }
 
-/// Decimal with a French comma, trailing zeros trimmed.
+/// Décimal avec une virgule à la française, sans zéros superflus.
 pub fn decimal(v: f64, places: usize) -> String {
     let s = format!("{v:.places$}");
     let s = if s.contains('.') { s.trim_end_matches('0').trim_end_matches('.').to_string() } else { s };
@@ -138,8 +138,8 @@ fn seg(s: &Segment) -> &'static str {
     segment_name(*s)
 }
 
-/// Short French summary of an effect, and whether it is good for the player.
-/// Returns None for effects that are purely internal (flags, chains).
+/// Court résumé en français d'un effet, et s'il est bon pour le joueur.
+/// Renvoie None pour les effets purement internes (indicateurs, enchaînements).
 pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
     Some(match e {
         Effect::Cash(v) => (format!("Trésorerie {}", if *v >= 0.0 { format!("+{}", money(*v)) } else { money(*v) }), *v >= 0.0),
@@ -195,7 +195,7 @@ pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
     })
 }
 
-/// Human-readable requirement text.
+/// Texte lisible d'une condition requise.
 pub fn condition_text(c: &Condition) -> String {
     match c {
         Condition::Always => "—".into(),

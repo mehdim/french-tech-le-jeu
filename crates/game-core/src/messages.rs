@@ -1,8 +1,8 @@
-//! Structured log messages and presentation cues.
+//! Messages du journal structurés et signaux de présentation.
 //!
-//! The simulation never formats prose: it emits [`Msg`] values that the
-//! content layer turns into French sentences (`game_content::dialogue`).
-//! Text that already comes *from* content (event outcomes) uses `Text`.
+//! La simulation ne rédige jamais de texte : elle émet des valeurs [`Msg`] que la
+//! couche de contenu transforme en phrases françaises (`game_content::dialogue`).
+//! Le texte qui vient déjà *du* contenu (issues d'événements) utilise `Text`.
 
 use crate::types::{Role, Segment};
 use serde::{Deserialize, Serialize};
@@ -65,7 +65,7 @@ pub struct LogEntry {
     pub msg: Msg,
 }
 
-/// One-shot cues for sound and animation. Not saved.
+/// Signaux ponctuels pour le son et l'animation. Non sauvegardés.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Cue {
     NewCustomers(u32),

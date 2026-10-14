@@ -1,35 +1,35 @@
-//! Bridge between Bevy and the deterministic simulation.
+//! Pont entre Bevy et la simulation déterministe.
 //!
-//! The simulation advances in fixed steps of one in-game day, decoupled from
-//! the frame rate: an accumulator converts real time × speed into whole ticks.
+//! La simulation avance par pas fixes d'un jour de jeu, indépendamment de la
+//! fréquence d'affichage : un accumulateur convertit temps réel × vitesse en ticks entiers.
 
 use crate::states::AppState;
 use bevy::prelude::*;
 use game_core::messages::Cue;
 use game_core::{Content, GameState};
 
-/// Static content (levels, events, tasks...). Shared, never mutated.
+/// Contenu statique (niveaux, événements, chantiers...). Partagé, jamais modifié.
 #[derive(Resource)]
 pub struct GameContent(pub Content);
 
-/// The authoritative company state. In the main menu this is a demo company
-/// driven by the autopilot.
+/// L'état de référence de l'entreprise. Dans le menu principal, c'est une entreprise
+/// de démonstration pilotée par l'autopilote.
 #[derive(Resource)]
 pub struct Game(pub GameState);
 
-/// Real seconds per simulated day at 1×.
+/// Secondes réelles par jour simulé à 1×.
 pub const SECONDS_PER_DAY: f32 = 1.6;
-/// Never run more than this many ticks in a single frame.
+/// Jamais plus de ticks que cela en une seule image.
 const MAX_TICKS_PER_FRAME: u32 = 4;
 
 #[derive(Resource)]
 pub struct SimClock {
-    /// 0 = paused, 1, 2 or 4.
+    /// 0 = pause, 1, 2 ou 4.
     pub speed: u8,
-    /// Speed to restore when unpausing.
+    /// Vitesse à rétablir à la reprise.
     pub last_speed: u8,
     pub acc: f32,
-    /// Fraction of the current day elapsed (for smooth UI animation).
+    /// Fraction du jour en cours déjà écoulée (pour des animations fluides de l'interface).
     pub day_fraction: f32,
 }
 
@@ -56,11 +56,11 @@ impl SimClock {
     }
 }
 
-/// Cues emitted by the simulation this frame (sounds, particles, toasts).
+/// Signaux émis par la simulation à cette image (sons, particules, notifications).
 #[derive(Resource, Default)]
 pub struct Cues(pub Vec<Cue>);
 
-/// Whether the demo (attract mode) company is shown instead of the player's.
+/// Indique si l'entreprise de démonstration est affichée à la place de celle du joueur.
 #[derive(Resource, Default)]
 pub struct DemoMode(pub bool);
 
@@ -82,7 +82,7 @@ impl Plugin for SimPlugin {
     }
 }
 
-/// A demo company a few months in, so the title screen office is alive.
+/// Une entreprise de démonstration lancée depuis quelques mois, pour que le bureau de l'écran titre soit vivant.
 pub fn demo_state(content: &Content) -> GameState {
     let mut s = GameState::new(content, 2026);
     while s.day < 120 && game_content::autopilot::step(&mut s, content) {}
@@ -117,7 +117,7 @@ fn tick_game(time: Res<Time>, mut clock: ResMut<SimClock>, mut game: ResMut<Game
     clock.day_fraction = clock.acc.fract();
 }
 
-/// Attract mode: the autopilot plays a company behind the title screen.
+/// Mode démo : l'autopilote joue une entreprise derrière l'écran titre.
 fn tick_demo(time: Res<Time>, mut clock: ResMut<SimClock>, mut game: ResMut<Game>, content: Res<GameContent>, demo: Res<DemoMode>) {
     if !demo.0 {
         return;

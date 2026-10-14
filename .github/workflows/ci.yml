@@ -11,7 +11,7 @@ env:
 
 jobs:
   test:
-    name: Simulation tests
+    name: Tests de la simulation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,20 +19,20 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      # --workspace includes the native Bevy client, whose audio backend
-      # links ALSA. The simulation tests (incl. the full-campaign autopilot)
-      # live in the pure-Rust crates.
-      - name: Install system libraries
+      # --workspace inclut le client Bevy natif, dont le moteur audio est lié
+      # à ALSA. Les tests de simulation (dont l'autopilote qui joue toute la
+      # campagne) sont dans les crates en Rust pur.
+      - name: Installer les bibliothèques système
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev
       - run: cargo test --workspace
       - run: cargo clippy --workspace -- -D warnings
 
   web:
-    name: Browser build
+    name: Build navigateur
     runs-on: ubuntu-latest
     needs: test
     env:
-      # Secrets cannot be tested in `if:` directly; expose presence via env.
+      # On ne peut pas tester un secret directement dans `if:` : on expose sa présence via env.
       HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
@@ -42,11 +42,11 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: wasm
-      - name: Install wasm-bindgen-cli (version from Cargo.lock)
+      - name: Installer wasm-bindgen-cli (version de Cargo.lock)
         run: |
           V=$(grep -A1 'name = "wasm-bindgen"$' Cargo.lock | sed -n 's/version = "\(.*\)"/\1/p')
           cargo install wasm-bindgen-cli --version "$V" --locked
-      - name: Install wasm-opt (native binaryen release)
+      - name: Installer wasm-opt (version native de binaryen)
         run: |
           curl -sSL https://github.com/WebAssembly/binaryen/releases/download/version_123/binaryen-version_123-x86_64-linux.tar.gz | tar xz
           echo "$PWD/binaryen-version_123/bin" >> "$GITHUB_PATH"
@@ -56,14 +56,14 @@ jobs:
           name: french-tech-tycoon-web
           path: dist
 
-      - name: Browser smoke test
+      - name: Test de fumée dans le navigateur
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
           python tools/smoke_test.py dist
 
-      # Optional: set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets.
-      - name: Deploy to Cloudflare Pages
+      # Optionnel : définir les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID.
+      - name: Déployer sur Cloudflare Pages
         if: github.ref == 'refs/heads/main' && env.HAS_CF_TOKEN == 'true'
         uses: cloudflare/wrangler-action@v3
         with:

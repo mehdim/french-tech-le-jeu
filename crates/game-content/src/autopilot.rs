@@ -1,8 +1,8 @@
-//! A scripted player. It only uses [`Command`]s — exactly what a human can
-//! do through the UI — and is used by:
-//!  * the campaign test (proves all twelve levels are achievable),
-//!  * the balancing report (`cargo run -p game-content --example balance`),
-//!  * the title screen "attract mode" in the client.
+//! Un joueur scripté. Il n'utilise que des [`Command`], exactement ce qu'un humain
+//! peut faire depuis l'interface, et sert à :
+//!  * le test de campagne (prouve que les douze niveaux sont réalisables),
+//!  * le rapport d'équilibrage (`cargo run -p game-content --example balance`),
+//!  * le « mode démo » de l'écran titre du client.
 
 use game_core::content::{Content, Trait};
 use game_core::employees::Assignment;
@@ -13,7 +13,7 @@ use game_core::simulation::{Command, GameState};
 use game_core::types::{Effect, Role, Segment};
 use game_core::content::RoundKind;
 
-/// Development priorities, in order. Repeatables are handled separately.
+/// Priorités de développement, dans l'ordre. Les chantiers répétables sont gérés à part.
 const TASK_PRIORITY: &[&str] = &[
     "mvp_text", "mvp_dashboard", "eval_dataset", "launch", "mvp_api", "auth", "finetune_v1", "mvp_csv", "self_serve",
     "calibration", "monitoring", "api_keys", "docs", "batch", "integrations", "analytics", "fp_reduction",
@@ -23,7 +23,7 @@ const TASK_PRIORITY: &[&str] = &[
     "authenticity_workflow", "trust_platform", "rust_rewrite",
 ];
 
-/// Desired team (role, count) per level.
+/// Équipe souhaitée (rôle, nombre) par niveau.
 fn target_team(level: u32) -> Vec<(Role, usize)> {
     match level {
         1 => vec![],
@@ -122,7 +122,7 @@ fn pick_choice(s: &GameState, c: &Content) -> usize {
     best.1
 }
 
-/// Play one day: issue commands, then tick. Returns false when the game is over.
+/// Joue une journée : envoie des commandes, puis avance d'un tick. Renvoie false quand la partie est finie.
 pub fn step(s: &mut GameState, c: &Content) -> bool {
     match s.campaign.phase {
         Phase::Victory | Phase::Bankrupt => return false,
@@ -154,7 +154,7 @@ fn manage(s: &mut GameState, c: &Content) {
     let cash = s.finance.cash;
     let burn = s.metrics.net_burn.max(1.0);
 
-    // --- funding ------------------------------------------------------------
+    // --- financement --------------------------------------------------------
     if level >= 2 && !s.funding.friends_family_done && (cash < 14_000.0 || s.metrics.runway < 4.0) {
         let _ = s.apply(c, Command::TakeFriendsFamily);
     }
@@ -201,7 +201,7 @@ fn manage(s: &mut GameState, c: &Content) {
             }
         }
 
-    // --- product --------------------------------------------------------------
+    // --- produit --------------------------------------------------------------
     let engineers: Vec<u32> = s
         .employees
         .iter()
@@ -227,7 +227,7 @@ fn manage(s: &mut GameState, c: &Content) {
         }
     }
 
-    // --- staffing -------------------------------------------------------------
+    // --- recrutement ----------------------------------------------------------
     let have = |s: &GameState, r: Role| s.employees.iter().filter(|e| e.role == r).count();
     if s.is_unlocked("recruitment") && s.metrics.runway > 6.0 && cash > 25_000.0 {
         for (role, n) in target_team(level) {
@@ -238,7 +238,7 @@ fn manage(s: &mut GameState, c: &Content) {
             }
         }
     }
-    // Hire the best candidate for each missing role.
+    // Recrute le meilleur candidat pour chaque rôle manquant.
     for (role, n) in target_team(level) {
         if have(s, role) >= n || s.metrics.runway < 5.0 {
             continue;
@@ -258,7 +258,7 @@ fn manage(s: &mut GameState, c: &Content) {
         }
     }
 
-    // --- office ---------------------------------------------------------------
+    // --- bureau ---------------------------------------------------------------
     let fx = s.office.effects(c);
     let head = s.employees.len() as u32;
     if fx.seats < head + 1 && s.is_unlocked("office_custom") {
@@ -286,7 +286,7 @@ fn manage(s: &mut GameState, c: &Content) {
             }
     }
 
-    // --- markets & pricing ----------------------------------------------------
+    // --- marchés et prix ------------------------------------------------------
     if s.is_unlocked("international") {
         for m in ["benelux", "de", "es", "it", "nordics"] {
             if s.market.markets.len() < 6 && cash > 200_000.0 {
@@ -300,7 +300,7 @@ fn manage(s: &mut GameState, c: &Content) {
         let _ = s.apply(c, Command::SetMarketingBudget(budget));
     }
 
-    // --- assignments ----------------------------------------------------------
+    // --- affectations ---------------------------------------------------------
     assign(s, c);
 }
 
@@ -338,7 +338,7 @@ fn assign(s: &mut GameState, c: &Content) {
             Role::ProductManager | Role::Hr => Assignment::Management,
             Role::DevOps if level >= 5 || e.trait_ == Trait::RustEvangelist && level >= 4 => Assignment::Ops,
             _ => {
-                // Researchers to research-heavy tasks, engineers spread across tasks.
+                // Les chercheurs sur les chantiers riches en recherche, les ingénieurs répartis sur les chantiers.
                 let pick = if e.role == Role::AiResearcher {
                     task_ids.iter().filter(|t| t.2 > 0.0).max_by(|a, b| a.2.total_cmp(&b.2)).map(|t| Assignment::Task(t.0))
                 } else {
@@ -367,7 +367,7 @@ fn first_task(tasks: &[(u32, f64, f64)]) -> Option<Assignment> {
     tasks.iter().find(|t| t.1 > 0.0 || t.2 > 0.0).map(|t| Assignment::Task(t.0))
 }
 
-/// Play a whole campaign. Returns the final state.
+/// Joue une campagne entière. Renvoie l'état final.
 pub fn play_campaign(c: &Content, seed: u64, max_days: u32) -> GameState {
     let mut s = GameState::new(c, seed);
     while s.day < max_days && step(&mut s, c) {}

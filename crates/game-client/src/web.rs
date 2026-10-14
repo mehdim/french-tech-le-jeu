@@ -1,9 +1,9 @@
-//! Browser integration (wasm32 only).
+//! Intégration navigateur (wasm32 uniquement).
 //!
-//! The HTML loader (`web/loader.js`) shows a boot screen while the wasm
-//! module downloads. Once Bevy has loaded the texture atlases and drawn a
-//! few frames, we dispatch a `ftt-ready` DOM event so the loader can fade
-//! the boot screen out without revealing an empty canvas.
+//! Le chargeur HTML (`web/loader.js`) affiche un écran de chargement pendant que le module
+//! wasm se télécharge. Une fois que Bevy a chargé les atlas de textures et dessiné quelques
+//! images, on envoie un événement DOM `ftt-ready` pour que le chargeur fasse disparaître
+//! l'écran de chargement sans révéler un canvas vide.
 
 use crate::assets::Atlas;
 use bevy::asset::UntypedAssetId;
@@ -60,7 +60,7 @@ fn signal_ready(atlas: Option<Res<Atlas>>, server: Res<AssetServer>, mut st: Loc
         ftt_progress(loaded, total);
     }
     if loaded == total {
-        // Let the first fully-textured frames reach the canvas.
+        // Laisse les premières images entièrement texturées arriver jusqu'au canvas.
         st.frames_after_load += 1;
         if st.frames_after_load >= 3 {
             st.done = true;

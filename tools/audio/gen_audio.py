@@ -1,8 +1,8 @@
-"""Original chiptune / French-electro music loops and sound effects.
+"""Boucles musicales chiptune / électro à la française et effets sonores originaux.
 
-Pure numpy synthesis -> WAV -> Ogg Vorbis (ffmpeg). Everything here is
-generated from scratch, so the game ships no third-party audio.
-Usage: python3 gen_audio.py <out_dir>
+Synthèse en numpy pur -> WAV -> Ogg Vorbis (ffmpeg). Tout est généré
+de zéro : le jeu n'embarque aucun audio tiers.
+Usage : python3 gen_audio.py <dossier_de_sortie>
 """
 import os
 import subprocess
@@ -16,7 +16,7 @@ SR = 32000
 
 
 def note(n):
-    """MIDI note -> Hz."""
+    """Note MIDI -> Hz."""
     return 440.0 * 2 ** ((n - 69) / 12)
 
 
@@ -85,9 +85,9 @@ def write(path, x, vol=0.8):
     os.unlink(wav_path)
 
 
-# --------------------------------------------------------------------- music
+# --------------------------------------------------------------- musique
 def music_office():
-    """Bouncy chiptune for the office: A minor / C major, 124 bpm, 16 bars."""
+    """Chiptune sautillant pour le bureau : la mineur / do majeur, 124 bpm, 16 mesures."""
     bpm = 124
     beat = 60 / bpm
     bars = 16
@@ -98,21 +98,21 @@ def music_office():
     for bar in range(bars):
         root, chord = prog[bar % 4]
         t0 = bar * 4 * beat
-        # triangle bass: root on every eighth, octave jumps
+        # basse triangle : fondamentale à chaque croche, sauts d'octave
         for k in range(8):
             n = root - 12 + (12 if k % 4 == 3 else 0)
             mix_into(buf, env(tri(note(n), beat / 2 * 0.95), 0.003, 0.05, 0.7, 0.02) * 0.45, t0 + k * beat / 2)
-        # square arpeggio (12.5 % duty for that NES sparkle)
+        # arpège en onde carrée (rapport cyclique de 12,5 % pour le scintillement NES)
         for k in range(16):
             n = chord[k % 3] + 12
             mix_into(buf, env(square(note(n), beat / 4 * 0.9, 0.125), 0.002, 0.03, 0.3, 0.01) * 0.12, t0 + k * beat / 4)
-        # lead melody (from bar 4)
+        # mélodie (à partir de la mesure 4)
         if bar >= 4:
             for k in range(8):
                 n = lead[((bar - 4) % 4) * 8 + k]
                 if n > 0:
                     mix_into(buf, env(square(note(n), beat / 2 * 0.9, 0.5), 0.005, 0.08, 0.5, 0.04) * 0.16, t0 + k * beat / 2)
-        # drums: noise hats + kick blips
+        # batterie : charleston en bruit + grosse caisse en blips
         for k in range(8):
             mix_into(buf, env(noise(0.03, bar * 8 + k), 0.001, 0.02, 0.0, 0.0) * (0.12 if k % 2 else 0.06), t0 + k * beat / 2)
         for k in (0, 2):
@@ -125,7 +125,7 @@ def music_office():
 
 
 def music_menu():
-    """French-house-ish menu loop: filtered chords, four-on-the-floor, 118 bpm."""
+    """Boucle de menu façon French house : accords filtrés, four-on-the-floor, 118 bpm."""
     bpm = 118
     beat = 60 / bpm
     bars = 16
@@ -134,24 +134,24 @@ def music_menu():
     for bar in range(bars):
         t0 = bar * 4 * beat
         chord = prog[bar % 4]
-        # pumping pad: chord stabs on off-beats (sidechain feel)
+        # nappe qui pompe : accords plaqués sur les contretemps (effet sidechain)
         for k in range(4):
             stab = sum(saw(note(n), beat * 0.45) for n in chord) / 4
             cutoff = 0.05 + 0.25 * (bar % 8) / 8
             stab = lowpass(stab, cutoff)
             mix_into(buf, env(stab, 0.01, 0.15, 0.4, 0.05) * 0.5, t0 + k * beat + beat / 2)
-        # bass
+        # basse
         for k in range(4):
             n = chord[0] - 24
             b = lowpass(saw(note(n), beat * 0.4), 0.08)
             mix_into(buf, env(b, 0.005, 0.1, 0.6, 0.05) * 0.6, t0 + k * beat + beat / 2)
-        # kick every beat
+        # grosse caisse à chaque temps
         for k in range(4):
             t = t_axis(0.18)
             kick = np.sin(2 * np.pi * (95 * t - 200 * t * t)) * np.exp(-t * 22)
             mix_into(buf, kick * 0.8, t0 + k * beat)
             mix_into(buf, env(noise(0.04, bar * 4 + k), 0.001, 0.03, 0.0, 0.0) * 0.1, t0 + k * beat + beat / 2)
-        if bar >= 8:   # a little vocal-chop-like square motif
+        if bar >= 8:   # un petit motif en onde carrée façon vocal chop
             motif = [76, -1, 74, 72, -1, 72, 74, -1]
             for k, n in enumerate(motif):
                 if n > 0:
@@ -159,7 +159,7 @@ def music_menu():
     return buf[: int(SR * beat * 4 * bars)]
 
 
-# ----------------------------------------------------------------------- sfx
+# --------------------------------------------------------------- effets
 def sfx_cash():
     buf = np.zeros(int(SR * 0.6))
     mix_into(buf, env(square(note(88), 0.07, 0.25), 0.001, 0.03, 0.5, 0.02), 0)

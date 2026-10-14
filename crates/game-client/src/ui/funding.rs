@@ -1,4 +1,4 @@
-//! Funding tab: France Travail, Bpifrance & co, love money, angels and VCs.
+//! Onglet Financement : France Travail, Bpifrance & cie, love money, business angels et VC.
 
 use super::style::*;
 use super::widgets::*;
@@ -129,7 +129,7 @@ fn equity(ui: &mut egui::Ui, c: &mut Ctx) {
             }
         });
     }
-    // Fundraising.
+    // Levée de fonds.
     let fr = c.game.0.funding.fundraising.clone();
     match fr {
         None => {

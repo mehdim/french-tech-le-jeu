@@ -1,4 +1,4 @@
-//! Campaign progression: levels, quests and the level-start snapshot.
+//! Progression de la campagne : niveaux, objectifs et instantané au début du niveau.
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -11,8 +11,8 @@ pub enum Phase {
     Bankrupt,
 }
 
-/// Values captured when a level starts, for relative quests
-/// ("reduce inference cost by 35 %", "keep 80 % of customers").
+/// Valeurs capturées au début d'un niveau, pour les objectifs relatifs
+/// (« réduire le coût d'inférence de 35 % », « garder 80 % des clients »).
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct LevelSnapshot {
     pub paying_customers: u32,
@@ -42,7 +42,7 @@ pub struct CampaignState {
     pub hired_in_level: u32,
     pub ending: Option<String>,
     pub results: Vec<LevelResult>,
-    /// The client shows the level intro scene while this is true.
+    /// Le client affiche la scène d'introduction du niveau tant que c'est vrai.
     pub intro_pending: bool,
 }
 

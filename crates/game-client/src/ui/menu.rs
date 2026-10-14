@@ -1,4 +1,4 @@
-//! Title screen, pause menu, save/load, settings and credits.
+//! Écran titre, menu pause, sauvegarde/chargement, paramètres et crédits.
 
 use super::style::*;
 use super::widgets::*;
@@ -51,7 +51,7 @@ fn load_slot(c: &mut Ctx, slot: &str) {
 }
 
 pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
-    // A dark vignette over the live office for legibility.
+    // Un vignettage sombre sur le bureau animé, pour la lisibilité.
     let rect = ctx.content_rect();
     let painter = ctx.layer_painter(egui::LayerId::new(egui::Order::Background, egui::Id::new("menu_bg")));
     painter.rect_filled(egui::Rect::from_min_max(rect.min, egui::pos2(rect.min.x + 470.0, rect.max.y)), 0.0, egui::Color32::from_black_alpha(205));
@@ -68,7 +68,7 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
             ui.add_space(6.0);
             ui.label(RichText::new("FRENCH TECH").font(pixel(44.0)).color(GREEN));
             ui.label(RichText::new("TYCOON").font(pixel(44.0)).color(OFFWHITE));
-            ui.label(RichText::new("From France Travail to Unicorn").font(pixel(11.0)).color(LIGHTGRAY));
+            ui.label(RichText::new("De France Travail à la licorne").font(pixel(11.0)).color(LIGHTGRAY));
             ui.add_space(4.0);
             ui.add(egui::Label::new(RichText::new("« La France est une startup nation. À vous de payer l'URSSAF. »").italics().size(14.0).color(LIGHTGRAY)).wrap());
             ui.add_space(14.0);

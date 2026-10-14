@@ -1,4 +1,4 @@
-//! Top bar: cash, MRR, runway, team, customers, churn, date, speed controls.
+//! Barre du haut : trésorerie, MRR, runway, équipe, clients, churn, date, vitesse.
 
 use super::style::*;
 use super::widgets::*;
@@ -9,12 +9,12 @@ use game_content::dialogue;
 
 const MONTHS: [&str; 12] = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
-/// In-game calendar: day 0 = Monday 3 November 2025 (resignation day).
+/// Calendrier du jeu : jour 0 = lundi 3 novembre 2025 (jour de la démission).
 pub fn date_label(day: u32) -> String {
-    // 28-day accounting months are a game abstraction; the calendar shown
-    // to the player is the real one.
+    // Les mois comptables de 28 jours sont une abstraction de jeu ; le calendrier
+    // montré au joueur est le vrai.
     let mut d = 3 + day as i64;
-    let mut m = 10usize; // November (0-based)
+    let mut m = 10usize; // novembre (indice à partir de 0)
     let mut y = 2025;
     let dim = |m: usize, y: i64| -> i64 {
         match m {
@@ -73,8 +73,8 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
                     "Personnes / places assises. Sans bureau, chacun travaille moins bien et le moral baisse.");
                 let cust = if g.product.launched { format!("{}", m.paying_customers) } else { format!("{} (bêta)", m.customers) };
                 stat(ui, c, "customers", cust, OFFWHITE, "Clients", "Comptes clients actifs. Avant le lancement, ce sont des bêta-testeurs gratuits.");
-                // With no customers yet, churn is only the projection for the
-                // current product: show it, but don't sound the alarm.
+                // Sans clients, le churn n'est qu'une projection pour le produit
+                // actuel : on l'affiche, sans déclencher l'alarme.
                 let (churn_txt, churn_col) = if m.customers == 0 {
                     (format!("{:.1} % (proj.)", m.churn), LIGHTGRAY)
                 } else {

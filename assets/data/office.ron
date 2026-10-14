@@ -1,6 +1,6 @@
-// Office tiers (rent is monthly, euros) and placeable furniture.
-// The entrance is the cell (width/2, height-1); it must stay free and every
-// item must remain reachable from it.
+// Niveaux de bureau (loyer mensuel, en euros) et mobilier à placer.
+// L'entrée est la case (largeur/2, hauteur-1) ; elle doit rester libre et chaque
+// objet doit rester accessible depuis elle.
 (
     tiers: [
         (

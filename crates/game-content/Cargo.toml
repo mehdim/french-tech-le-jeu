@@ -1,6 +1,6 @@
 [package]
 name = "game-content"
-description = "French Tech Tycoon — data-driven content: levels, events, tasks, characters, balancing."
+description = "French Tech Tycoon — contenu piloté par les données : niveaux, événements, chantiers, personnages, équilibrage."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

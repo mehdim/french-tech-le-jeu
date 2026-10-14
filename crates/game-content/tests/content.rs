@@ -14,7 +14,7 @@ fn starter_offices_are_valid_layouts() {
     for tier in &c.offices {
         let mut office = game_core::office::OfficeState::new(tier.id);
         office.move_to(&c, tier.id);
-        assert_eq!(office.items.len(), tier.starter.len(), "office {} starter layout invalid", tier.id);
+        assert_eq!(office.items.len(), tier.starter.len(), "bureau {} : agencement de départ invalide", tier.id);
     }
 }
 

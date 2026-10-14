@@ -1,6 +1,6 @@
-// Employee archetypes, recruitment channels and name pools.
-// Salaries are gross monthly euros, approximate Paris figures tuned for gameplay
-// (not payroll advice). Employer contributions are added from balancing.ron.
+// Profils de salariés, canaux de recrutement et réserves de noms.
+// Les salaires sont des bruts mensuels en euros, ordres de grandeur parisiens ajustés pour le jeu
+// (pas un conseil en paie). Les cotisations patronales s'ajoutent depuis balancing.ron.
 (
     archetypes: [
         (

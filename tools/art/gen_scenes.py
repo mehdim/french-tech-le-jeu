@@ -1,4 +1,4 @@
-"""Title background, ending illustrations and HUD icons."""
+"""Fond de l'écran titre, illustrations des fins et icônes du HUD."""
 import math, random
 from pixlib import *
 from gen_tiles import hash2
@@ -24,7 +24,7 @@ def tower(img, cx, base, height, col):
                 px(img, x, y, col)
         if abs(t - 0.62) < 0.02 or abs(t - 0.3) < 0.015:
             rect(img, cx - w - 1, y, 2 * w + 3, 1, col)
-    # arch
+    # arche
     for x in range(cx - height // 5, cx + height // 5):
         dy = int((1 - ((x - cx) / (height / 5)) ** 2) * 6)
         for y in range(base - dy, base):
@@ -42,7 +42,7 @@ def rooftops(img, base_y, seed, lit=0.25, color=(26, 32, 30, 255), window_cols=(
         for yy in range(top, img.height):
             for xx in range(x, x + w):
                 px(img, xx, yy, color)
-        # mansard zinc roof
+        # toit mansardé en zinc
         for i in range(5):
             for xx in range(x + i, x + w - i):
                 px(img, xx, top - i, shade(color, 1.25))
@@ -61,7 +61,7 @@ def rooftops(img, base_y, seed, lit=0.25, color=(26, 32, 30, 255), window_cols=(
 def title_background():
     img = new(320, 180)
     sky(img, (8, 12, 14, 255), (34, 52, 44, 255), seed=4)
-    # moon
+    # lune
     for y in range(-6, 7):
         for x in range(-6, 7):
             if x * x + y * y <= 36 and (x + 2) ** 2 + (y - 1) ** 2 > 22:
@@ -69,7 +69,7 @@ def title_background():
     tower(img, 230, 150, 98, (54, 70, 64, 255))
     rooftops(img, 150, 7, lit=0.18, color=(30, 38, 36, 255))
     rooftops(img, 172, 11, lit=0.32, color=(18, 22, 21, 255))
-    # neon sign on a roof
+    # enseigne au néon sur un toit
     tiny_text(img, 40, 128, "VERIDIX", GREEN)
     for x in range(38, 70):
         px(img, x, 134, GREEN_DIM)
@@ -80,18 +80,18 @@ def unicorn(img, cx, cy):
     body = [(x, y) for y in range(-6, 6) for x in range(-14, 14) if (x / 14) ** 2 + (y / 6) ** 2 <= 1]
     for x, y in body:
         px(img, cx + x, cy + y, OFFWHITE if y < 3 else LIGHTGRAY)
-    for i in range(10):                         # neck & head
+    for i in range(10):                         # cou et tête
         rect(img, cx + 10 + i // 2, cy - 6 - i, 6, 3, OFFWHITE)
     rect(img, cx + 15, cy - 17, 9, 5, OFFWHITE)
     px(img, cx + 21, cy - 16, INK)
-    for i in range(7):                          # horn
+    for i in range(7):                          # corne
         px(img, cx + 18 + i // 2, cy - 18 - i, GREEN)
-    for i in range(10):                         # mane
+    for i in range(10):                         # crinière
         px(img, cx + 12 + i // 3, cy - 8 - i, [GREEN, ORANGE, RED, BLUE, PURPLE][i % 5])
-    for lx, d in ((-9, 4), (-5, -3), (6, 3), (10, -4)):   # galloping legs
+    for lx, d in ((-9, 4), (-5, -3), (6, 3), (10, -4)):   # pattes au galop
         for i in range(8):
             px(img, cx + lx + (d * i) // 8, cy + 5 + i, LIGHTGRAY)
-    for i in range(9):                          # rainbow tail
+    for i in range(9):                          # queue arc-en-ciel
         px(img, cx - 14 - i, cy - 3 + i // 3, [RED, ORANGE, YELLOW, GREEN, BLUE][i % 5])
     outline_alpha(img)
 
@@ -115,7 +115,7 @@ def ending_profitable():
     img = new(160, 90)
     sky(img, (240, 170, 110, 255), (250, 214, 160, 255), stars=False)
     rooftops(img, 80, 5, lit=0.0, color=(120, 90, 90, 255))
-    # building with lit windows
+    # immeuble aux fenêtres éclairées
     rect(img, 50, 30, 60, 60, (226, 214, 190, 255))
     for i in range(4):
         for x in range(48 + i, 112 - i):
@@ -126,7 +126,7 @@ def ending_profitable():
             rect(img, wx + 2, wy + 4, 2, 4, LEAF_M)
     tiny_text(img, 62, 22, "VERIDIX", DEEP_GREEN)
     tiny_text(img, 4, 4, "EBITDA > 0", DEEP_GREEN)
-    # a rising chart in a window
+    # une courbe qui monte dans une fenêtre
     pts = [(116, 70), (126, 64), (136, 66), (146, 52), (156, 40)]
     for a, b in zip(pts, pts[1:]):
         line(img, a, b, DEEP_GREEN)
@@ -136,7 +136,7 @@ def ending_profitable():
 def ending_acquisition():
     img = new(160, 90)
     sky(img, (110, 150, 200, 255), (200, 220, 236, 255), stars=False)
-    # glass tower
+    # tour de verre
     for y in range(6, 90):
         for x in range(70, 120):
             c = (120, 160, 200, 255) if (x // 5 + y // 6) % 2 else (150, 190, 226, 255)
@@ -145,7 +145,7 @@ def ending_acquisition():
         rect(img, 70, y, 50, 1, (90, 120, 160, 255))
     rect(img, 74, 20, 42, 9, OFFWHITE)
     tiny_text(img, 76, 22, "ACQUIRED", RED)
-    # founder carrying a box with a moka pot
+    # fondateur portant un carton avec une cafetière italienne
     rect(img, 30, 66, 6, 7, SKINS[1]); rect(img, 30, 64, 6, 2, HAIRS[0])
     rect(img, 29, 73, 8, 9, GRAPHITE_2)
     rect(img, 30, 82, 2, 6, JEANS if False else (58, 74, 112, 255)); rect(img, 34, 82, 2, 6, (58, 74, 112, 255))
@@ -159,7 +159,7 @@ def ending_acquisition():
 def ending_commons():
     img = new(160, 90)
     sky(img, (12, 18, 16, 255), (26, 40, 34, 255), seed=9)
-    # a glowing tree of commits
+    # un arbre de commits lumineux
     def branch(x, y, a, l, d):
         if d == 0:
             return
@@ -169,7 +169,7 @@ def ending_commons():
         branch(x2, y2, a + 0.45, l * 0.7, d - 1)
         branch(x2, y2, a - 0.45, l * 0.7, d - 1)
     branch(80, 76, math.pi / 2, 18, 6)
-    # little contributors around
+    # de petits contributeurs autour
     r = random.Random(5)
     for i in range(14):
         x = 10 + i * 10 + r.randrange(-2, 3)

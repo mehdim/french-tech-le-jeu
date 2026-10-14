@@ -1,5 +1,5 @@
-//! Display names for roles, traits and recurring characters, plus the
-//! portrait key the client uses for each speaker.
+//! Noms affichés des rôles, des traits et des personnages récurrents, plus la
+//! clé de portrait que le client utilise pour chaque personnage qui parle.
 
 use game_core::content::Trait;
 use game_core::types::{Role, Segment};
@@ -61,7 +61,7 @@ pub fn segment_name(s: Segment) -> &'static str {
     }
 }
 
-/// Portrait sprite key for a speaker name used in dialogue.
+/// Clé du sprite de portrait pour un nom de personnage utilisé dans les dialogues.
 pub fn portrait_for(speaker: &str) -> &'static str {
     let s = speaker.to_lowercase();
     if s.contains("vous") {

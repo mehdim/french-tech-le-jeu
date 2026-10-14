@@ -1,5 +1,5 @@
-//! Juice: floating texts, particles and speech bubbles triggered by
-//! simulation cues (customers signed, features shipped, incidents, money).
+//! Effets : textes flottants, particules et bulles déclenchés par les
+//! signaux de la simulation (clients signés, fonctionnalités livrées, incidents, argent).
 
 use crate::animation::{EmployeeSprite, Nav, Poi, show_bubble};
 use crate::assets::{Atlas, iso};
@@ -71,7 +71,7 @@ fn react_to_cues(
     for cue in &cues.0 {
         match cue {
             Cue::NewCustomers(n) => {
-                // Credit a salesperson (or the founder) with the deal.
+                // Attribue la vente à un commercial (ou au fondateur).
                 let seller = game
                     .0
                     .employees

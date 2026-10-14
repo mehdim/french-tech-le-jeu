@@ -1,4 +1,4 @@
-//! Sales & marketing tab: segments, pricing, marketing budget, markets.
+//! Onglet Ventes & marketing : segments, prix, budget marketing, marchés.
 
 use super::style::*;
 use super::widgets::*;
@@ -71,7 +71,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
                 cols[1].label(RichText::new(format!("churn {:.1} %", s.churn_rate)).size(12.5).color(churn_col)).on_hover_text(tip);
                 cols[2].label(RichText::new(format!("{}/mois", money(s.customers as f64 * s.price))).size(12.5).color(GREEN));
             });
-            // Required features.
+            // Fonctionnalités requises.
             let missing: Vec<String> = def
                 .required_features
                 .iter()

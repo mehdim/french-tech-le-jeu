@@ -1,8 +1,8 @@
-//! Grid-based office: furniture placement and its gameplay effects.
+//! Bureau en grille : placement du mobilier et ses effets sur le jeu.
 //!
-//! Coordinates: x grows along the right-hand back wall, y along the
-//! left-hand back wall (isometric). The entrance is the front cell
-//! `door()`; every seat or appliance must stay reachable from it.
+//! Coordonnées : x croît le long du mur du fond à droite, y le long du
+//! mur du fond à gauche (isométrique). L'entrée est la case avant
+//! `door()` ; chaque poste ou appareil doit rester accessible depuis elle.
 
 use crate::content::{Content, FurnitureDef, OfficeTierDef};
 use serde::{Deserialize, Serialize};
@@ -21,10 +21,10 @@ pub struct PlacedItem {
 pub struct OfficeState {
     pub tier: u32,
     pub items: Vec<PlacedItem>,
-    /// Owned furniture that did not fit after a move.
+    /// Mobilier possédé qui n'a pas trouvé de place après un déménagement.
     pub storage: Vec<String>,
     pub next_uid: u32,
-    /// Rent increases negotiated (or not) with the landlord.
+    /// Hausses de loyer négociées (ou non) avec le propriétaire.
     #[serde(default)]
     pub rent_extra: f64,
 }
@@ -50,7 +50,7 @@ impl PlaceError {
     }
 }
 
-/// Aggregated effects of all placed furniture.
+/// Effets cumulés de tout le mobilier posé.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct OfficeEffects {
     pub seats: u32,
@@ -104,8 +104,8 @@ impl OfficeState {
         grid
     }
 
-    /// Check whether `item` can go at (x, y). `ignore` lets an existing item
-    /// be moved without colliding with itself.
+    /// Vérifie si `item` peut aller en (x, y). `ignore` permet de déplacer un
+    /// objet existant sans qu'il entre en collision avec lui-même.
     pub fn can_place(
         &self,
         content: &Content,
@@ -138,7 +138,7 @@ impl OfficeState {
                 grid[(cy * tier.width + cx) as usize] = Some(u32::MAX);
             }
         }
-        // Every item must have a free neighbour reachable from the door.
+        // Chaque objet doit avoir une case voisine libre accessible depuis la porte.
         let reach = reachable(tier, &grid);
         let mut items: Vec<(i32, i32, i32, i32)> = self
             .items
@@ -197,7 +197,7 @@ impl OfficeState {
         Ok(())
     }
 
-    /// First free position for an item (row-major scan), if any.
+    /// Première position libre pour un objet (parcours ligne par ligne), s'il y en a une.
     pub fn find_spot(&self, content: &Content, item: &str) -> Option<(i32, i32, bool)> {
         let tier = content.office(self.tier)?;
         for y in 0..tier.height {
@@ -212,7 +212,7 @@ impl OfficeState {
         None
     }
 
-    /// Move into a bigger office, carrying the furniture along.
+    /// Emménage dans un bureau plus grand en emportant le mobilier.
     pub fn move_to(&mut self, content: &Content, tier: u32) {
         let mut owned: Vec<String> = self.items.drain(..).map(|i| i.item).collect();
         owned.append(&mut self.storage);
@@ -223,7 +223,7 @@ impl OfficeState {
                 let _ = self.place(content, &item, x, y, false);
             }
         }
-        // Place big items first so they find room.
+        // On place d'abord les gros objets pour qu'ils trouvent de la place.
         owned.sort_by_key(|i| {
             content
                 .furniture(i)
@@ -256,7 +256,7 @@ impl OfficeState {
             if def.effects.seats > 0 && def.effects.eng_bonus > 0.0 {
                 fx.workstations += 1;
             }
-            // Beyond max_effective, an item only counts for seats.
+            // Au-delà de max_effective, un objet ne compte plus que pour les places assises.
             let w = if *n <= def.max_effective { 1.0 } else { 0.0 };
             let e = &def.effects;
             fx.morale += e.morale * w;
@@ -312,7 +312,7 @@ fn touches_reachable(tier: &OfficeTierDef, reach: &[bool], x: i32, y: i32, w: i3
     false
 }
 
-/// Free walkable cells reachable from the door (for client navigation).
+/// Cases libres praticables accessibles depuis la porte (pour la navigation du client).
 pub fn walkable(content: &Content, office: &OfficeState) -> Vec<bool> {
     let Some(tier) = content.office(office.tier) else { return Vec::new() };
     let grid = office.occupancy(content, tier, None);

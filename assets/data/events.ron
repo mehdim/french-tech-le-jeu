@@ -1,9 +1,9 @@
-// Event library. Random events are drawn when their conditions hold
-// (weighted, with cooldowns). Scripted events are boss events and story chains.
-// Every choice changes the simulation; texts are flavour on top of mechanics.
+// Bibliothèque d'événements. Les événements aléatoires sont tirés quand leurs conditions sont
+// remplies (pondérés, avec délais de carence). Les événements scénarisés sont les événements
+// majeurs et les enchaînements de l'histoire. Chaque choix modifie la simulation ; le texte habille la mécanique.
 [
     // =================================================================
-    // SCRIPTED — level bosses and story chains
+    // SCÉNARISÉS — événements majeurs des niveaux et enchaînements de l'histoire
     // =================================================================
     (
         id: "page4", scripted: true, title: "Il manque la page 4 de votre dossier",
@@ -235,7 +235,7 @@
     ),
 
     // =================================================================
-    // RANDOM — conditional on company state
+    // ALÉATOIRES — selon l'état de l'entreprise
     // =================================================================
     (
         id: "kubernetes", title: "L'incident Kubernetes", weight: 1.2, once: true,

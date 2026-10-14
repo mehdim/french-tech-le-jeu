@@ -1,5 +1,5 @@
-//! Pointer and keyboard input on the game world: selecting employees and
-//! furniture, placing furniture on the grid, and global shortcuts.
+//! Entrées pointeur et clavier sur le monde du jeu : sélection des salariés et du
+//! mobilier, placement des meubles sur la grille, et raccourcis globaux.
 
 use crate::animation::EmployeeSprite;
 use crate::assets::world_to_grid;
@@ -23,7 +23,7 @@ impl Plugin for InputPlugin {
     }
 }
 
-/// Cursor position in world space (None when outside the world viewport).
+/// Position du curseur dans le monde (None hors de la zone d'affichage du monde).
 #[derive(Resource, Default)]
 pub struct CursorWorld(pub Option<Vec2>);
 
@@ -81,7 +81,7 @@ fn placement_input(
         };
         match game.0.apply(&content.0, cmd) {
             Ok(()) => {
-                // Keep placing copies of new purchases while Shift is held.
+                // Continue de poser des copies des nouveaux achats tant que Maj est enfoncée.
                 let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
                 if !(shift && placement.moving_uid.is_none() && placement.stored_index.is_none()) {
                     *placement = Placement::default();
@@ -107,7 +107,7 @@ fn pick_input(
         return;
     }
     let Some(p) = cw.0 else { return };
-    // Employees first (they stand in front of furniture).
+    // Les salariés d'abord (ils sont devant le mobilier).
     let mut best: Option<(f32, u32)> = None;
     for (s, tf, vis) in &employees {
         if *vis == Visibility::Hidden {
@@ -139,7 +139,7 @@ fn pick_input(
         selection.furniture = Some(uid);
         selection.employee = None;
         ui.inspect_furniture = Some(uid);
-        // Clicking the whiteboard opens R&D, a meeting table opens sales, etc.
+        // Cliquer sur le tableau blanc ouvre la R&D, une table de réunion ouvre les ventes, etc.
         ui.tab = match item.as_str() {
             "whiteboard" | "gpu_server" | "bookshelf_item" => Tab::Product,
             "meeting_table" => Tab::Sales,
@@ -166,9 +166,9 @@ fn shortcuts(
     if vp.keyboard_captured {
         return;
     }
-    // While a story dialogue or event is open, Enter and 1-4 belong to it.
-    // (Also for one frame after it closes, so the key that answered it
-    // does not change the speed too.)
+    // Quand un dialogue ou un événement est ouvert, Entrée et 1-4 lui appartiennent.
+    // (Aussi pendant une image après sa fermeture, pour que la touche qui y a répondu
+    // ne change pas aussi la vitesse.)
     let open_now = game.0.campaign.intro_pending || game.0.events.pending.is_some();
     let dialog_open = open_now || *dialog_last_frame;
     *dialog_last_frame = open_now;

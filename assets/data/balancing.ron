@@ -1,5 +1,5 @@
-// Gameplay balancing knobs (see crates/game-core/src/balancing.rs for meanings).
-// Payroll figures approximate French employer costs for gameplay only.
+// Paramètres d'équilibrage (voir crates/game-core/src/balancing.rs pour leur signification).
+// Les chiffres de masse salariale approchent les coûts employeur français, pour le jeu uniquement.
 (
     start_cash: 30000.0,
     start_reputation: 10.0,
@@ -51,6 +51,6 @@
     valuation_arr_multiple: 6.0,
     valuation_floor: 350000.0,
     valuation_per_engineer: 60000.0,
-    // Customers use the product a bit more every day (~+2 %/month).
+    // Les clients utilisent le produit un peu plus chaque jour (~+2 %/mois).
     usage_creep_per_day: 0.0007,
 )

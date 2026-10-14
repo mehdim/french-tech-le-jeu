@@ -1,4 +1,4 @@
-//! Team tab: roster, assignments, inspector, recruitment.
+//! Onglet Équipe : effectif, affectations, fiche détaillée, recrutement.
 
 use super::style::*;
 use super::widgets::*;

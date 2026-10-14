@@ -1,46 +1,46 @@
-//! Veridix the product: detection quality, drift, tech debt, inference cost.
+//! Veridix, le produit : qualité de détection, dérive, dette technique, coût d'inférence.
 //!
-//! Universal AI-text detection is *not* a solvable problem here: accuracy
-//! gains shrink near a ceiling, benchmarks drift as new foundation models
-//! ship, and false positives on human text keep customers nervous.
+//! La détection universelle de texte généré par IA n'est *pas* un problème soluble ici : les
+//! gains de précision s'amenuisent près d'un plafond, les benchmarks dérivent à chaque nouveau
+//! modèle de fondation, et les faux positifs sur des textes humains inquiètent les clients.
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProductState {
-    /// Task ids shipped at least once.
+    /// Identifiants des chantiers livrés au moins une fois.
     pub shipped: BTreeSet<String>,
-    /// Breadth/polish of the product, 0..100.
+    /// Étendue et finition du produit, 0..100.
     pub feature_score: f64,
-    /// Model accuracy on the reference benchmark before drift, in %.
+    /// Précision du modèle sur le benchmark de référence avant dérive, en %.
     pub model_accuracy: f64,
-    /// Benchmark degradation accumulated since the last retraining.
+    /// Dégradation du benchmark accumulée depuis le dernier réentraînement.
     pub drift: f64,
-    /// Robustness to drift and adversarial paraphrasing (0..0.8).
+    /// Robustesse à la dérive et aux paraphrases adverses (0..0,8).
     pub robustness: f64,
-    /// Base false-positive rate on human-written text, in %.
+    /// Taux de base de faux positifs sur des textes humains, en %.
     pub fpr: f64,
     pub tech_debt: f64,
-    /// € per 1,000 analyses (before temporary modifiers).
+    /// € pour 1 000 analyses (avant modificateurs temporaires).
     pub inference_cost_per_k: f64,
-    /// Multiplier on per-customer usage.
+    /// Multiplicateur de l'usage par client.
     pub usage_mult: f64,
-    /// Supported languages (1 = French + English).
+    /// Langues prises en charge (1 = français + anglais).
     pub languages: u32,
-    /// Reliability hit from recent incidents (decays).
+    /// Fiabilité dégradée par les incidents récents (s'atténue).
     pub incident_penalty: f64,
     pub launched: bool,
-    /// Relative retention bonuses per segment (0.1 = -10 % churn).
+    /// Bonus de rétention relatifs par segment (0,1 = -10 % de churn).
     pub retention: [f64; 3],
-    /// Relative conversion bonuses per segment.
+    /// Bonus de conversion relatifs par segment.
     pub conversion: [f64; 3],
-    /// Extra monthly hosting from architecture decisions.
+    /// Hébergement mensuel supplémentaire dû aux choix d'architecture.
     pub hosting_extra: f64,
-    /// Incident probability reduction from monitoring, audits, SRE work.
+    /// Réduction de la probabilité d'incident grâce au monitoring, aux audits, au travail SRE.
     #[serde(default)]
     pub resilience: f64,
-    /// Accumulated organic usage growth (capped).
+    /// Croissance organique cumulée de l'usage (plafonnée).
     #[serde(default)]
     pub usage_creep: f64,
 }
@@ -68,18 +68,18 @@ impl ProductState {
         }
     }
 
-    /// Accuracy measured on today's traffic (model accuracy minus drift).
+    /// Précision mesurée sur le trafic du jour (précision du modèle moins la dérive).
     pub fn effective_accuracy(&self) -> f64 {
         (self.model_accuracy - self.drift).clamp(50.0, 99.0)
     }
 
-    /// False positives grow as the benchmark drifts.
+    /// Les faux positifs augmentent à mesure que le benchmark dérive.
     pub fn effective_fpr(&self) -> f64 {
         (self.fpr + self.drift * 0.15).clamp(0.3, 40.0)
     }
 
-    /// Detection score 0..100: accuracy above coin-flip minus a penalty for
-    /// flagging humans (the thing customers hate most).
+    /// Score de détection 0..100 : précision au-dessus du pile ou face, moins une pénalité
+    /// pour avoir signalé des humains (ce que les clients détestent le plus).
     pub fn detection_score(&self) -> f64 {
         ((self.effective_accuracy() - 50.0) * 3.0 - self.effective_fpr() * 1.2).clamp(0.0, 100.0)
     }
@@ -88,8 +88,8 @@ impl ProductState {
         (100.0 - self.tech_debt * 0.6 - self.incident_penalty).clamp(0.0, 100.0)
     }
 
-    /// Market-facing product quality, 0..100.
-    /// quality = 35 % features + 45 % detection + 20 % reliability
+    /// Qualité produit perçue par le marché, 0..100.
+    /// qualité = 35 % fonctionnalités + 45 % détection + 20 % fiabilité
     pub fn quality(&self) -> f64 {
         (0.35 * self.feature_score.min(100.0)
             + 0.45 * self.detection_score()
@@ -97,8 +97,8 @@ impl ProductState {
         .clamp(0.0, 100.0)
     }
 
-    /// Apply an accuracy gain with diminishing returns: the closer to the
-    /// ceiling, the smaller the improvement.
+    /// Applique un gain de précision à rendement décroissant : plus on est près du
+    /// plafond, plus l'amélioration est faible.
     pub fn gain_accuracy(&mut self, amount: f64, ceiling: f64) {
         let gap = (ceiling - self.model_accuracy).max(0.0);
         let scale = (gap / (ceiling - 53.0)).clamp(0.0, 1.0).sqrt();

@@ -1,4 +1,4 @@
-//! Employees, candidates and recruitment.
+//! Salariés, candidats et recrutement.
 
 use crate::content::{ArchetypeDef, ChannelDef, Content, Trait};
 use crate::types::{Role, Seniority};
@@ -15,21 +15,21 @@ pub struct Skills {
     pub ops: f64,
 }
 
-/// What an employee spends their day on. This *is* the department.
+/// Ce à quoi un salarié consacre sa journée. C'est *aussi* son département.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Assignment {
     Unassigned,
-    /// Works on an active development task (instance id).
+    /// Travaille sur un chantier de développement actif (id d'instance).
     Task(u32),
     Sales,
     Marketing,
-    /// Infrastructure, on-call, tech-debt hygiene.
+    /// Infrastructure, astreinte, hygiène de la dette technique.
     Ops,
-    /// Paperwork: grant dossiers, France Travail, URSSAF.
+    /// Paperasse : dossiers de subvention, France Travail, URSSAF.
     Admin,
-    /// Pitch decks and investor meetings.
+    /// Pitch decks et rendez-vous investisseurs.
     Fundraising,
-    /// Coordination (PM), people (HR), finance (CFO).
+    /// Coordination (PM), humain (RH), finances (CFO).
     Management,
 }
 
@@ -48,7 +48,7 @@ impl Assignment {
     }
 }
 
-/// High-level state for the presentation layer's animation state machine.
+/// État de haut niveau pour la machine à états d'animation de la couche de présentation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Activity {
     Idle,
@@ -67,12 +67,12 @@ pub struct Employee {
     pub archetype: String,
     pub trait_: Trait,
     pub seniority: Seniority,
-    /// Gross monthly salary (employer contributions are added on top).
+    /// Salaire mensuel brut (les cotisations patronales s'ajoutent par-dessus).
     pub salary: f64,
-    /// Daily rate billed by an ESN instead of a salary.
+    /// Taux journalier facturé par une ESN à la place d'un salaire.
     pub day_rate: Option<f64>,
     pub skills: Skills,
-    /// Personal productivity multiplier (0.7..1.3).
+    /// Multiplicateur de productivité personnel (0,7..1,3).
     pub productivity: f64,
     pub morale: f64,
     pub fatigue: f64,
@@ -81,12 +81,12 @@ pub struct Employee {
     pub hired_day: u32,
     pub contract_end: Option<u32>,
     pub on_leave_until: Option<u32>,
-    /// Fraction of salary covered by an aid for the first 6 months.
+    /// Part du salaire couverte par une aide pendant les 6 premiers mois.
     pub subsidy: f64,
     pub activity: Activity,
-    /// Days spent below the resignation threshold.
+    /// Jours passés sous le seuil de démission.
     pub unhappy_days: u32,
-    /// Sprite variant for the client (hair/skin palette index).
+    /// Variante de sprite pour le client (indice de palette cheveux/peau).
     pub look: u8,
 }
 
@@ -95,7 +95,7 @@ impl Employee {
         self.on_leave_until.is_none_or(|d| day >= d)
     }
 
-    /// Monthly cost to the company (salary + contributions, or ESN billing).
+    /// Coût mensuel pour l'entreprise (salaire + cotisations, ou facturation ESN).
     pub fn monthly_cost(&self, employer_contrib: f64, day: u32) -> f64 {
         if let Some(rate) = self.day_rate {
             return rate * 20.0;
@@ -119,7 +119,7 @@ pub struct Candidate {
     pub employee: Employee,
     pub channel: String,
     pub expires_day: u32,
-    /// One-off cost to hire (recruiter fee, referral bonus).
+    /// Coût ponctuel d'embauche (frais de cabinet, prime de cooptation).
     pub hiring_cost: f64,
     pub pitch: String,
 }
@@ -145,7 +145,7 @@ pub fn random_name(content: &Content, rng: &mut ChaCha8Rng) -> String {
     format!("{first} {last}")
 }
 
-/// Build an employee from an archetype definition.
+/// Crée un salarié à partir de la définition d'un profil.
 pub fn roll_employee(
     content: &Content,
     arch: &ArchetypeDef,
@@ -197,7 +197,7 @@ pub fn roll_employee(
     }
 }
 
-/// Default assignment for a freshly hired employee.
+/// Affectation par défaut d'une nouvelle recrue.
 pub fn default_assignment(role: Role) -> Assignment {
     match role {
         Role::Sales => Assignment::Sales,
@@ -208,8 +208,8 @@ pub fn default_assignment(role: Role) -> Assignment {
     }
 }
 
-/// Which assignments make sense for a role (the UI greys out others,
-/// the simulation simply yields little output).
+/// Les affectations qui ont du sens pour un rôle (l'interface grise les autres,
+/// la simulation en tire simplement peu de travail).
 pub fn allowed_assignments(role: Role) -> Vec<Assignment> {
     let mut v = vec![Assignment::Unassigned, Assignment::Sales, Assignment::Marketing];
     if role.is_engineering() || role == Role::ProductManager {

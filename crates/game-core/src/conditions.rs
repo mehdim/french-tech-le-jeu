@@ -1,9 +1,9 @@
-//! Evaluation of [`Condition`]s against the game state.
+//! Évaluation des [`Condition`] sur l'état du jeu.
 
 use crate::simulation::GameState;
 use crate::types::{Condition, Segment};
 
-/// Progress toward a condition, for UI bars: (current, target, higher_is_better).
+/// Progression vers une condition, pour les barres de l'interface : (actuel, cible, plus_haut_est_mieux).
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Progress {
     pub current: f64,
@@ -18,7 +18,7 @@ impl Progress {
     fn down(current: f64, target: f64) -> Option<Self> {
         Some(Self { current, target, higher_is_better: false })
     }
-    /// 0..1 fill for a progress bar.
+    /// Remplissage 0..1 pour une barre de progression.
     pub fn fraction(&self) -> f64 {
         if self.higher_is_better {
             if self.target <= 0.0 { 1.0 } else { (self.current / self.target).clamp(0.0, 1.0) }
@@ -133,7 +133,7 @@ impl GameState {
             + self.funding.equity_by_level.get(&l).copied().unwrap_or(0.0)
     }
 
-    /// Numeric progress for UI bars, when the condition is quantitative.
+    /// Progression chiffrée pour les barres de l'interface, quand la condition est quantitative.
     pub fn progress(&self, c: &Condition) -> Option<Progress> {
         let m = &self.metrics;
         match c {

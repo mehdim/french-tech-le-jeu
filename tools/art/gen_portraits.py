@@ -1,4 +1,4 @@
-"""40x40 dialogue portraits for recurring speakers."""
+"""Portraits de dialogue en 40x40 pour les personnages récurrents."""
 from pixlib import *
 
 P = 40
@@ -8,9 +8,9 @@ def bust(bg, skin, hair, style, shirt, extras=None):
     e = extras or {}
     img = new(P, P)
     rect(img, 0, 0, P, P, bg)
-    for i in range(P):       # subtle vignette stripes
+    for i in range(P):       # légères rayures de vignettage
         px(img, i, 0, shade(bg, 0.8)); px(img, i, P - 1, shade(bg, 0.8))
-    # shoulders
+    # épaules
     for y in range(29, P):
         w = 13 + (y - 29)
         for x in range(20 - w, 20 + w):
@@ -37,13 +37,13 @@ def bust(bg, skin, hair, style, shirt, extras=None):
             px(img, 16 + i, 30 + (1 if i in (0, 7) else 2), YELLOW)
     if e.get("logo"):
         rect(img, 24, 34, 3, 3, e["logo"])
-    # neck + head
+    # cou + tête
     rect(img, 17, 25, 6, 5, shade(skin, 0.88))
     for y in range(8, 27):
         for x in range(12, 28):
             if (x - 20) ** 2 / 64 + (y - 17) ** 2 / 100 <= 1:
                 px(img, x, y, skin if x > 14 else shade(skin, 0.9))
-    # hair
+    # cheveux
     if style != "bald":
         for y in range(6, 14):
             for x in range(11, 29):
@@ -67,7 +67,7 @@ def bust(bg, skin, hair, style, shirt, extras=None):
         for x in (12, 13, 27, 28):
             for y in range(13, 18):
                 px(img, x, y, hair)
-    # face
+    # visage
     px(img, 16, 17, INK); px(img, 23, 17, INK)
     px(img, 16, 16, OFFWHITE) if e.get("wide") else None
     rect(img, 15, 15, 3, 1, shade(hair if style != "bald" else skin, 0.8))

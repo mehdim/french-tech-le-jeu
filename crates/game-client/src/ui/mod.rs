@@ -1,7 +1,7 @@
-//! Management interface (egui). egui is used for the data-dense panels
-//! (tables, sliders, progress bars, tooltips, scrolling feeds) where an
-//! immediate-mode UI is much more productive and readable than Bevy UI;
-//! the game world itself (office, characters, particles) is Bevy sprites.
+//! Interface de gestion (egui). egui sert aux panneaux denses en données
+//! (tableaux, curseurs, barres de progression, infobulles, fils défilants), où une
+//! interface en mode immédiat est bien plus productive et lisible que Bevy UI ;
+//! le monde du jeu lui-même (bureau, personnages, particules) est en sprites Bevy.
 
 mod dialogs;
 mod feed;
@@ -65,12 +65,12 @@ pub struct UiState {
     pub product_filter: Option<game_core::content::TaskCategory>,
     pub feed_filter: u8,
     pub initialised: bool,
-    /// egui applies new fonts on the next frame: draw only after that.
+    /// egui applique les nouvelles polices à l'image suivante : on ne dessine qu'après.
     pub fonts_ready: bool,
     pub show_help: bool,
 }
 
-/// Short-lived notifications in the corner.
+/// Notifications éphémères dans le coin.
 #[derive(Resource, Default)]
 pub struct Toasts(pub Vec<(String, bool, f32)>);
 
@@ -83,7 +83,7 @@ impl Toasts {
     }
 }
 
-/// egui texture ids for our atlases (registered once loaded).
+/// Identifiants de textures egui pour nos atlas (enregistrés une fois chargés).
 #[derive(Resource, Default, Clone)]
 pub struct UiTextures {
     pub portraits: Option<egui::TextureId>,
@@ -137,7 +137,7 @@ fn register_textures(mut contexts: EguiContexts, atlas: Option<Res<Atlas>>, mut 
     }
 }
 
-/// Everything the panels need, bundled to keep system signatures sane.
+/// Tout ce dont les panneaux ont besoin, regroupé pour garder des signatures de systèmes raisonnables.
 pub struct Ctx<'a> {
     pub game: &'a mut Game,
     pub content: &'a GameContent,
@@ -157,7 +157,7 @@ pub struct Ctx<'a> {
 }
 
 impl Ctx<'_> {
-    /// Run a command and report errors as toasts.
+    /// Exécute une commande et signale les erreurs par des notifications.
     pub fn run(&mut self, cmd: game_core::Command) -> bool {
         *self.click += 1;
         match self.game.0.apply(&self.content.0, cmd) {
@@ -170,7 +170,7 @@ impl Ctx<'_> {
     }
 }
 
-/// Resources used by the UI, bundled (Bevy systems take at most 16 params).
+/// Ressources utilisées par l'interface, regroupées (un système Bevy prend au plus 16 paramètres).
 #[derive(bevy::ecs::system::SystemParam)]
 pub struct UiRes<'w, 's> {
     game: ResMut<'w, Game>,
@@ -266,7 +266,7 @@ fn ui_root(
         }
     };
 
-    // Floating texts over the world.
+    // Textes flottants au-dessus du monde.
     if let Ok((camera, gtf)) = cam.single() {
         let painter = ctx.layer_painter(egui::LayerId::new(egui::Order::Middle, egui::Id::new("fx_text")));
         let painter = painter.with_clip_rect(central);
@@ -287,7 +287,7 @@ fn ui_root(
         widgets::placement_hint(&ctx, &c, &item, central);
     }
 
-    // Tell the camera and input systems what is left for the world.
+    // Indique aux systèmes de caméra et d'entrée ce qui reste pour le monde.
     let pointer = ctx.pointer_hover_pos();
     vp.min = Vec2::new(central.min.x, central.min.y);
     vp.max = Vec2::new(central.max.x, central.max.y);

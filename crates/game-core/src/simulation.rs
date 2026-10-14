@@ -1,11 +1,11 @@
-//! The authoritative, deterministic simulation.
+//! La simulation de référence, déterministe.
 //!
-//! One `tick()` = one in-game day. Order of operations:
-//!  1. employees generate work        6. revenue accrues
-//!  2. tasks / paperwork / pitches    7. expenses accrue
-//!  3. marketing generates leads      8. morale, fatigue, departures
-//!  4. sales converts leads           9. events (delayed, boss, random)
-//!  5. customers churn               10. missions are evaluated
+//! Un `tick()` = un jour de jeu. Ordre des opérations :
+//!  1. les salariés produisent du travail   6. les revenus s'accumulent
+//!  2. chantiers / paperasse / pitchs       7. les dépenses s'accumulent
+//!  3. le marketing génère des leads        8. moral, fatigue, départs
+//!  4. les commerciaux convertissent        9. événements (différés, majeurs, aléatoires)
+//!  5. des clients résilient               10. les objectifs sont évalués
 
 use crate::content::{Content, ProgramKind, RoundKind, Trait};
 use crate::customers::{FunnelInputs, MarketState, daily_funnel};
@@ -24,7 +24,7 @@ use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-/// Bumped whenever the save format changes incompatibly.
+/// Incrémenté à chaque changement incompatible du format de sauvegarde.
 pub const SAVE_SCHEMA: u32 = 1;
 const LOG_CAP: usize = 250;
 
@@ -40,7 +40,7 @@ pub struct Stats {
     pub max_mrr: f64,
     pub customers_won: u32,
     pub customers_lost: u32,
-    /// R&D payroll since the last research tax credit claim.
+    /// Masse salariale R&D depuis la dernière demande de crédit d'impôt recherche.
     pub rd_spend: f64,
     pub coffees: u32,
 }
@@ -68,16 +68,16 @@ pub struct GameState {
     pub modifiers: Vec<Modifier>,
     pub crunch: bool,
     pub founder_mult: f64,
-    /// Competitive pressure added by events; decays monthly.
+    /// Pression concurrentielle ajoutée par les événements ; décroît chaque mois.
     pub event_pressure: f64,
     pub next_id: u32,
     pub log: Vec<LogEntry>,
     pub incident_day: Option<u32>,
     pub stats: Stats,
-    /// Weekly accumulators for the activity feed.
+    /// Compteurs hebdomadaires pour le fil d'actualité.
     pub week_new: u32,
     pub week_churn: u32,
-    /// Team output of the last working day (for UI explanations).
+    /// Production de l'équipe le dernier jour travaillé (pour les explications de l'interface).
     #[serde(default)]
     pub last_work: WorkSummary,
     #[serde(skip)]
@@ -86,7 +86,7 @@ pub struct GameState {
     pub cues: Vec<Cue>,
 }
 
-/// Player commands: the only way the presentation layer mutates the game.
+/// Commandes du joueur : le seul moyen pour la couche de présentation de modifier la partie.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Command {
     Assign { employee: u32, assignment: Assignment },
@@ -136,7 +136,7 @@ impl CmdError {
     }
 }
 
-/// Output of the last working day, kept for the UI.
+/// Production du dernier jour travaillé, gardée pour l'interface.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct WorkSummary {
     pub sales: f64,
@@ -147,7 +147,7 @@ pub struct WorkSummary {
     pub growth_hackers: u32,
 }
 
-/// Daily work produced by the team.
+/// Travail quotidien produit par l'équipe.
 #[derive(Clone, Debug, Default)]
 struct Work {
     task_points: BTreeMap<u32, (f64, f64)>,
@@ -171,7 +171,7 @@ impl GameState {
     pub fn new(content: &Content, seed: u64) -> Self {
         let b = &content.balancing;
         let mut rng = ChaCha8Rng::seed_from_u64(seed);
-        let founder_arch = content.archetype("founder").expect("content must define the founder");
+        let founder_arch = content.archetype("founder").expect("le contenu doit définir le fondateur");
         let mut founder = roll_employee(content, founder_arch, None, 1, 0, &mut rng);
         founder.name = "Vous".to_string();
         founder.salary = 0.0;
@@ -263,7 +263,7 @@ impl GameState {
     }
 
     // ------------------------------------------------------------------
-    // levels
+    // niveaux
     // ------------------------------------------------------------------
 
     pub fn start_level(&mut self, content: &Content, level: u32) {
@@ -344,11 +344,11 @@ impl GameState {
     }
 
     // ------------------------------------------------------------------
-    // the daily tick
+    // le tick quotidien
     // ------------------------------------------------------------------
 
-    /// Advance one day. Returns false when the simulation is waiting for
-    /// the player (event choice, level transition, intro, game over).
+    /// Avance d'un jour. Renvoie false quand la simulation attend le
+    /// joueur (choix d'événement, changement de niveau, intro, fin de partie).
     pub fn tick(&mut self, content: &Content) -> bool {
         if !self.is_running() {
             return false;
@@ -553,7 +553,7 @@ impl GameState {
             let name = content.program(&p).map(|d| d.name.clone()).unwrap_or(p);
             self.log(Tone::Info, Msg::ApplicationSubmitted { program: name });
         }
-        // Decisions.
+        // Décisions.
         let decide: Vec<usize> = self
             .funding
             .applications
@@ -566,8 +566,8 @@ impl GameState {
             let program_id = self.funding.applications[i].program.clone();
             let Some(def) = content.program(&program_id) else { continue };
             let innovation = self.metrics.innovation_score;
-            // Committees judge innovation and credibility; founder support,
-            // statuses and tax credits are mostly a matter of paperwork.
+            // Les comités jugent l'innovation et la crédibilité ; l'accompagnement des créateurs,
+            // les statuts et les crédits d'impôt sont surtout une affaire de paperasse.
             let merit = match def.kind {
                 ProgramKind::Grant | ProgramKind::Advance | ProgramKind::Loan => {
                     (0.8 + innovation / 250.0) * (0.9 + self.reputation / 250.0)
@@ -710,8 +710,8 @@ impl GameState {
         (customers / capacity - 1.0).clamp(0.0, 1.5)
     }
 
-    /// Funnel inputs from the current state (team output from the last
-    /// working day). Used by the daily funnel and by the UI breakdowns.
+    /// Entrées du tunnel à partir de l'état courant (production de l'équipe du dernier
+    /// jour travaillé). Utilisé par le tunnel quotidien et par les détails de l'interface.
     pub fn funnel_inputs(&self, content: &Content) -> FunnelInputs {
         let b = &content.balancing;
         let mut gate = [0.0; 3];
@@ -726,7 +726,7 @@ impl GameState {
                 def.required_features.iter().filter(|f| self.product.has(f)).count() as f64 / n as f64
             };
         }
-        // Before any MVP exists there is nothing to sell, not even a beta.
+        // Tant qu'aucun MVP n'existe, il n'y a rien à vendre, pas même une bêta.
         if !self.product.has("mvp_text") {
             unlocked = [false; 3];
         }
@@ -815,7 +815,7 @@ impl GameState {
         m.other_income += rr.other_income / d;
         self.finance.cash += (mrr + rr.other_income - rr.expenses()) / d;
 
-        // R&D payroll (research tax credit base).
+        // Masse salariale R&D (base du crédit d'impôt recherche).
         let contrib = content.balancing.employer_contrib;
         let rd: f64 = self
             .employees
@@ -825,7 +825,7 @@ impl GameState {
             .sum();
         self.stats.rd_spend += rd / d;
 
-        // Disbursements.
+        // Versements.
         let day = self.day;
         let due: Vec<Disbursement> = {
             let (due, keep): (Vec<_>, Vec<_>) =
@@ -875,7 +875,7 @@ impl GameState {
         let debt_pen = ((self.product.tech_debt - 50.0).max(0.0)) / 5.0;
         let burnout_mult: f64 = if work.hr > 0 { 0.6 } else { 1.0 };
 
-        let mut leaving: Vec<(usize, u8)> = Vec::new(); // 0 resign, 1 contract end
+        let mut leaving: Vec<(usize, u8)> = Vec::new(); // 0 démission, 1 fin de contrat
         let mut burnouts = Vec::new();
         for (i, e) in self.employees.iter_mut().enumerate() {
             if let Some(until) = e.on_leave_until
@@ -899,7 +899,7 @@ impl GameState {
                 e.fatigue -= 3.0;
             }
             e.fatigue = e.fatigue.clamp(0.0, 100.0);
-            // Morale.
+            // Moral.
             let mut target = base_target;
             if e.fatigue > 70.0 {
                 target -= (e.fatigue - 70.0) / 3.0;
@@ -917,12 +917,12 @@ impl GameState {
             }
             e.morale += (target - e.morale) * b.morale_drift;
             e.morale = e.morale.clamp(0.0, 100.0);
-            // Interns learn.
+            // Les stagiaires apprennent.
             if e.trait_ == Trait::Stagiaire && busy && !weekend {
                 e.skills.eng = (e.skills.eng + 0.05).min(70.0);
                 e.skills.research = (e.skills.research + 0.03).min(60.0);
             }
-            // Activity for the presentation layer.
+            // Activité pour la couche de présentation.
             e.activity = if !available {
                 Activity::OnLeave
             } else if incident_active && e.role.is_engineering() {
@@ -939,12 +939,12 @@ impl GameState {
             if e.role == Role::Founder {
                 continue;
             }
-            // Burnout.
+            // Burn-out.
             if available && e.fatigue >= 90.0 && self.rng.random_bool((0.06 * burnout_mult).min(1.0)) {
                 burnouts.push(i);
                 continue;
             }
-            // Resignation.
+            // Démission.
             if e.morale < b.resign_morale_threshold {
                 e.unhappy_days += 1;
                 let p = (0.04 * (1.25 - e.loyalty)).clamp(0.005, 0.05);
@@ -969,7 +969,7 @@ impl GameState {
                 o.morale = (o.morale - 3.0).max(0.0);
             }
         }
-        // Remove from the highest index down so earlier indices stay valid.
+        // On retire de l'indice le plus haut au plus bas pour que les indices précédents restent valides.
         leaving.sort_by_key(|l| std::cmp::Reverse(l.0));
         for (i, why) in leaving {
             let e = self.employees.remove(i);
@@ -983,7 +983,7 @@ impl GameState {
             } else {
                 let consultant = e.trait_ == Trait::EsnConsultant;
                 if consultant {
-                    // The consultant leaves with all the project context.
+                    // Le consultant part avec tout le contexte du projet.
                     for t in &mut self.tasks {
                         t.eng_done *= 0.9;
                     }
@@ -1011,7 +1011,7 @@ impl GameState {
         let growth = work.task_workers as f64 * b.tech_debt_daily_per_engineer * rust * (1.0 - (ops_ratio * 0.3).min(0.5));
         self.product.tech_debt = (self.product.tech_debt + growth).clamp(0.0, 100.0);
         self.product.incident_penalty = (self.product.incident_penalty - 1.2).max(0.0);
-        // Customers adopt the product more deeply over time, up to a point.
+        // Les clients adoptent le produit de plus en plus, jusqu'à un certain point.
         if self.product.launched && self.product.usage_creep < 0.6 {
             let step = b.usage_creep_per_day;
             self.product.usage_creep += step;
@@ -1089,7 +1089,7 @@ impl GameState {
 
     fn update_events(&mut self, content: &Content) {
         let day = self.day;
-        // Delayed consequences.
+        // Conséquences différées.
         let due: Vec<DelayedEffect> = {
             let (due, keep): (Vec<_>, Vec<_>) = self.events.delayed.drain(..).partition(|d| d.due_day <= day);
             self.events.delayed = keep;
@@ -1111,7 +1111,7 @@ impl GameState {
             self.fire_event(content, &next.event_id, next.boss);
             return;
         }
-        // Boss event of the level.
+        // Événement majeur du niveau.
         if !self.campaign.boss_fired
             && let Some(level) = content.level(self.campaign.level) {
                 let trigger = match &level.boss_trigger {
@@ -1125,7 +1125,7 @@ impl GameState {
                     return;
                 }
             }
-        // Random events.
+        // Événements aléatoires.
         let b = &content.balancing;
         if day < self.events.last_event_day + b.event_min_gap_days || self.day_in_level() < 3 {
             return;
@@ -1172,7 +1172,7 @@ impl GameState {
         self.cues.push(Cue::EventPopup);
     }
 
-    /// Whether a choice of the pending event is currently allowed.
+    /// Indique si un choix de l'événement en attente est actuellement possible.
     pub fn choice_allowed(&self, content: &Content, index: usize) -> bool {
         let Some(def) = self.events.pending_def(content) else { return false };
         def.choices.get(index).is_some_and(|c| c.requires.iter().all(|r| self.check(r)))
@@ -1215,7 +1215,7 @@ impl GameState {
             s.new_this_month = 0;
             s.churned_this_month = 0;
         }
-        // Recurring incomes and loans.
+        // Revenus récurrents et prêts.
         let mut ended = Vec::new();
         for inc in &mut self.finance.incomes {
             inc.months_left = inc.months_left.saturating_sub(1);
@@ -1242,7 +1242,7 @@ impl GameState {
         for label in repaid {
             self.log(Tone::Good, Msg::LoanRepaid { label });
         }
-        // Investor sentiment and competition drift.
+        // Dérive du moral des investisseurs et de la concurrence.
         let mc = self.market.market_conditions * self.rng.random_range(0.95..1.06);
         self.market.market_conditions = mc.clamp(0.75, 1.3);
         self.event_pressure *= 0.92;
@@ -1277,7 +1277,7 @@ impl GameState {
     }
 
     // ------------------------------------------------------------------
-    // derived metrics
+    // indicateurs dérivés
     // ------------------------------------------------------------------
 
     pub fn contrib_rate(&self, content: &Content, e: &Employee) -> f64 {
@@ -1288,8 +1288,8 @@ impl GameState {
         }
     }
 
-    /// Effective inference cost per 1k analyses (office hardware and
-    /// temporary price shocks included).
+    /// Coût d'inférence effectif pour 1 000 analyses (matériel du bureau et
+    /// chocs de prix temporaires compris).
     pub fn inference_cost(&self, content: &Content) -> f64 {
         let fx = self.office.effects(content);
         self.product.inference_cost_per_k * (1.0 - fx.inference_cost.min(0.5)) * self.mod_mul(ModKind::InfraCostMul)
@@ -1408,7 +1408,7 @@ impl GameState {
     }
 
     // ------------------------------------------------------------------
-    // commands
+    // commandes
     // ------------------------------------------------------------------
 
     pub fn apply(&mut self, content: &Content, cmd: Command) -> Result<(), CmdError> {
@@ -1570,7 +1570,7 @@ impl GameState {
                 let old = seg.price;
                 seg.price = price;
                 if price > old * 1.1 && seg.customers > 0 {
-                    // Existing customers are migrated: some of them leave.
+                    // Les clients existants sont migrés : certains partent.
                     self.modifiers.push(Modifier {
                         kind: ModKind::ChurnAdd,
                         value: ((price / old) - 1.0) * 6.0,

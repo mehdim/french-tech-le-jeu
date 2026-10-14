@@ -1,4 +1,4 @@
-//! Office tab: current office, moving, furniture shop and placement.
+//! Onglet Bureau : bureau actuel, déménagement, boutique de mobilier et placement.
 
 use super::style::*;
 use super::widgets::*;
@@ -70,7 +70,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
         muted(ui, format!("Effets du mobilier : {}", parts.join(" · ")));
     });
 
-    // Selected furniture.
+    // Meuble sélectionné.
     if let Some(uid) = c.ui.inspect_furniture
         && let Some(it) = c.game.0.office.items.iter().find(|i| i.uid == uid).cloned()
             && let Some(fdef) = c.content.0.furniture(&it.item).cloned() {
@@ -100,7 +100,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
                 });
             }
 
-    // Moving.
+    // Déménagement.
     let next: Vec<_> = c.content.0.offices.iter().filter(|o| o.id > tier).cloned().collect();
     if !next.is_empty() {
         subheading(ui, "Déménager");
@@ -126,7 +126,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
         });
     }
 
-    // Storage.
+    // Stockage.
     let storage = c.game.0.office.storage.clone();
     if !storage.is_empty() {
         subheading(ui, "Mobilier en carton");
@@ -141,7 +141,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
         }
     }
 
-    // Shop.
+    // Boutique.
     subheading(ui, "Mobilier");
     if !c.game.0.is_unlocked("office_custom") {
         muted(ui, "🔒 L'aménagement se débloque au niveau 2. Pour l'instant, c'est votre salon.");

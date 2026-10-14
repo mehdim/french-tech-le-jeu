@@ -1,12 +1,12 @@
-"""Shared helpers for the procedural pixel-art generator.
+"""Outils partagés du générateur de pixel art procédural.
 
-Everything is drawn at 1x with a fixed palette, no anti-aliasing. The game
-renders with nearest-neighbour sampling and an integer camera zoom.
+Tout est dessiné en 1x avec une palette fixe, sans anticrénelage. Le jeu
+affiche avec un échantillonnage au plus proche voisin et un zoom de caméra entier.
 """
 from PIL import Image, ImageDraw
 
-# --- palette (À la French: black / green / off-white, plus support colours) --
-INK = (16, 20, 18, 255)            # #101412 outlines
+# --- palette (À la French : noir / vert / blanc cassé, plus des couleurs d'appoint) --
+INK = (16, 20, 18, 255)            # #101412 contours
 GRAPHITE = (32, 40, 34, 255)       # #202822
 GRAPHITE_2 = (44, 54, 47, 255)
 GREEN = (124, 255, 82, 255)        # #7CFF52
@@ -46,12 +46,12 @@ SKINS = [(246, 210, 176, 255), (228, 178, 134, 255), (192, 134, 94, 255), (146, 
 HAIRS = [(42, 32, 26, 255), (98, 64, 36, 255), (214, 170, 96, 255), (30, 30, 34, 255), (156, 66, 42, 255),
          (226, 224, 214, 255), (60, 40, 30, 255), (120, 84, 50, 255)]
 
-TW, TH = 32, 16   # isometric tile size
+TW, TH = 32, 16   # taille d'une case isométrique
 HALF_W, HALF_H = TW // 2, TH // 2
 
 
 def shade(c, f):
-    """Multiply rgb by f (f<1 darker, f>1 lighter)."""
+    """Multiplie rgb par f (f<1 plus sombre, f>1 plus clair)."""
     r, g, b, a = c
     return (max(0, min(255, int(r * f))), max(0, min(255, int(g * f))), max(0, min(255, int(b * f))), a)
 
@@ -65,7 +65,7 @@ def new(w, h):
 
 
 def iso_pt(origin, gx, gy, gz=0):
-    """Project grid coords (gx, gy) and height gz (pixels) to image pixel coords."""
+    """Projette les coordonnées de grille (gx, gy) et la hauteur gz (pixels) en pixels de l'image."""
     ox, oy = origin
     return (ox + (gx - gy) * HALF_W, oy + (gx + gy) * HALF_H - gz)
 
@@ -93,7 +93,7 @@ def rect(img, x, y, w, h, c):
 
 
 def iso_box(img, o, x0, y0, w, h, z0, height, color, top=None, left=None, right=None, outline=INK):
-    """Draw an isometric box. Faces: top, front-left (y = y0+h), front-right (x = x0+w)."""
+    """Dessine un bloc isométrique. Faces : dessus, avant gauche (y = y0+h), avant droite (x = x0+w)."""
     top = top or shade(color, 1.18)
     left = left or color
     right = right or shade(color, 0.78)
@@ -109,7 +109,7 @@ def iso_box(img, o, x0, y0, w, h, z0, height, color, top=None, left=None, right=
 
 
 def outline_alpha(img, color=INK):
-    """Add a 1px outline around opaque pixels (for characters / props)."""
+    """Ajoute un contour d'1 px autour des pixels opaques (personnages / accessoires)."""
     w, h = img.size
     src = img.copy()
     pxs = src.load()
@@ -125,7 +125,7 @@ def outline_alpha(img, color=INK):
     return img
 
 
-# --- tiny 3x5 font for signs and posters ------------------------------------
+# --- mini police 3x5 pour les panneaux et les affiches -------------------
 TINY = {
     "A": ["010", "101", "111", "101", "101"], "B": ["110", "101", "110", "101", "110"],
     "C": ["011", "100", "100", "100", "011"], "D": ["110", "101", "101", "101", "110"],

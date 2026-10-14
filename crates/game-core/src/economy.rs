@@ -1,14 +1,14 @@
-//! Cash, monthly accounting and derived SaaS metrics.
+//! Trésorerie, comptabilité mensuelle et indicateurs SaaS dérivés.
 //!
-//! Formulas (all monthly):
-//!   MRR           = Σ customers × price          (0 during free beta)
-//!   ARR           = MRR × 12                     (run-rate, not realised revenue)
-//!   COGS          = inference + hosting
-//!   Gross margin  = (MRR − COGS) / MRR           (0 when MRR = 0)
-//!   Net burn      = expenses − MRR − other income
-//!   Runway        = cash / net burn              (∞ when net burn ≤ 0)
-//!   LTV           = ARPA × gross margin / churn  (0 when churn = 0 → capped)
-//!   CAC           = (marketing + sales payroll) / new customers (28 days)
+//! Formules (toutes mensuelles) :
+//!   MRR           = Σ clients × prix             (0 pendant la bêta gratuite)
+//!   ARR           = MRR × 12                     (rythme annualisé, pas un revenu réalisé)
+//!   COGS          = inférence + hébergement
+//!   Marge brute   = (MRR − COGS) / MRR           (0 quand MRR = 0)
+//!   Burn net      = dépenses − MRR − autres revenus
+//!   Runway        = trésorerie / burn net        (∞ quand burn net ≤ 0)
+//!   LTV           = ARPA × marge brute / churn   (0 quand churn = 0 → plafonnée)
+//!   CAC           = (marketing + salaires commerciaux) / nouveaux clients (28 jours)
 
 use serde::{Deserialize, Serialize};
 
@@ -65,7 +65,7 @@ pub struct Finance {
     pub cash: f64,
     pub month: MonthAccum,
     pub reports: Vec<MonthlyReport>,
-    /// (day, cash, mrr) sampled weekly, for charts.
+    /// (jour, trésorerie, mrr) échantillonnés chaque semaine, pour les graphiques.
     pub history: Vec<(u32, f64, f64)>,
     pub negative_since: Option<u32>,
     pub incomes: Vec<Income>,
@@ -87,7 +87,7 @@ impl Finance {
         }
     }
 
-    /// MRR growth (%) of the last closed month vs the one before.
+    /// Croissance du MRR (%) du dernier mois clos par rapport au précédent.
     pub fn last_mrr_growth(&self) -> Option<f64> {
         let n = self.reports.len();
         if n < 2 {
@@ -101,8 +101,8 @@ impl Finance {
         Some((cur / prev - 1.0) * 100.0)
     }
 
-    /// Average month-over-month MRR growth (%) over the last `n` closed
-    /// months, or None if there is not enough history yet.
+    /// Croissance mensuelle moyenne du MRR (%) sur les `n` derniers mois
+    /// clos, ou None s'il n'y a pas encore assez d'historique.
     pub fn avg_growth_pct(&self, n: usize) -> Option<f64> {
         if self.reports.len() < n + 1 || n == 0 {
             return None;
@@ -115,8 +115,8 @@ impl Finance {
         Some((total.powf(1.0 / n as f64) - 1.0) * 100.0)
     }
 
-    /// Number of consecutive closed months (most recent first) with MRR
-    /// growth of at least `min_pct` percent.
+    /// Nombre de mois clos consécutifs (du plus récent) avec une croissance
+    /// du MRR d'au moins `min_pct` pour cent.
     pub fn growth_streak(&self, min_pct: f64) -> u32 {
         let mut streak = 0;
         let r = &self.reports;
@@ -132,7 +132,7 @@ impl Finance {
         streak
     }
 
-    /// Average MoM growth over the last `n` closed months (fraction).
+    /// Croissance mensuelle moyenne sur les `n` derniers mois clos (fraction).
     pub fn avg_growth(&self, n: usize) -> f64 {
         let r = &self.reports;
         if r.len() < 2 {
@@ -152,7 +152,7 @@ impl Finance {
     }
 }
 
-/// Monthly run-rate breakdown computed from the current state.
+/// Détail du rythme mensuel calculé à partir de l'état courant.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct RunRate {
     pub payroll: f64,
@@ -182,7 +182,7 @@ impl RunRate {
     }
 }
 
-/// Derived dashboard metrics. Recomputed every tick; never authoritative.
+/// Indicateurs dérivés du tableau de bord. Recalculés à chaque tick ; jamais la référence.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Metrics {
     pub mrr: f64,
@@ -190,7 +190,7 @@ pub struct Metrics {
     pub run_rate: RunRate,
     pub gross_margin: f64,
     pub net_burn: f64,
-    /// Months; `f64::INFINITY` when not burning.
+    /// Mois ; `f64::INFINITY` quand on ne brûle pas de trésorerie.
     pub runway: f64,
     pub customers: u32,
     pub paying_customers: u32,
@@ -228,13 +228,13 @@ pub fn runway(cash: f64, net_burn: f64) -> f64 {
 
 pub fn ltv(arpa: f64, gross_margin: f64, churn_pct: f64) -> f64 {
     if churn_pct <= 0.0 {
-        // Cap at 5 years of margin when nobody churns.
+        // Plafond à 5 ans de marge quand personne ne part.
         return arpa * gross_margin.max(0.0) * 60.0;
     }
     (arpa * gross_margin.max(0.0) / (churn_pct / 100.0)).min(arpa * 60.0)
 }
 
-/// Inputs to the valuation model.
+/// Entrées du modèle de valorisation.
 pub struct ValuationInputs {
     pub arr: f64,
     pub growth: f64,
@@ -249,8 +249,8 @@ pub struct ValuationInputs {
     pub per_engineer: f64,
 }
 
-/// Valuation = max(ARR × multiple, team/tech floor) × market conditions.
-/// multiple = base × growth × margin × retention × credibility
+/// Valorisation = max(ARR × multiple, plancher équipe/tech) × conditions de marché.
+/// multiple = base × croissance × marge × rétention × crédibilité
 pub fn valuation(v: &ValuationInputs) -> f64 {
     let growth = (1.0 + v.growth.clamp(-0.3, 0.5) * 8.0).max(0.3);
     let margin = 0.5 + v.gross_margin.clamp(0.0, 1.0) * 0.7;

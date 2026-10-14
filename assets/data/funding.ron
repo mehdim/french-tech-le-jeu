@@ -1,6 +1,6 @@
-// Public funding programs, investors and round definitions.
-// Every program is a satirical, simplified game mechanic inspired by real French
-// schemes. Nothing here describes actual eligibility rules or amounts.
+// Dispositifs de financement public, investisseurs et définitions des tours de table.
+// Chaque dispositif est une mécanique de jeu satirique et simplifiée, inspirée de vrais
+// dispositifs français. Rien ici ne décrit de vraies conditions d'éligibilité ni de vrais montants.
 (
     programs: [
         (

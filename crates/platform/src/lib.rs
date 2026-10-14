@@ -1,12 +1,12 @@
 //! # platform
 //!
-//! Thin adapters around platform services so the game logic never touches a
-//! browser or OS API directly:
+//! Fines couches d'adaptation autour des services de la plateforme, pour que la logique
+//! du jeu ne touche jamais directement une API du navigateur ou du système :
 //!
-//! * [`storage`] — key/value persistence for saves and settings
-//!   (browser `localStorage` on the web, files on desktop; an Android/iOS
-//!   port only needs another `Storage` implementation).
-//! * [`clock`] — wall-clock milliseconds for seeding new games.
+//! * [`storage`] — persistance clé/valeur pour les sauvegardes et les paramètres
+//!   (`localStorage` du navigateur sur le web, fichiers sur desktop ; un portage
+//!   Android/iOS n'a besoin que d'une autre implémentation de `Storage`).
+//! * [`clock`] — millisecondes de l'horloge murale pour tirer la graine des nouvelles parties.
 
 pub mod storage;
 
@@ -14,7 +14,7 @@ pub mod storage;
 pub mod web;
 
 pub mod clock {
-    /// Milliseconds since the Unix epoch (used only to seed new campaigns).
+    /// Millisecondes depuis l'époque Unix (utilisées uniquement pour la graine des nouvelles campagnes).
     pub fn now_millis() -> u64 {
         #[cfg(target_arch = "wasm32")]
         {

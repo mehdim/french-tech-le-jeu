@@ -1,4 +1,4 @@
-//! Bottom panel: activity feed (newest first) with filters.
+//! Panneau du bas : fil d'actualité (le plus récent en premier) avec filtres.
 
 use super::Ctx;
 use super::hud::date_label;

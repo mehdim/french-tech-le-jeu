@@ -1,4 +1,4 @@
-//! Save slots, autosave and persisted settings.
+//! Emplacements de sauvegarde, sauvegarde auto et paramètres persistés.
 
 use crate::sim::{DemoMode, Game, GameContent};
 use crate::states::AppState;
@@ -28,7 +28,7 @@ pub struct Settings {
     pub music_volume: f32,
     pub sfx_volume: f32,
     pub ui_scale: f32,
-    /// Cap at 30 FPS for slower devices.
+    /// Limite à 30 FPS pour les appareils plus lents.
     pub low_power: bool,
     pub hints: bool,
 }
@@ -39,7 +39,7 @@ impl Default for Settings {
     }
 }
 
-/// Slot listing cache for the UI (refreshed after every write).
+/// Cache de la liste des emplacements pour l'interface (rafraîchi après chaque écriture).
 #[derive(Resource, Default)]
 pub struct SlotList(pub Vec<(String, Result<SaveMeta, String>)>);
 
@@ -117,7 +117,7 @@ fn autosave(
         tracker.month = month;
         if !first || game.0.day > 0 {
             if let Err(e) = save_to(&mut store, "autosave", &game.0, &content) {
-                warn!("autosave failed: {e}");
+                warn!("échec de la sauvegarde auto : {e}");
             }
             *list = refresh_slots(&store);
         }

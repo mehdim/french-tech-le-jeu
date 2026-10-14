@@ -1,9 +1,9 @@
-"""Isometric floor tiles, wall segments, windows and wall decorations."""
+"""Cases de sol isométriques, pans de mur, fenêtres et décorations murales."""
 import math
 from pixlib import *
 
-WALL_H = 60   # wall height in pixels
-CAP = 3       # wall top thickness
+WALL_H = 60   # hauteur du mur en pixels
+CAP = 3       # épaisseur du haut du mur
 
 
 def hash2(a, b, s=0):
@@ -13,7 +13,7 @@ def hash2(a, b, s=0):
 
 
 def diamond_rows():
-    """Yield (y, x_start, x_end) for a 32x16 diamond that tiles perfectly."""
+    """Produit (y, x_début, x_fin) pour un losange 32x16 qui se raccorde parfaitement."""
     for y in range(TH):
         k = y if y < TH // 2 else TH - 1 - y
         xs = HALF_W - 2 - 2 * k
@@ -30,7 +30,7 @@ def floor_tile(pattern, variant):
             u = (dx / HALF_W + dy / HALF_H) / 2
             v = (dy / HALF_H - dx / HALF_W) / 2
             c = pattern(u, v, variant, x, y)
-            # subtle grid edge
+            # léger bord de grille
             edge = min(u, v, 1 - u, 1 - v)
             if edge < 0.035:
                 c = shade(c, 0.9)
@@ -74,7 +74,7 @@ def pat_wood(u, v, var, x, y):
     base = [(150, 98, 58, 255), (138, 88, 52, 255), (160, 108, 66, 255)][int(hash2(k, var) * 3)]
     if f < 0.08:
         return WOOD_DD
-    # point de Hongrie hint: diagonal joints
+    # soupçon de point de Hongrie : joints en diagonale
     if ((v * 3 + f * 0.6) % 1) < 0.05:
         return shade(base, 0.8)
     return shade(base, 0.96 + 0.06 * math.sin(v * 30 + k))
@@ -103,34 +103,34 @@ FLOORS = {
 }
 
 
-# --- walls -------------------------------------------------------------------
+# --- murs --------------------------------------------------------------------
 WALL_STYLES = {
-    # tier: (base colour, texture)
-    0: ((236, 226, 206, 255), "stripes"),     # apartment wallpaper
-    1: (BRICK_L, "brick"),                     # coworking bricks
-    2: ((232, 236, 228, 255), "paint_green"),  # incubator
-    3: ((238, 230, 210, 255), "haussmann"),    # Paris office
-    4: ((150, 156, 152, 255), "concrete"),     # Station hall
-    5: ((54, 64, 58, 255), "hq"),              # HQ graphite
+    # niveau : (couleur de base, texture)
+    0: ((236, 226, 206, 255), "stripes"),     # papier peint de l'appartement
+    1: (BRICK_L, "brick"),                     # briques du coworking
+    2: ((232, 236, 228, 255), "paint_green"),  # incubateur
+    3: ((238, 230, 210, 255), "haussmann"),    # bureau parisien
+    4: ((150, 156, 152, 255), "concrete"),     # hall de la Station
+    5: ((54, 64, 58, 255), "hq"),              # siège en graphite
 }
 
 
 def wall_segment(tier, side, kind="plain"):
-    """A wall segment along one tile edge. side = 'L' (left wall, x=0) or 'R'.
-    Image: 17 x (WALL_H + 9 + CAP); anchor = floor point of the back corner end."""
+    """Un pan de mur le long d'un bord de case. side = 'L' (mur gauche, x=0) ou 'R'.
+    Image : 17 x (WALL_H + 9 + CAP) ; ancre = point au sol de l'extrémité côté coin du fond."""
     base, tex = WALL_STYLES[tier]
     W, H = 17, WALL_H + 9 + CAP
     img = new(W, H)
-    bottom0 = H - 9  # floor y at the anchor end (x=16)
+    bottom0 = H - 9  # y du sol à l'extrémité de l'ancre (x=16)
     for x in range(W):
         c = 16 - x
         bot = bottom0 + c / 2
         top = bot - WALL_H
         for y in range(int(top), int(bot) + 1):
-            ly = y - top       # 0 at top
+            ly = y - top       # 0 en haut
             col = wall_texel(tier, base, tex, c, ly, x, y)
             px(img, x, y, col)
-        # cap (wall thickness)
+        # chaperon (épaisseur du mur)
         for y in range(int(top) - CAP, int(top)):
             px(img, x, y, shade(base, 0.62) if tex != "hq" else GRAPHITE)
         px(img, x, int(top) - CAP, INK)
@@ -138,7 +138,7 @@ def wall_segment(tier, side, kind="plain"):
         draw_window(img, tier, bottom0)
     elif kind == "door":
         draw_door(img, tier, bottom0)
-    # outline of the segment base
+    # contour de la base du pan
     for x in range(W):
         c = 16 - x
         px(img, x, int(bottom0 + c / 2), shade(base, 0.5))
@@ -160,7 +160,7 @@ def darken(img, f):
 
 
 def wall_texel(tier, base, tex, c, ly, x, y):
-    # baseboard
+    # plinthe
     if ly > WALL_H - 3:
         return shade(base, 0.7) if tex != "hq" else DEEP_GREEN
     if tex == "stripes":
@@ -177,7 +177,7 @@ def wall_texel(tier, base, tex, c, ly, x, y):
             return DEEP_GREEN
         return base
     if tex == "haussmann":
-        # moulding panels
+        # panneaux moulurés
         if ly in (8, 9) or ly in (WALL_H - 14, WALL_H - 13):
             return shade(base, 0.86)
         if (c % 16 in (2, 14)) and 12 < ly < WALL_H - 16:
@@ -195,13 +195,13 @@ def wall_texel(tier, base, tex, c, ly, x, y):
 
 
 def window_view(w, h, tier):
-    """Paris rooftops seen through a window."""
+    """Les toits de Paris vus par une fenêtre."""
     v = new(w, h)
     for y in range(h):
         sky = mix((150, 186, 220, 255), (232, 214, 190, 255), y / max(1, h - 1))
         for x in range(w):
             px(v, x, y, sky)
-    # zinc roofs + chimneys
+    # toits en zinc + cheminées
     for i in range(0, w, 7):
         rh = h - 6 - int(hash2(i, tier) * 5)
         for x in range(i, min(w, i + 7)):
@@ -212,7 +212,7 @@ def window_view(w, h, tier):
             px(v, cx, y, TERRACOTTA)
             px(v, cx + 1, y, TERRACOTTA)
     if tier >= 3:
-        # a distant tower silhouette
+        # silhouette d'une tour au loin
         tx = w - 6
         for y in range(2, h - 6):
             spread = (y - 2) // 4
@@ -223,7 +223,7 @@ def window_view(w, h, tier):
 
 
 def shear_left(flat, W):
-    """Shear a flat image so it lies on a left wall (y increases leftwards)."""
+    """Déforme une image plate pour qu'elle épouse un mur gauche (y augmente vers la gauche)."""
     fw, fh = flat.size
     out = new(fw, fh + fw // 2 + 1)
     for x in range(fw):
@@ -243,7 +243,7 @@ def draw_window(img, tier, bottom0):
     fc = OFFWHITE if tier in (0, 3) else (METAL_D if tier in (4, 5) else GRAPHITE_2)
     rect(frame, 0, 0, ww + 4, wtall + 4, fc)
     frame.paste(view, (2, 2))
-    # mullions
+    # meneaux
     for y in range(2, wtall + 2):
         px(frame, (ww + 4) // 2, y, fc)
     for x in range(2, ww + 2):
@@ -266,7 +266,7 @@ def draw_door(img, tier, bottom0):
     img.alpha_composite(sh, (3, bottom0 - 34 + 4))
 
 
-# --- wall decorations (flat art, sheared at runtime placement time) ---------
+# --- décorations murales (images plates, déformées au moment du placement) ---
 def poster(w, h, bg, draw_fn):
     img = new(w, h)
     rect(img, 0, 0, w, h, INK)
@@ -304,7 +304,7 @@ def decor_images():
         rect(img, 1, 1, 5, 14, BLUE)
         rect(img, 6, 1, 5, 14, OFFWHITE)
         rect(img, 11, 1, 5, 14, RED)
-        # giant invoice
+        # facture géante
         rect(img, 18, 0, 14, img.height, OFFWHITE)
         tiny_text(img, 19, 2, "AWS", INK)
         for yy in range(9, img.height - 6, 3):

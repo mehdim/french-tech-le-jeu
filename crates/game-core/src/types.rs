@@ -1,23 +1,23 @@
-//! Shared vocabulary: segments, roles, conditions, effects and modifiers.
+//! Vocabulaire commun : segments, rôles, conditions, effets et modificateurs.
 //!
-//! Content files (RON) are written in terms of these types, so they are the
-//! contract between the simulation (`game-core`) and the data (`game-content`).
+//! Les fichiers de contenu (RON) sont écrits avec ces types : ils forment le
+//! contrat entre la simulation (`game-core`) et les données (`game-content`).
 
 use serde::{Deserialize, Serialize};
 
-/// Simulated days per accounting month.
+/// Jours simulés par mois comptable.
 pub const DAYS_PER_MONTH: u32 = 28;
-/// Simulated days per week.
+/// Jours simulés par semaine.
 pub const DAYS_PER_WEEK: u32 = 7;
 
-/// Customer segments. Each one has its own price, funnel and churn profile.
+/// Segments de clientèle. Chacun a son prix, son tunnel et son profil de churn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Segment {
-    /// Self-serve SMBs, schools, freelancers.
+    /// PME en self-service, écoles, indépendants.
     Smb,
-    /// Media groups, universities, scale-ups.
+    /// Groupes de médias, universités, scale-ups.
     Mid,
-    /// CAC 40 and public administrations.
+    /// CAC 40 et administrations publiques.
     Enterprise,
 }
 
@@ -32,8 +32,8 @@ impl Segment {
     }
 }
 
-/// Employee roles. A role decides which work an employee is good at by
-/// default; archetypes and traits refine it.
+/// Rôles des salariés. Un rôle détermine dans quel travail un salarié est bon
+/// par défaut ; les profils et les traits l'affinent.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Role {
     Founder,
@@ -65,7 +65,7 @@ impl Role {
         Role::Intern,
         Role::Consultant,
     ];
-    /// Roles that can be recruited (the founder is unique).
+    /// Rôles recrutables (le fondateur est unique).
     pub const HIRABLE: [Role; 11] = [
         Role::Backend,
         Role::Frontend,
@@ -93,28 +93,28 @@ impl Role {
     }
 }
 
-/// Temporary modifiers applied by events, investors and incidents.
+/// Modificateurs temporaires appliqués par les événements, les investisseurs et les incidents.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ModKind {
-    /// Multiplies lead generation.
+    /// Multiplie la génération de leads.
     LeadMul,
-    /// Multiplies lead-to-customer conversion.
+    /// Multiplie la conversion des leads en clients.
     ConversionMul,
-    /// Adds percentage points to monthly churn (all segments).
+    /// Ajoute des points de pourcentage au churn mensuel (tous segments).
     ChurnAdd,
-    /// Multiplies every employee's output.
+    /// Multiplie la production de chaque salarié.
     ProductivityMul,
-    /// Adds to the morale target of the whole team.
+    /// S'ajoute à l'objectif de moral de toute l'équipe.
     MoraleTarget,
-    /// Multiplies infrastructure + inference costs.
+    /// Multiplie les coûts d'infrastructure et d'inférence.
     InfraCostMul,
-    /// Multiplies sales capacity.
+    /// Multiplie la capacité commerciale.
     SalesMul,
-    /// Multiplies research output.
+    /// Multiplie la production de recherche.
     ResearchMul,
-    /// Multiplies production incident probability.
+    /// Multiplie la probabilité d'incident de production.
     IncidentRiskMul,
-    /// Adds to competitor pressure (0..1 scale).
+    /// S'ajoute à la pression concurrentielle (échelle 0..1).
     CompetitionAdd,
 }
 
@@ -123,13 +123,13 @@ pub struct Modifier {
     pub kind: ModKind,
     pub value: f64,
     pub remaining_days: u32,
-    /// Short label shown in tooltips ("Influenceur LinkedIn", ...).
+    /// Court libellé affiché dans les infobulles (« Influenceur LinkedIn », ...).
     #[serde(default)]
     pub source: String,
 }
 
-/// A predicate over the company state. Used by quests, event triggers,
-/// choice requirements and investor demands.
+/// Un prédicat sur l'état de l'entreprise. Utilisé par les objectifs, les déclencheurs
+/// d'événements, les conditions des choix et les exigences des investisseurs.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Condition {
     Always,
@@ -142,11 +142,11 @@ pub enum Condition {
     EmployeesAtLeast(u32),
     EmployeesBelow(u32),
     RoleAtLeast(Role, u32),
-    /// Number of employees who joined during the current level.
+    /// Nombre de salariés arrivés pendant le niveau en cours.
     HiredInLevelAtLeast(u32),
     Shipped(String),
     NotShipped(String),
-    /// Number of tasks with `meaningful: true` shipped during this level.
+    /// Nombre de chantiers `meaningful: true` livrés pendant ce niveau.
     ShippedInLevelAtLeast(u32),
     TaskActive(String),
     Flag(String),
@@ -156,10 +156,10 @@ pub enum Condition {
     LevelAtMost(u32),
     QualityAtLeast(f64),
     QualityBelow(f64),
-    /// Effective benchmark accuracy (model accuracy minus drift), in %.
+    /// Précision effective sur le benchmark (précision du modèle moins la dérive), en %.
     AccuracyAtLeast(f64),
     AccuracyBelow(f64),
-    /// Effective false-positive rate, in %.
+    /// Taux effectif de faux positifs, en %.
     FprAtMost(f64),
     FprAbove(f64),
     TechDebtAtLeast(f64),
@@ -169,35 +169,35 @@ pub enum Condition {
     FatigueAtLeast(f64),
     ReputationAtLeast(f64),
     ReputationBelow(f64),
-    /// Projected monthly churn across all paying customers, in %.
+    /// Churn mensuel projeté sur l'ensemble des clients payants, en %.
     ChurnBelow(f64),
     ChurnAtLeast(f64),
     SegmentChurnBelow(Segment, f64),
     RunwayAtLeast(f64),
     RunwayBelow(f64),
     GrossMarginAtLeast(f64),
-    /// Non-dilutive + dilutive money secured during the current level
-    /// (grants approved, loans, equity).
+    /// Argent non dilutif et dilutif obtenu pendant le niveau en cours
+    /// (subventions accordées, prêts, levées).
     FundingSecuredInLevelAtLeast(f64),
-    /// A grant application was submitted during this level.
+    /// Un dossier de subvention a été déposé pendant ce niveau.
     ApplicationSubmittedInLevel,
     FounderEquityAtLeast(f64),
-    /// An equity round of at least `min_amount` closed this level with
-    /// dilution at most `max_dilution` percent.
+    /// Un tour de table d'au moins `min_amount` a été bouclé pendant ce niveau,
+    /// avec une dilution d'au plus `max_dilution` pour cent.
     RoundClosedInLevel { min_amount: f64, max_dilution: f64 },
     EquityRaisedInLevelAtLeast(f64),
-    /// MRR grew by at least `min_pct` % per month on average (compounded)
-    /// over the last `months` closed months.
+    /// Le MRR a progressé d'au moins `min_pct` % par mois en moyenne (composée)
+    /// sur les `months` derniers mois clos.
     MrrGrowthStreak { months: u32, min_pct: f64 },
-    /// Inference cost per 1k analyses fell by at least this fraction
-    /// (0.35 = 35 %) compared with the level start.
+    /// Le coût d'inférence pour 1 000 analyses a baissé d'au moins cette fraction
+    /// (0,35 = 35 %) par rapport au début du niveau.
     InferenceCostReducedBy(f64),
-    /// Paying customers are at least this % of the level-start count.
+    /// Les clients payants représentent au moins ce % du nombre au début du niveau.
     CustomersRetainedPct(f64),
     MarketsAtLeast(u32),
     LanguagesAtLeast(u32),
     LtvCacAtLeast(f64),
-    /// Monthly net burn (expenses - revenue) at most this amount.
+    /// Burn net mensuel (dépenses - revenus) au plus égal à ce montant.
     NetBurnAtMost(f64),
     ValuationAtLeast(f64),
     OfficeTierAtLeast(u32),
@@ -209,76 +209,76 @@ pub enum Condition {
     Not(Box<Condition>),
 }
 
-/// A state change. Used by event choices, task rewards and level starts.
+/// Un changement d'état. Utilisé par les choix d'événements, les récompenses de chantiers et les débuts de niveau.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Effect {
     Cash(f64),
     Reputation(f64),
     MoraleAll(f64),
     FatigueAll(f64),
-    /// Morale change for employees of one role only.
+    /// Changement de moral pour les salariés d'un seul rôle.
     MoraleRole(Role, f64),
     TechDebt(f64),
-    /// Accuracy gain, scaled by the remaining gap to the theoretical ceiling.
+    /// Gain de précision, proportionnel à l'écart restant jusqu'au plafond théorique.
     Accuracy(f64),
-    /// False-positive rate change in percentage points (negative is good).
+    /// Variation du taux de faux positifs en points de pourcentage (négatif = mieux).
     Fpr(f64),
-    /// Benchmark drift (positive degrades effective accuracy).
+    /// Dérive du benchmark (positive = dégrade la précision effective).
     Drift(f64),
-    /// Multiplies the current drift (0.3 = remove 70 % of it).
+    /// Multiplie la dérive actuelle (0,3 = en retire 70 %).
     DriftMul(f64),
-    /// Robustness to drift and adversarial editing (0..0.8).
+    /// Robustesse à la dérive et aux modifications adverses (0..0,8).
     Robustness(f64),
     FeatureScore(f64),
     Leads(Segment, f64),
-    /// Lose (negative) or gain a fraction of a segment's customers.
+    /// Perd (négatif) ou gagne une fraction des clients d'un segment.
     CustomersPct(Segment, f64),
     AddCustomers(Segment, u32),
     CompetitorPressure(f64),
-    /// Multiplies the inference cost per 1k analyses permanently.
+    /// Multiplie durablement le coût d'inférence pour 1 000 analyses.
     InferenceCostMul(f64),
-    /// Adds to fixed monthly hosting costs.
+    /// S'ajoute aux coûts fixes mensuels d'hébergement.
     HostingMonthly(f64),
-    /// Multiplies how much each customer uses the product.
+    /// Multiplie l'usage du produit par chaque client.
     UsageMul(f64),
-    /// Retention bonus for a segment (relative churn reduction, 0.08 = -8 %).
+    /// Bonus de rétention pour un segment (baisse relative du churn, 0,08 = -8 %).
     Retention(Segment, f64),
-    /// Conversion bonus for a segment (relative).
+    /// Bonus de conversion pour un segment (relatif).
     ConversionBonus(Segment, f64),
     Languages(u32),
     SetFlag(String),
     ClearFlag(String),
-    /// Extra paperwork on the active grant applications.
+    /// Paperasse supplémentaire sur les dossiers de subvention en cours.
     AdminPoints(f64),
-    /// Postpone pending grant/loan disbursements.
+    /// Repousse les versements de subventions/prêts en attente.
     DelayDisbursements(u32),
     Modifier { kind: ModKind, value: f64, days: u32 },
-    /// Trigger a production incident right now.
+    /// Déclenche immédiatement un incident de production.
     Incident,
-    /// An employee with this role resigns (the most fatigued one).
+    /// Un salarié de ce rôle démissionne (le plus fatigué).
     QuitRole(Role),
-    /// Progress lost on active tasks (fraction 0..1).
+    /// Avancement perdu sur les chantiers actifs (fraction 0..1).
     TaskSetback(f64),
     Unlock(String),
-    /// Change the monthly salary of every employee by a fraction.
+    /// Modifie le salaire mensuel de chaque salarié d'une fraction.
     SalaryPct(f64),
-    /// Multiplies the founder's productivity permanently.
+    /// Multiplie durablement la productivité du fondateur.
     FounderProductivity(f64),
-    /// Monthly recurring income for N months (e.g. France Travail ARE/ARCE).
+    /// Revenu mensuel récurrent pendant N mois (ex. ARE/ARCE de France Travail).
     Income { monthly: f64, months: u32, label: String },
-    /// Queue a scripted event (story chains).
+    /// Met un événement scénarisé en file d'attente (enchaînements de l'histoire).
     TriggerEvent(String),
-    /// The product goes from free beta to paid plans.
+    /// Le produit passe de la bêta gratuite aux offres payantes.
     Launch,
-    /// Permanent reduction of production incident probability (0..0.8).
+    /// Réduction permanente de la probabilité d'incident de production (0..0,8).
     Resilience(f64),
-    /// Monthly rent change for the current office (reset when moving).
+    /// Variation du loyer mensuel du bureau actuel (remise à zéro au déménagement).
     RentMonthly(f64),
-    /// Multiply every segment's price by (1 + f).
+    /// Multiplie le prix de chaque segment par (1 + f).
     PriceAll(f64),
 }
 
-/// Seniority bands affect salary and output.
+/// Les niveaux d'ancienneté influent sur le salaire et la production.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Seniority {
     Junior,

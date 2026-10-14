@@ -1,44 +1,44 @@
-//! Numeric balancing knobs. Defaults live here so the simulation is usable
-//! without content; `game-content` overrides them from `balancing.ron`.
+//! Paramètres numériques d'équilibrage. Les valeurs par défaut vivent ici pour que la
+//! simulation fonctionne sans contenu ; `game-content` les remplace depuis `balancing.ron`.
 
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Balancing {
-    // --- starting conditions -------------------------------------------
+    // --- conditions de départ --------------------------------------------
     pub start_cash: f64,
     pub start_reputation: f64,
     pub start_accuracy: f64,
     pub start_fpr: f64,
     pub start_tech_debt: f64,
 
-    // --- payroll (approximate French figures, gameplay-tuned) -----------
-    /// Employer social contributions as a fraction of gross salary.
+    // --- masse salariale (ordres de grandeur français, ajustés pour le jeu) -----
+    /// Cotisations patronales, en fraction du salaire brut.
     pub employer_contrib: f64,
-    /// Reduced contribution rate for R&D staff under JEI status.
+    /// Taux de cotisations réduit pour le personnel R&D sous statut JEI.
     pub jei_contrib: f64,
-    /// SaaS tools per head per month (Slack, Notion, Jira, Figma...).
+    /// Outils SaaS par personne et par mois (Slack, Notion, Jira, Figma...).
     pub tools_per_employee: f64,
-    /// Severance in months of salary per year of tenure (+ notice month).
+    /// Indemnités de licenciement en mois de salaire par année d'ancienneté (+ un mois de préavis).
     pub severance_months_per_year: f64,
 
-    // --- infrastructure -------------------------------------------------
+    // --- infrastructure ---------------------------------------------------
     pub hosting_base: f64,
     pub hosting_per_customer: f64,
-    /// Inference cost in euros per 1,000 analyses at game start.
+    /// Coût d'inférence en euros pour 1 000 analyses au début de la partie.
     pub inference_cost_per_k: f64,
     pub incident_base: f64,
     pub incident_per_debt: f64,
     pub incident_per_kcustomer: f64,
 
-    // --- AI research ----------------------------------------------------
+    // --- recherche en IA ---------------------------------------------------
     pub accuracy_ceiling: f64,
     pub drift_per_day: f64,
     pub drift_growth_per_level: f64,
 
-    // --- work -----------------------------------------------------------
-    /// Points produced per skill point per day (skill 60 -> 6 points).
+    // --- travail ----------------------------------------------------------
+    /// Points produits par point de compétence et par jour (compétence 60 -> 6 points).
     pub output_per_skill: f64,
     pub fatigue_work: f64,
     pub fatigue_weekend_recovery: f64,
@@ -49,7 +49,7 @@ pub struct Balancing {
     pub tech_debt_drag: f64,
     pub tech_debt_daily_per_engineer: f64,
 
-    // --- market ---------------------------------------------------------
+    // --- marché -----------------------------------------------------------
     pub organic_leads: f64,
     pub self_serve_rate: f64,
     pub lead_decay: f64,
@@ -58,20 +58,20 @@ pub struct Balancing {
     pub competition_base: f64,
     pub competition_per_level: f64,
 
-    // --- events ---------------------------------------------------------
+    // --- événements --------------------------------------------------------
     pub event_chance_per_day: f64,
     pub event_min_gap_days: u32,
 
-    // --- failure --------------------------------------------------------
+    // --- échec ------------------------------------------------------------
     pub bankruptcy_grace_days: u32,
     pub bankruptcy_floor: f64,
     pub resign_morale_threshold: f64,
 
-    // --- valuation ------------------------------------------------------
+    // --- valorisation ------------------------------------------------------
     pub valuation_arr_multiple: f64,
     pub valuation_floor: f64,
     pub valuation_per_engineer: f64,
-    /// Daily growth of per-customer usage once launched (deeper adoption).
+    /// Croissance quotidienne de l'usage par client après le lancement (adoption plus profonde).
     pub usage_creep_per_day: f64,
 }
 

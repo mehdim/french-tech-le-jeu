@@ -1,4 +1,4 @@
-//! Explicit top-level game states.
+//! États de jeu explicites de premier niveau.
 
 use crate::sim::{Game, SimClock};
 use bevy::prelude::*;
@@ -6,18 +6,18 @@ use game_core::missions::Phase;
 
 #[derive(States, Default, Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum AppState {
-    /// Title screen; an autopilot company plays in the background.
+    /// Écran titre ; une entreprise pilotée par l'autopilote joue en arrière-plan.
     #[default]
     MainMenu,
-    /// The player runs Veridix.
+    /// Le joueur dirige Veridix.
     Playing,
-    /// Pause menu open (Esc). The simulation is frozen.
+    /// Menu pause ouvert (Échap). La simulation est figée.
     Paused,
-    /// A level was completed: outro + summary, then next level.
+    /// Un niveau est terminé : conclusion + bilan, puis niveau suivant.
     MissionComplete,
-    /// Bankruptcy.
+    /// Faillite.
     GameOver,
-    /// The campaign is won; ending scene.
+    /// La campagne est gagnée ; scène de fin.
     Victory,
 }
 
@@ -30,7 +30,7 @@ impl Plugin for StatesPlugin {
     }
 }
 
-/// Follow the simulation's campaign phase into the matching app state.
+/// Fait suivre à l'état de l'application la phase de campagne de la simulation.
 fn watch_phase(game: Res<Game>, mut next: ResMut<NextState<AppState>>, mut clock: ResMut<SimClock>) {
     match game.0.campaign.phase {
         Phase::Playing => {}

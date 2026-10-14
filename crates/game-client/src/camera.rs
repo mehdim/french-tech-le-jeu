@@ -1,6 +1,6 @@
-//! Orthographic camera: integer zoom (crisp pixels), panning with mouse,
-//! keyboard or touch, auto-framing of the office, and a viewport limited to
-//! the area not covered by the management panels.
+//! Caméra orthographique : zoom par paliers entiers (pixels nets), déplacement à la souris,
+//! au clavier ou au toucher, cadrage automatique du bureau, et zone d'affichage limitée
+//! à la partie non couverte par les panneaux de gestion.
 
 use crate::assets::iso;
 use crate::sim::{Game, GameContent};
@@ -15,12 +15,12 @@ use bevy::window::PrimaryWindow;
 #[derive(Component)]
 pub struct MainCamera;
 
-/// Central screen area left free by the UI (logical pixels), written by the UI.
+/// Zone centrale de l'écran laissée libre par l'interface (pixels logiques), écrite par l'interface.
 #[derive(Resource, Clone, Copy)]
 pub struct WorldViewport {
     pub min: Vec2,
     pub max: Vec2,
-    /// True when egui wants the pointer this frame (hovering a panel).
+    /// Vrai quand egui veut le pointeur à cette image (survol d'un panneau).
     pub pointer_over_ui: bool,
     pub keyboard_captured: bool,
 }
@@ -59,9 +59,9 @@ impl Plugin for CameraPlugin {
 }
 
 fn spawn_camera(mut commands: Commands, mut egui_settings: ResMut<bevy_egui::EguiGlobalSettings>) {
-    // World camera: draws the office inside the area left free by panels.
+    // Caméra du monde : dessine le bureau dans la zone laissée libre par les panneaux.
     commands.spawn((Camera2d, MainCamera, Transform::from_xyz(0.0, 0.0, 100.0)));
-    // UI camera: full window, draws only egui, layered on top.
+    // Caméra d'interface : toute la fenêtre, ne dessine qu'egui, par-dessus.
     egui_settings.auto_create_primary_context = false;
     commands.spawn((
         bevy_egui::PrimaryEguiContext,
@@ -79,7 +79,7 @@ fn spawn_camera(mut commands: Commands, mut egui_settings: ResMut<bevy_egui::Egu
     ));
 }
 
-/// Office bounds in world space.
+/// Limites du bureau dans le monde.
 pub fn office_bounds(content: &GameContent, game: &Game) -> Rect {
     let tier = content.0.office(game.0.office.tier);
     let (w, h) = tier.map(|t| (t.width as f32, t.height as f32)).unwrap_or((7.0, 6.0));
@@ -88,7 +88,7 @@ pub fn office_bounds(content: &GameContent, game: &Game) -> Rect {
     for p in pts {
         r = r.union_point(p);
     }
-    // Walls rise above the back corner.
+    // Les murs s'élèvent au-dessus du coin du fond.
     r.max.y += 70.0;
     r
 }
@@ -123,7 +123,7 @@ fn pan_zoom(
     let cursor_in_world = window
         .cursor_position()
         .is_some_and(|c| c.x >= vp.min.x && c.x <= vp.max.x && c.y >= vp.min.y && c.y <= vp.max.y);
-    // Zoom (integer steps keep pixels crisp).
+    // Zoom (des paliers entiers gardent les pixels nets).
     for ev in wheel.read() {
         if vp.pointer_over_ui || !cursor_in_world {
             continue;
@@ -156,7 +156,7 @@ fn pan_zoom(
             state.target += dir.normalize() * 300.0 / z * time.delta_secs();
         }
     }
-    // Drag with right/middle button anywhere, or left button on empty floor.
+    // Glisser avec le bouton droit/milieu n'importe où, ou le bouton gauche sur un sol vide.
     let drag_button = mouse.pressed(MouseButton::Right) || mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left);
     if (mouse.just_pressed(MouseButton::Right) || mouse.just_pressed(MouseButton::Middle) || mouse.just_pressed(MouseButton::Left))
         && cursor_in_world
@@ -174,13 +174,13 @@ fn pan_zoom(
     }
     if state.dragging && delta != Vec2::ZERO {
         state.drag_distance += delta.length();
-        // Left-drag only pans once it is clearly a drag, not a click.
+        // Le glisser gauche ne déplace la vue que si c'est clairement un glisser, pas un clic.
         if state.drag_distance > 6.0 || !mouse.pressed(MouseButton::Left) {
             let z = state.zoom;
             state.target += Vec2::new(-delta.x, delta.y) / z;
         }
     }
-    // Touch: one finger pans, two fingers pinch-zoom.
+    // Tactile : un doigt déplace, deux doigts zooment.
     let active: Vec<_> = touches.iter().collect();
     if active.len() == 1 {
         let t = active[0];
@@ -201,7 +201,7 @@ fn pan_zoom(
     } else {
         state.pinch_start = None;
     }
-    // Keep the office in view.
+    // Garde le bureau dans le champ.
     let b = office_bounds(&content, &game);
     state.target = state.target.clamp(b.min, b.max);
 }
@@ -217,11 +217,11 @@ fn apply_camera(
     if let Projection::Orthographic(o) = proj.as_mut() {
         o.scale = 1.0 / (state.zoom * scale).max(0.25) * scale;
     }
-    // Snap to whole screen pixels to avoid shimmering.
+    // Aligne sur des pixels entiers de l'écran pour éviter le scintillement.
     let snap = 1.0 / state.zoom;
     tf.translation.x = (state.target.x / snap).round() * snap;
     tf.translation.y = (state.target.y / snap).round() * snap;
-    // Restrict rendering to the area not covered by panels.
+    // Limite le rendu à la zone non couverte par les panneaux.
     let w = window.physical_width();
     let h = window.physical_height();
     let min = (vp.min * scale).as_uvec2().min(UVec2::new(w.saturating_sub(1), h.saturating_sub(1)));

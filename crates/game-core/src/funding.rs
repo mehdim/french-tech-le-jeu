@@ -1,4 +1,4 @@
-//! Public funding (France Travail, Bpifrance, CIR, JEI), loans and equity.
+//! Financement public (France Travail, Bpifrance, CIR, JEI), prêts et levées de fonds.
 
 use crate::content::RoundKind;
 use serde::{Deserialize, Serialize};
@@ -6,9 +6,9 @@ use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AppStatus {
-    /// Paperwork in progress — admin points accumulate.
+    /// Paperasse en cours : les points d'administratif s'accumulent.
     Drafting,
-    /// Waiting for the committee.
+    /// En attente du comité.
     Submitted,
     Approved,
     Rejected,
@@ -25,7 +25,7 @@ pub struct Application {
     pub submitted_day: Option<u32>,
     pub decision_day: Option<u32>,
     pub amount: f64,
-    /// Number of times the dossier was sent back for more documents.
+    /// Nombre de fois où le dossier a été renvoyé pour des pièces supplémentaires.
     pub revisions: u32,
 }
 
@@ -59,7 +59,7 @@ pub struct Disbursement {
 pub struct Loan {
     pub label: String,
     pub monthly: f64,
-    /// Grace months before repayments start.
+    /// Mois de différé avant le début des remboursements.
     pub grace_left: u32,
     pub months_left: u32,
 }
@@ -77,7 +77,7 @@ impl CapTable {
     pub fn founder_pct(&self) -> f64 {
         100.0 * self.founder / self.total()
     }
-    /// Issue new shares for `amount` at `pre_money`; returns dilution in %.
+    /// Émet de nouvelles actions pour `amount` à `pre_money` ; renvoie la dilution en %.
     pub fn issue(&mut self, holder: &str, amount: f64, pre_money: f64) -> f64 {
         let total = self.total();
         let new_shares = total * amount / pre_money.max(1.0);
@@ -134,11 +134,11 @@ pub struct FundingState {
     pub cap: CapTable,
     pub fundraising: Option<Fundraising>,
     pub rounds: Vec<RoundRecord>,
-    /// program id -> day of last application (cooldowns).
+    /// id du dispositif -> jour du dernier dépôt (délais de carence).
     pub last_applied: BTreeMap<String, u32>,
-    /// Programs approved at least once.
+    /// Dispositifs accordés au moins une fois.
     pub approved: Vec<String>,
-    /// Money secured (approved/closed) per level, for quests.
+    /// Argent obtenu (accordé ou encaissé) par niveau, pour les objectifs.
     pub secured_by_level: BTreeMap<u32, f64>,
     pub equity_by_level: BTreeMap<u32, f64>,
     pub jei: bool,

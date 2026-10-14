@@ -1,5 +1,5 @@
-"""Isometric furniture sprites. Each returns (image, anchor) where anchor is the
-pixel position of the footprint's back corner (grid point (0,0) at floor level)."""
+"""Sprites de mobilier isométrique. Chaque fonction renvoie (image, ancre), où l'ancre est la
+position en pixels du coin arrière de l'emprise (point de grille (0,0) au niveau du sol)."""
 import math
 from pixlib import *
 
@@ -32,7 +32,7 @@ def table(img, o, x0, y0, w, h, height, top_col, leg_col=METAL_D, thick=2):
 def desk():
     img, o = canvas(2, 1, 40)
     table(img, o, 0, 0, 2, 1, 14, WOOD_L)
-    # laptop seen from behind (the employee faces the camera)
+    # laptop vu de dos (le salarié fait face à la caméra)
     iso_box(img, o, 0.65, 0.35, 0.7, 0.35, 14, 1, METAL_M)
     lid = [iso_pt(o, 0.65, 0.42, 15), iso_pt(o, 1.35, 0.42, 15), iso_pt(o, 1.35, 0.42, 25), iso_pt(o, 0.65, 0.42, 25)]
     poly(img, lid, GRAPHITE, INK)
@@ -44,7 +44,7 @@ def desk():
     rect(img, m[0] - 1, m[1] - 4, 3, 4, OFFWHITE)
     px(img, m[0] + 2, m[1] - 3, OFFWHITE)
     px(img, m[0], m[1] - 4, WOOD_DD)
-    # papers
+    # papiers
     p = iso_pt(o, 0.3, 0.6, 14)
     rect(img, p[0] - 2, p[1] - 1, 4, 2, OFFWHITE)
     return finish(img, o)
@@ -53,11 +53,11 @@ def desk():
 def workstation():
     img, o = canvas(2, 1, 44)
     table(img, o, 0, 0, 2, 1, 14, GRAPHITE_2, leg_col=METAL_M)
-    # PC tower under the desk
+    # tour PC sous le bureau
     iso_box(img, o, 1.55, 0.2, 0.35, 0.5, 0, 11, GRAPHITE)
     t = iso_pt(o, 1.9, 0.5, 8)
     px(img, t[0] - 1, t[1], GREEN)
-    # monitor back on a stand
+    # dos d'écran sur pied
     s = iso_pt(o, 1.0, 0.35, 14)
     rect(img, s[0], s[1] - 6, 1, 6, METAL_D)
     mon = [iso_pt(o, 0.45, 0.35, 19), iso_pt(o, 1.55, 0.35, 19), iso_pt(o, 1.55, 0.35, 32), iso_pt(o, 0.45, 0.35, 32)]
@@ -66,11 +66,11 @@ def workstation():
     poly(img, mon2, GRAPHITE_2, None)
     g = iso_pt(o, 1.0, 0.35, 26)
     px(img, g[0], g[1], GREEN_DIM)
-    # mechanical keyboard with coloured keycaps (toward the viewer)
+    # clavier mécanique aux touches colorées (côté spectateur)
     for i in range(6):
         k = iso_pt(o, 0.55 + i * 0.15, 0.78, 14)
         px(img, k[0], k[1] - 1, [GREEN, OFFWHITE, ORANGE, OFFWHITE, GREEN, OFFWHITE][i])
-    # desk lamp
+    # lampe de bureau
     l = iso_pt(o, 0.2, 0.3, 14)
     rect(img, l[0], l[1] - 7, 1, 7, METAL_D)
     rect(img, l[0] - 1, l[1] - 9, 4, 2, YELLOW)
@@ -88,7 +88,7 @@ def plant():
             for xx in range(-r, r + 1):
                 if xx * xx + yy * yy * 1.4 <= r * r:
                     px(img, c[0] + dx + xx, c[1] + dy + yy, col)
-        # monstera holes
+        # trous du monstera
         px(img, c[0] + dx, c[1] + dy, LEAF_D)
     outline_alpha(img)
     return finish(img, o)
@@ -112,7 +112,7 @@ def coffee_machine():
     iso_box(img, o, 0.2, 0.15, 0.6, 0.5, 15, 14, GRAPHITE)
     iso_box(img, o, 0.25, 0.2, 0.5, 0.4, 29, 2, METAL_M)
     f = iso_pt(o, 0.55, 0.65, 24)
-    px(img, f[0], f[1], GREEN)          # uptime LED
+    px(img, f[0], f[1], GREEN)          # LED d'uptime
     px(img, f[0] - 2, f[1], ORANGE)
     sp = iso_pt(o, 0.5, 0.65, 18)
     rect(img, sp[0] - 1, sp[1], 2, 1, METAL_L)
@@ -133,7 +133,7 @@ def sofa():
     for gx in (0.6, 1.3):
         c = iso_pt(o, gx, 0.6, 8)
         rect(img, c[0] - 2, c[1] - 2, 4, 2, shade(DEEP_GREEN, 1.25))
-    # cushion
+    # coussin
     c = iso_pt(o, 1.5, 0.35, 12)
     rect(img, c[0] - 2, c[1] - 3, 4, 4, ORANGE)
     return finish(img, o)
@@ -146,7 +146,7 @@ def whiteboard_item():
         rect(img, a[0], a[1] - 30, 1, 30, METAL_D)
     board = [iso_pt(o, 0.05, 0.5, 14), iso_pt(o, 0.95, 0.5, 14), iso_pt(o, 0.95, 0.5, 36), iso_pt(o, 0.05, 0.5, 36)]
     poly(img, board, OFFWHITE, METAL_D)
-    # boxes & arrows
+    # boîtes et flèches
     for (gx, z, col) in [(0.25, 30, BLUE), (0.6, 30, DEEP_GREEN), (0.42, 20, RED)]:
         p = iso_pt(o, gx, 0.5, z)
         rect(img, p[0] - 2, p[1] - 2, 5, 3, col)
@@ -158,7 +158,7 @@ def whiteboard_item():
 
 def meeting_table():
     img, o = canvas(2, 2, 30)
-    # chairs
+    # chaises
     for (gx, gy) in [(0.3, 2.05), (1.2, 2.05), (2.05, 0.4), (2.05, 1.3)]:
         iso_box(img, o, gx, gy, 0.45, 0.4, 0, 6, ORANGE)
     table(img, o, 0.2, 0.2, 1.6, 1.6, 11, OFFWHITE, leg_col=METAL_D)
@@ -208,13 +208,13 @@ def k8s_cluster():
         for z in range(10, 6 + h, 5):
             p = iso_pt(o, gx + 0.2, 0.7, z)
             px(img, p[0], p[1], [GREEN, ORANGE, GREEN, RED][(i + z) % 4])
-    # cables everywhere
+    # des câbles partout
     for (a, b) in [((0.3, 0.7, 30), (0.75, 0.7, 36)), ((0.75, 0.7, 20), (1.2, 0.7, 24)), ((1.2, 0.7, 14), (1.65, 0.7, 28)), ((0.3, 0.7, 12), (1.65, 0.7, 10))]:
         pa, pb = iso_pt(o, *a), iso_pt(o, *b)
         mx, my = (pa[0] + pb[0]) / 2, max(pa[1], pb[1]) + 4
         line(img, pa, (mx, my), RED)
         line(img, (mx, my), pb, RED)
-    # a gear on top, spinning for no reason
+    # un engrenage au-dessus, qui tourne sans raison
     g = iso_pt(o, 0.75, 0.45, 42)
     for k in range(8):
         a = k / 8 * 2 * math.pi
@@ -230,10 +230,10 @@ def pingpong():
     a = iso_pt(o, 0.1, 1.0, 12)
     b = iso_pt(o, 1.9, 1.0, 12)
     line(img, a, b, OFFWHITE)
-    # the net is gone; one post remains
+    # le filet a disparu ; il reste un poteau
     p = iso_pt(o, 0.1, 1.0, 12)
     rect(img, p[0], p[1] - 3, 1, 3, METAL_L)
-    # crack
+    # fissure
     c = iso_pt(o, 1.4, 0.5, 12)
     line(img, (c[0] - 3, c[1] - 1), (c[0] + 2, c[1] + 1), INK)
     ball = iso_pt(o, 1.5, 1.6, 0)

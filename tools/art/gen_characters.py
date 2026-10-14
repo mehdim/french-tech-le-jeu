@@ -1,8 +1,8 @@
-"""Animated employee sprites: 12 roles x 8 looks x 16 frames (16x26 each).
+"""Sprites animés des salariés : 12 rôles x 8 apparences x 16 images (16x26 chacune).
 
-Frame layout per row:
-  0-1 idle   2-5 walk   6-7 typing (seated)   8-9 coffee
-  10-11 talk 12-13 exhausted   14-15 panic
+Disposition des images par ligne :
+  0-1 attente   2-5 marche   6-7 frappe (assis)   8-9 café
+  10-11 discussion   12-13 épuisement   14-15 panique
 """
 from pixlib import *
 
@@ -18,7 +18,7 @@ KHAKI = (176, 150, 104, 255)
 SHOE = (34, 30, 30, 255)
 
 OUTFIT = {
-    # role: (shirt, shirt_shade, pants, extras)
+    # rôle : (chemise, ombre de la chemise, pantalon, accessoires)
     "Founder": (GRAPHITE_2, GRAPHITE, JEANS, {"logo": GREEN, "hood": True}),
     "Backend": (DEEP_GREEN, shade(DEEP_GREEN, 0.8), JEANS, {"headphones": True}),
     "Frontend": ((236, 120, 150, 255), (200, 92, 122, 255), KHAKI, {"beanie": (232, 196, 70, 255)}),
@@ -37,39 +37,39 @@ OUTFIT = {
 def look_colors(look):
     skin = SKINS[look % len(SKINS)]
     hair = HAIRS[(look * 3 + 1) % len(HAIRS)]
-    style = look % 4  # 0 short, 1 long, 2 bun, 3 curly
+    style = look % 4  # 0 courts, 1 longs, 2 chignon, 3 bouclés
     return skin, hair, style
 
 
 def draw_head(img, x0, y0, skin, hair, style, extras, eyes="open", mouth=None):
-    # face 7x8 at (x0..x0+6, y0..y0+7)
+    # visage de 7x8 en (x0..x0+6, y0..y0+7)
     for y in range(y0 + 1, y0 + 8):
         for x in range(x0, x0 + 7):
             px(img, x, y, skin)
-    # shading on the far side
+    # ombre du côté éloigné
     for y in range(y0 + 2, y0 + 8):
         px(img, x0, y, shade(skin, 0.86))
-    # hair
+    # cheveux
     for x in range(x0 - (1 if style in (1, 3) else 0), x0 + 7 + (1 if style == 3 else 0)):
         px(img, x, y0, hair)
         px(img, x, y0 + 1, hair)
     px(img, x0, y0 + 2, hair)
     px(img, x0 + 1, y0 + 2, hair)
     px(img, x0 - (0 if style != 3 else 1), y0 + 3, hair)
-    if style == 1:      # long hair down the side
+    if style == 1:      # cheveux longs sur le côté
         for y in range(y0 + 2, y0 + 10):
             px(img, x0 - 1, y, hair)
             px(img, x0, y, hair)
-    elif style == 2:    # bun
+    elif style == 2:    # chignon
         rect(img, x0 + 1, y0 - 2, 3, 2, hair)
-    elif style == 3:    # curly volume
+    elif style == 3:    # volume des boucles
         for x in range(x0 - 1, x0 + 8):
             px(img, x, y0 - 1, hair)
         px(img, x0 + 7, y0 + 2, hair)
         px(img, x0 - 1, y0 + 4, hair)
-    # ear
+    # oreille
     px(img, x0 + 1, y0 + 4, shade(skin, 0.8))
-    # eyes (facing right: features shifted right)
+    # yeux (tourné vers la droite : traits décalés à droite)
     ey = y0 + 4
     if eyes == "open":
         px(img, x0 + 3, ey, INK)
@@ -86,7 +86,7 @@ def draw_head(img, x0, y0, skin, hair, style, extras, eyes="open", mouth=None):
             px(img, x, ey - 1, frame)
         for x in (x0 + 2, x0 + 4, x0 + 6):
             px(img, x, ey, frame)
-    # mouth
+    # bouche
     if mouth == "open":
         px(img, x0 + 4, y0 + 6, INK)
         px(img, x0 + 4, y0 + 7, (160, 60, 60, 255))
@@ -94,7 +94,7 @@ def draw_head(img, x0, y0, skin, hair, style, extras, eyes="open", mouth=None):
         px(img, x0 + 3, y0 + 6, shade(skin, 0.6)); px(img, x0 + 5, y0 + 6, shade(skin, 0.6)); px(img, x0 + 4, y0 + 7, shade(skin, 0.6))
     else:
         px(img, x0 + 4, y0 + 6, shade(skin, 0.65))
-    # headwear
+    # couvre-chef
     if extras.get("headphones"):
         for x in range(x0, x0 + 7):
             px(img, x, y0 - 1, INK)
@@ -107,7 +107,7 @@ def draw_head(img, x0, y0, skin, hair, style, extras, eyes="open", mouth=None):
     if extras.get("cap"):
         c = extras["cap"]
         rect(img, x0, y0 - 1, 7, 2, c)
-        rect(img, x0 - 3, y0 + 1, 3, 1, shade(c, 0.8))  # backwards visor
+        rect(img, x0 - 3, y0 + 1, 3, 1, shade(c, 0.8))  # casquette à l'envers
     if extras.get("hood"):
         px(img, x0 - 1, y0 + 6, GRAPHITE)
         px(img, x0 - 1, y0 + 7, GRAPHITE)
@@ -126,7 +126,7 @@ def draw_arm(img, shoulder, hand, sleeve, skin):
 
 
 POSES = {
-    # name: (body_dy, head_dy, back_hand, front_hand, legs, eyes, mouth)
+    # nom : (body_dy, head_dy, main_arrière, main_avant, jambes, yeux, bouche)
     "idle0": (0, 0, (3, 19), (12, 19), "stand", "open", None),
     "idle1": (0, 1, (3, 19), (12, 19), "stand", "open", None),
     "walk0": (0, 0, (2, 18), (13, 18), "walk_a", "open", None),
@@ -171,9 +171,9 @@ def draw_frame(role, look, pose):
     skin, hair, style = look_colors(look)
     by, hy, back_hand, front_hand, legs, eyes, mouth = POSES[pose]
     draw_legs(img, legs, pants, by if legs != "sit" else 1)
-    # back arm (behind torso)
+    # bras arrière (derrière le torse)
     draw_arm(img, (4, 12 + by), (back_hand[0], back_hand[1] + (by if pose.startswith("tired") else 0)), shirt_d, skin)
-    # torso
+    # torse
     for y in range(11 + by, 19 + by + (1 if legs == "sit" else 0)):
         for x in range(4, 12):
             c = shirt if x > 5 else shirt_d
@@ -198,11 +198,11 @@ def draw_frame(role, look, pose):
     if extras.get("strap"):
         for i in range(6):
             px(img, 10 - i, 11 + by + i, extras["strap"])
-    # head
+    # tête
     draw_head(img, 5, 3 + hy, skin, hair, style, extras, eyes, mouth)
-    # front arm
+    # bras avant
     draw_arm(img, (11, 12 + by), (front_hand[0], front_hand[1] + (by if pose.startswith("tired") else 0)), shirt, skin)
-    # props
+    # accessoires
     if pose.startswith("coffee"):
         hx, hyy = front_hand
         rect(img, hx, hyy - 2, 2, 2, OFFWHITE)
@@ -234,7 +234,7 @@ def atlas():
 if __name__ == "__main__":
     s = atlas()
     s.save("/tmp/claude-0/art/chars.png")
-    # preview: first look of each role, all frames, x4
+    # aperçu : première apparence de chaque rôle, toutes les images, x4
     prev = new(FW * FRAMES, FH * len(ROLES))
     for r in range(len(ROLES)):
         prev.alpha_composite(s.crop((0, r * LOOKS * FH, FW * FRAMES, (r * LOOKS + 1) * FH)), (0, r * FH))

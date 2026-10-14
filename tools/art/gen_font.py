@@ -1,8 +1,8 @@
-"""Build an original pixel TTF ("Veridix Pixel") with fontTools.
+"""Construit une police TTF pixel originale (« Veridix Pixel ») avec fontTools.
 
-Glyph grid: 11 rows. Rows 0-1 = accent zone, rows 2-8 = cap height
-(baseline under row 8), rows 9-10 = descenders. One pixel = 100 units.
-Render at multiples of 11 px for perfectly crisp output.
+Grille des glyphes : 11 lignes. Lignes 0-1 = zone des accents, lignes 2-8 = hauteur des capitales
+(ligne de base sous la ligne 8), lignes 9-10 = jambages. Un pixel = 100 unités.
+Rendu en multiples de 11 px pour un résultat parfaitement net.
 """
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -10,9 +10,9 @@ import unicodedata
 
 U = 100
 ROWS = 11
-BASE = 9  # baseline is between row 8 and 9
+BASE = 9  # la ligne de base est entre les lignes 8 et 9
 
-# 9-row glyphs (rows 2..10). '#' = on.
+# Glyphes de 9 lignes (lignes 2..10). '#' = allumé.
 G = {}
 
 
@@ -23,7 +23,7 @@ def g(ch, *rows):
     G[ch] = rows
 
 
-# --- uppercase (5 wide, 7 tall) ---
+# --- majuscules (5 de large, 7 de haut) ---
 g("A", ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#")
 g("B", "####.", "#...#", "#...#", "####.", "#...#", "#...#", "####.")
 g("C", ".###.", "#...#", "#....", "#....", "#....", "#...#", ".###.")
@@ -50,7 +50,7 @@ g("W", "#...#", "#...#", "#...#", "#.#.#", "#.#.#", "##.##", "#...#")
 g("X", "#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#")
 g("Y", "#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#..")
 g("Z", "#####", "....#", "...#.", "..#..", ".#...", "#....", "#####")
-# --- lowercase (x-height rows 4..8) ---
+# --- minuscules (hauteur d'x : lignes 4..8) ---
 g("a", ".....", ".....", ".###.", "....#", ".####", "#...#", ".####")
 g("b", "#....", "#....", "####.", "#...#", "#...#", "#...#", "####.")
 g("c", ".....", ".....", ".###.", "#....", "#....", "#....", ".###.")
@@ -77,7 +77,7 @@ g("w", ".....", ".....", "#...#", "#...#", "#.#.#", "#.#.#", ".#.#.")
 g("x", ".....", ".....", "#...#", ".#.#.", "..#..", ".#.#.", "#...#")
 g("y", ".....", ".....", "#...#", "#...#", "#...#", ".####", "....#", "....#", ".###.")
 g("z", ".....", ".....", "#####", "...#.", "..#..", ".#...", "#####")
-# --- digits ---
+# --- chiffres ---
 g("0", ".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###.")
 g("1", "..#..", ".##..", "..#..", "..#..", "..#..", "..#..", ".###.")
 g("2", ".###.", "#...#", "....#", "...#.", "..#..", ".#...", "#####")
@@ -88,7 +88,7 @@ g("6", ".###.", "#....", "#....", "####.", "#...#", "#...#", ".###.")
 g("7", "#####", "....#", "...#.", "..#..", "..#..", "..#..", "..#..")
 g("8", ".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###.")
 g("9", ".###.", "#...#", "#...#", ".####", "....#", "....#", ".###.")
-# --- punctuation ---
+# --- ponctuation ---
 g(" ", "...", "...", "...", "...", "...", "...", "...")
 g("\u00a0", "...", "...", "...", "...", "...", "...", "...")
 g("\u202f", "..", "..", "..", "..", "..", "..", "..")
@@ -151,7 +151,7 @@ COMBINING = {"̀": "grave", "́": "acute", "̂": "circumflex", "̈": "diaeresis"
 
 
 def compose(ch):
-    """Build accented letters from base glyph + accent mark."""
+    """Construit les lettres accentuées à partir du glyphe de base et d'un accent."""
     d = unicodedata.normalize("NFD", ch)
     if len(d) != 2:
         return None
@@ -160,8 +160,8 @@ def compose(ch):
         return None
     rows = [r for r in G[base]]
     w = len(rows[0])
-    full = ["." * w, "." * w] + rows   # 11 rows
-    if mark == "̧":                # cedilla
+    full = ["." * w, "." * w] + rows   # 11 lignes
+    if mark == "̧":                # cédille
         r9 = list(full[9]); r10 = list(full[10])
         c = w // 2
         r9[c] = "#"; r10[max(0, c - 1)] = "#"
@@ -174,7 +174,7 @@ def compose(ch):
     upper = base.isupper()
     top = 0 if upper else 2
     if base == "i":
-        # dotless i + accent
+        # i sans point + accent
         full = ["." * w, "." * w] + ["..."] * 2 + G["i"][2:]
         top = 2
     off = (w - 3) // 2
@@ -208,7 +208,7 @@ def build(path):
     fb.setupCharacterMap({ord(ch): n for ch, n in names.items()})
     pen_glyphs = {}
     metrics = {}
-    # .notdef box
+    # boîte .notdef
     p = TTGlyphPen(None)
     p.moveTo((0, 0)); p.lineTo((0, 700)); p.lineTo((500, 700)); p.lineTo((500, 0)); p.closePath()
     pen_glyphs[".notdef"] = p.glyph()
@@ -224,7 +224,7 @@ def build(path):
                     x0 = x
                     while x < w and row[x] == "#":
                         x += 1
-                    # clockwise contour for TrueType
+                    # contour dans le sens horaire pour TrueType
                     pen.moveTo((x0 * U, y_top)); pen.lineTo((x * U, y_top))
                     pen.lineTo((x * U, y_top - U)); pen.lineTo((x0 * U, y_top - U)); pen.closePath()
                 else:
@@ -246,4 +246,4 @@ def build(path):
 if __name__ == "__main__":
     import sys
     n = build(sys.argv[1] if len(sys.argv) > 1 else "/tmp/claude-0/art/VeridixPixel.ttf")
-    print("glyphs:", n)
+    print("glyphes :", n)

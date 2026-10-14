@@ -1,4 +1,4 @@
-//! Random and scripted event engine state.
+//! État du moteur d'événements, aléatoires et scénarisés.
 
 use crate::content::{Content, EventDef};
 use crate::types::Effect;
@@ -31,7 +31,7 @@ pub struct EventRecord {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct EventState {
     pub pending: Option<PendingEvent>,
-    /// Scripted events waiting for the current one to be resolved.
+    /// Événements scénarisés en attente que l'événement courant soit résolu.
     pub queue: Vec<PendingEvent>,
     pub last_fired: BTreeMap<String, u32>,
     pub fired_once: BTreeSet<String>,

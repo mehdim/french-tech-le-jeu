@@ -1,8 +1,8 @@
-//! Browser storage adapter backed by `window.localStorage`.
+//! Adaptateur de stockage navigateur fondé sur `window.localStorage`.
 //!
-//! localStorage is synchronous and universally available; a full campaign
-//! save is ~40-80 KB of JSON, far below the ~5 MB per-origin quota.
-//! Private-browsing modes may refuse writes: errors are surfaced to the UI.
+//! localStorage est synchrone et disponible partout ; une sauvegarde de campagne complète
+//! pèse ~40-80 Ko de JSON, bien en dessous du quota de ~5 Mo par origine.
+//! La navigation privée peut refuser l'écriture : les erreurs remontent jusqu'à l'interface.
 
 use crate::storage::{Storage, StorageError};
 
@@ -10,7 +10,7 @@ pub struct LocalStorage {
     inner: web_sys::Storage,
 }
 
-// The browser main thread is the only thread on wasm32-unknown-unknown.
+// Le thread principal du navigateur est le seul thread sur wasm32-unknown-unknown.
 unsafe impl Send for LocalStorage {}
 unsafe impl Sync for LocalStorage {}
 

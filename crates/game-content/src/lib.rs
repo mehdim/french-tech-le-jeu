@@ -1,9 +1,9 @@
 //! # game-content
 //!
-//! All game data lives in `assets/data/*.ron` and is embedded at compile time,
-//! so the browser build needs no extra network requests and tests see exactly
-//! what players see. This crate parses it into [`game_core::Content`], checks
-//! cross-references, and formats simulation messages into French prose.
+//! Toutes les données du jeu vivent dans `assets/data/*.ron` et sont intégrées à la compilation :
+//! le build navigateur n'a besoin d'aucune requête réseau supplémentaire et les tests voient
+//! exactement ce que voient les joueurs. Cette crate les convertit en [`game_core::Content`],
+//! vérifie les références croisées et met en forme les messages de la simulation en français.
 
 pub mod autopilot;
 pub mod balancing;
@@ -68,7 +68,7 @@ fn parse<T: for<'de> Deserialize<'de>>(name: &str, src: &str) -> Result<T, Conte
     ron::from_str(src).map_err(|e| ContentError(format!("{name}: {e}")))
 }
 
-/// Parse every embedded data file and validate cross-references.
+/// Analyse chaque fichier de données intégré et vérifie les références croisées.
 pub fn try_load() -> Result<Content, ContentError> {
     let tasks: Vec<TaskDef> = parse("tasks.ron", TASKS)?;
     let emp: EmployeesFile = parse("employees.ron", EMPLOYEES)?;
@@ -102,9 +102,9 @@ pub fn try_load() -> Result<Content, ContentError> {
     Ok(content)
 }
 
-/// Load content, panicking with a readable message on malformed data.
-/// Data is embedded and covered by tests, so this cannot fail at runtime
-/// for a build that passed `cargo test`.
+/// Charge le contenu, en paniquant avec un message lisible si les données sont mal formées.
+/// Les données sont intégrées et couvertes par les tests : cela ne peut pas échouer à
+/// l'exécution pour un build qui a passé `cargo test`.
 pub fn load() -> Content {
-    try_load().unwrap_or_else(|e| panic!("invalid game content:\n{e}"))
+    try_load().unwrap_or_else(|e| panic!("contenu de jeu invalide :\n{e}"))
 }

@@ -1,9 +1,9 @@
-//! Customer acquisition funnel and churn, per segment.
+//! Tunnel d'acquisition et churn des clients, par segment.
 //!
-//! leads/day   = organic(reputation, quality) + paid(budget / CPL) + staff
-//! conversion  = base × quality × price × reputation × competition × features
-//! churn/month = base × (1 - retention) + quality gap + false positives
-//!               + price premium + competition + incidents + modifiers
+//! leads/jour  = organique(réputation, qualité) + payant(budget / CPL) + équipe
+//! conversion  = base × qualité × prix × réputation × concurrence × fonctionnalités
+//! churn/mois  = base × (1 - rétention) + écart de qualité + faux positifs
+//!               + surcoût de prix + concurrence + incidents + modificateurs
 
 use crate::content::Content;
 use crate::types::{DAYS_PER_MONTH, Segment};
@@ -18,15 +18,15 @@ pub struct SegmentState {
     pub leads: f64,
     pub acc_new: f64,
     pub acc_churn: f64,
-    /// Projected monthly churn, % (recomputed daily).
+    /// Churn mensuel projeté, en % (recalculé chaque jour).
     pub churn_rate: f64,
-    /// Projected conversion probability of a worked lead.
+    /// Probabilité de conversion projetée d'un lead travaillé.
     pub conversion: f64,
-    /// Leads generated per day (last tick).
+    /// Leads générés par jour (dernier tick).
     pub leads_per_day: f64,
     pub new_this_month: u32,
     pub churned_this_month: u32,
-    /// Rolling 28-day windows of daily new / churned customers.
+    /// Fenêtres glissantes de 28 jours des nouveaux clients / départs quotidiens.
     pub new_window: Vec<u32>,
     pub churn_window: Vec<u32>,
 }
@@ -59,13 +59,13 @@ impl SegmentState {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MarketState {
     pub segments: [SegmentState; 3],
-    /// Monthly paid-acquisition budget (ads, events, sponsoring).
+    /// Budget mensuel d'acquisition payante (pub, salons, sponsoring).
     pub marketing_budget: f64,
-    /// Open geographic markets (France is always open).
+    /// Marchés géographiques ouverts (la France l'est toujours).
     pub markets: Vec<String>,
-    /// 0..1, how hard competitors squeeze conversion and churn.
+    /// 0..1 : à quel point les concurrents écrasent la conversion et le churn.
     pub competitor_pressure: f64,
-    /// Investor sentiment random walk, multiplies valuations (0.7..1.3).
+    /// Marche aléatoire du moral des investisseurs, multiplie les valorisations (0,7..1,3).
     pub market_conditions: f64,
 }
 
@@ -96,18 +96,18 @@ impl MarketState {
     pub fn total_leads(&self) -> f64 {
         self.segments.iter().map(|s| s.leads).sum()
     }
-    /// MRR = Σ customers × price, zero while still in free beta.
+    /// MRR = Σ clients × prix, zéro pendant la bêta gratuite.
     pub fn mrr(&self, launched: bool) -> f64 {
         if !launched {
             return 0.0;
         }
         self.segments.iter().map(|s| s.customers as f64 * s.price).sum()
     }
-    /// Customer-weighted projected monthly churn, %.
+    /// Churn mensuel projeté, pondéré par le nombre de clients, en %.
     pub fn blended_churn(&self) -> f64 {
         let total = self.total_customers();
         if total == 0 {
-            // Show the SMB projection so the player sees what they'd face.
+            // Affiche la projection PME pour que le joueur voie ce qui l'attend.
             return self.segments[0].churn_rate;
         }
         self.segments
@@ -118,7 +118,7 @@ impl MarketState {
     }
 }
 
-/// Everything the funnel needs from the rest of the company.
+/// Tout ce dont le tunnel a besoin du reste de l'entreprise.
 #[derive(Clone, Debug, Default)]
 pub struct FunnelInputs {
     pub quality: f64,
@@ -137,7 +137,7 @@ pub struct FunnelInputs {
     pub conversion_bonus: [f64; 3],
     pub market_mult: f64,
     pub incident_recent: f64,
-    /// Customers per unit of support/ops capacity above comfort (0 = fine).
+    /// Clients par unité de capacité support/ops au-delà du confort (0 = ça va).
     pub support_deficit: f64,
     pub organic_leads: f64,
     pub self_serve_rate: f64,
@@ -154,12 +154,12 @@ pub struct FunnelResult {
 }
 
 const PAID_SHARE: [f64; 3] = [0.6, 0.3, 0.1];
-/// Paid acquisition saturates: at most this many paid leads/day per market.
+/// L'acquisition payante sature : au plus ce nombre de leads payants par jour et par marché.
 const PAID_CAP: [f64; 3] = [14.0, 2.5, 0.25];
-/// Even a perfect product doesn't convert every lead.
+/// Même un produit parfait ne convertit pas tous les leads.
 const CONVERSION_CAP: [f64; 3] = [0.40, 0.35, 0.30];
 
-/// Early adopters forgive a lot; mainstream buyers much less.
+/// Les early adopters pardonnent beaucoup ; les clients grand public beaucoup moins.
 pub fn quality_factor(quality: f64) -> f64 {
     ((quality + 20.0) / 70.0).clamp(0.3, 1.5)
 }
@@ -168,7 +168,7 @@ pub fn price_factor(price: f64, reference: f64, elasticity: f64) -> f64 {
     (reference / price.max(1.0)).powf(elasticity).clamp(0.15, 2.5)
 }
 
-/// Projected monthly churn for a segment, in %.
+/// Churn mensuel projeté pour un segment, en %.
 pub fn churn_rate(content: &Content, seg: Segment, state: &SegmentState, inp: &FunnelInputs) -> f64 {
     let def = content.segment(seg);
     let i = seg.index();
@@ -191,7 +191,7 @@ pub fn churn_rate(content: &Content, seg: Segment, state: &SegmentState, inp: &F
     raw.clamp(0.3, 45.0)
 }
 
-/// Lead-to-customer probability for a worked lead.
+/// Probabilité qu'un lead travaillé devienne client.
 pub fn conversion_prob(content: &Content, seg: Segment, state: &SegmentState, inp: &FunnelInputs) -> f64 {
     let def = content.segment(seg);
     let i = seg.index();
@@ -207,7 +207,7 @@ pub fn conversion_prob(content: &Content, seg: Segment, state: &SegmentState, in
     p.clamp(0.0, CONVERSION_CAP[i])
 }
 
-/// Run one simulated day of the funnel.
+/// Simule une journée du tunnel.
 pub fn daily_funnel(
     market: &mut MarketState,
     content: &Content,
@@ -218,7 +218,7 @@ pub fn daily_funnel(
     let unlocked_paid: f64 = (0..3).filter(|&i| inp.unlocked[i]).map(|i| PAID_SHARE[i]).sum();
     let budget_daily = market.marketing_budget / DAYS_PER_MONTH as f64;
 
-    // --- 1. leads ------------------------------------------------------
+    // --- 1. leads --------------------------------------------------------
     for seg in Segment::ALL {
         let i = seg.index();
         let def = content.segment(seg);
@@ -229,8 +229,8 @@ pub fn daily_funnel(
         }
         let tam = (def.tam_per_market * inp.market_mult).max(1.0);
         let saturation = (1.0 - s.customers as f64 / tam).clamp(0.05, 1.0);
-        // Ad auctions get pricier as competitors pile in, and each market
-        // only has so many prospects to reach.
+        // Les enchères publicitaires renchérissent quand les concurrents affluent, et chaque
+        // marché n'a qu'un nombre limité de prospects à toucher.
         let paid_raw = if unlocked_paid > 0.0 {
             budget_daily * PAID_SHARE[i] / unlocked_paid / (def.cost_per_lead * (1.0 + inp.competition * 2.0))
         } else {
@@ -260,7 +260,7 @@ pub fn daily_funnel(
         s.leads += leads;
     }
 
-    // --- 2. sales capacity is shared, weighted by demand ---------------
+    // --- 2. la capacité commerciale est partagée, pondérée par la demande ---
     let demand: Vec<f64> = Segment::ALL
         .iter()
         .map(|&seg| {
@@ -296,7 +296,7 @@ pub fn daily_funnel(
         let self_serve = if seg == Segment::Smb { (s.leads - worked).max(0.0) * inp.self_serve_rate } else { 0.0 };
         let expected = worked * p + self_serve * p * 0.6;
         s.leads = (s.leads - worked - self_serve).max(0.0) * (1.0 - inp.lead_decay);
-        // A little noise so days don't feel scripted.
+        // Un peu de bruit pour que les journées ne semblent pas scriptées.
         s.acc_new += expected * rng.random_range(0.8..1.2);
         let new = s.acc_new.floor() as u32;
         s.acc_new -= new as f64;
@@ -317,7 +317,7 @@ pub fn daily_funnel(
     result
 }
 
-/// Components of a segment's projected churn, for the UI (label, points).
+/// Composantes du churn projeté d'un segment, pour l'interface (libellé, points).
 pub fn churn_breakdown(content: &Content, seg: Segment, state: &SegmentState, inp: &FunnelInputs) -> Vec<(&'static str, f64)> {
     let def = content.segment(seg);
     let i = seg.index();

@@ -1,16 +1,16 @@
-//! Development and R&D task queue.
+//! File des chantiers de développement et de R&D.
 
 use crate::content::{Content, TaskDef};
 use crate::product::ProductState;
 use serde::{Deserialize, Serialize};
 
-/// How carefully a task is built: speed versus technical debt.
+/// Le soin apporté à un chantier : vitesse contre dette technique.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Approach {
-    /// "On verra en prod" — fast, debt-heavy, risky.
+    /// « On verra en prod » : rapide, beaucoup de dette, risqué.
     Quick,
     Standard,
-    /// Tests, docs, code review — slow, little debt.
+    /// Tests, docs, revue de code : lent, peu de dette.
     Clean,
 }
 
@@ -78,7 +78,7 @@ impl ActiveTask {
     }
 }
 
-/// Why a task can't be started right now.
+/// Pourquoi un chantier ne peut pas démarrer maintenant.
 #[derive(Clone, Debug, PartialEq)]
 pub enum TaskBlock {
     Locked(String),
@@ -116,7 +116,7 @@ pub fn task_availability(
     Ok(())
 }
 
-/// Tasks visible in the tree (dependencies may still be missing).
+/// Chantiers visibles dans l'arbre (des dépendances peuvent encore manquer).
 pub fn visible_tasks<'a>(
     content: &'a Content,
     unlocks: &std::collections::BTreeSet<String>,

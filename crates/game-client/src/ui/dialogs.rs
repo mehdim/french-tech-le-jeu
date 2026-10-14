@@ -1,5 +1,5 @@
-//! Story scenes and decisions: level intros, events, mission complete,
-//! bankruptcy and endings.
+//! Scènes d'histoire et décisions : intros de niveau, événements, mission accomplie,
+//! faillite et fins.
 
 use super::style::*;
 use super::widgets::*;
@@ -20,9 +20,9 @@ fn modal(ctx: &egui::Context, id: &str, width: f32, add: impl FnOnce(&mut egui::
             modal_frame().show(ui, |ui| {
                 let cr = ctx.content_rect();
                 ui.set_width(width.min(cr.width() - 60.0).max(240.0));
-                // An Area lays out inside last frame's size, and a ScrollArea
-                // never grows past the space it is given: raise the ceiling
-                // explicitly or the dialog stays stuck at its first height.
+                // Une Area se met en page dans la taille de l'image précédente, et une ScrollArea
+                // ne dépasse jamais l'espace qu'on lui donne : on relève le plafond
+                // explicitement, sinon le dialogue reste bloqué à sa première hauteur.
                 let limit = (cr.height() - 100.0).max(200.0);
                 ui.set_max_height(limit);
                 egui::ScrollArea::vertical().max_height(limit).show(ui, add);
@@ -56,7 +56,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
     let Some(def) = c.content.0.level(level).cloned() else { return };
     let n = def.intro.len();
     let idx = c.ui.intro_line.min(n);
-    // Enter advances the story (next line, then "C'est parti !").
+    // Entrée fait avancer l'histoire (réplique suivante, puis « C'est parti ! »).
     let enter = ctx.input(|i| i.key_pressed(egui::Key::Enter));
     modal(ctx, "intro", 680.0, |ui| {
         ui.label(RichText::new(format!("{} — NIVEAU {}/12", def.subtitle.to_uppercase(), level)).font(pixel(11.0)).color(MUTED));
@@ -105,7 +105,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
 fn event(ctx: &egui::Context, c: &mut Ctx) {
     let Some(def) = c.game.0.events.pending_def(&c.content.0).cloned() else { return };
     let boss = c.game.0.events.pending.as_ref().is_some_and(|p| p.boss);
-    // Keys 1-4 pick a choice.
+    // Les touches 1-4 choisissent une option.
     let keys = [egui::Key::Num1, egui::Key::Num2, egui::Key::Num3, egui::Key::Num4];
     let key_choice = ctx.input(|i| keys.iter().position(|k| i.key_pressed(*k)));
     modal(ctx, "event", 640.0, |ui| {

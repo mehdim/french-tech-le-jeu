@@ -1,10 +1,10 @@
-//! FRENCH TECH TYCOON — Bevy presentation layer.
+//! FRENCH TECH TYCOON — couche de présentation Bevy.
 //!
-//! The simulation lives in `game-core` (pure Rust, deterministic). This crate
-//! renders it: an isometric pixel-art office, animated employees, an egui
-//! management interface, audio, saves and menus.
+//! La simulation vit dans `game-core` (Rust pur, déterministe). Cette crate
+//! l'affiche : un bureau isométrique en pixel art, des salariés animés, une interface
+//! de gestion egui, l'audio, les sauvegardes et les menus.
 
-// Bevy systems routinely take many parameters and nested query types.
+// Les systèmes Bevy prennent couramment beaucoup de paramètres et des types de requêtes imbriqués.
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod animation;
@@ -57,7 +57,7 @@ fn main() {
         DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "French Tech Tycoon — From France Travail to Unicorn".into(),
+                    title: "French Tech Tycoon — De France Travail à la licorne".into(),
                     resolution: WindowResolution::from((1280u32, 720u32)),
                     canvas: Some("#game-canvas".into()),
                     fit_canvas_to_parent: true,

@@ -1,4 +1,4 @@
-//! Balancing parameters loader (`assets/data/balancing.ron`).
+//! Chargement des paramètres d'équilibrage (`assets/data/balancing.ron`).
 
 use crate::ContentError;
 use game_core::balancing::Balancing;

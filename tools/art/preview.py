@@ -1,4 +1,4 @@
-"""Compose an office scene from the generated pieces (art iteration aid)."""
+"""Compose une scène de bureau à partir des éléments générés (aide à l'itération graphique)."""
 import sys
 from pixlib import *
 import gen_tiles as T

@@ -1,12 +1,12 @@
 //! # game-core
 //!
-//! Deterministic, engine-agnostic simulation of VERIDIX, a French AI startup.
-//! No Bevy, no browser APIs: this crate runs identically on web, desktop and
-//! mobile, and in headless tests.
+//! Simulation déterministe et indépendante du moteur de VERIDIX, une startup française d'IA.
+//! Ni Bevy ni API navigateur : cette crate tourne à l'identique sur le web, le desktop et
+//! le mobile, ainsi que dans les tests sans affichage.
 //!
-//! * [`simulation::GameState`] is the single authoritative state.
-//! * [`simulation::Command`] is the only way to mutate it from outside.
-//! * [`content::Content`] holds static, data-driven definitions.
+//! * [`simulation::GameState`] est l'unique état de référence.
+//! * [`simulation::Command`] est le seul moyen de le modifier depuis l'extérieur.
+//! * [`content::Content`] contient les définitions statiques, issues des données.
 
 pub mod balancing;
 pub mod conditions;

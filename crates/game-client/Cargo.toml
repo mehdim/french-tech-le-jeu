@@ -1,6 +1,6 @@
 [package]
 name = "game-client"
-description = "French Tech Tycoon — Bevy presentation layer (office, HUD, menus, audio)."
+description = "French Tech Tycoon — couche de présentation Bevy (bureau, HUD, menus, audio)."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,8 +12,8 @@ path = "src/main.rs"
 
 [features]
 default = ["webgl2", "audio"]
-# Exactly one of `webgl2` / `webgpu` should be enabled for a browser build.
-# On native targets both are irrelevant (wgpu picks Vulkan/Metal/DX12).
+# Activer exactement une des deux, `webgl2` ou `webgpu`, pour un build navigateur.
+# En natif, les deux sont sans effet (wgpu choisit Vulkan/Metal/DX12).
 webgl2 = ["bevy/webgl2"]
 webgpu = ["bevy/webgpu"]
 audio = ["bevy/bevy_audio", "bevy/vorbis"]

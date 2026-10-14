@@ -1,4 +1,4 @@
-//! Integration tests for the simulation with real game content.
+//! Tests d'intégration de la simulation avec le vrai contenu du jeu.
 
 use game_content::autopilot;
 use game_core::employees::Assignment;
@@ -32,7 +32,7 @@ fn simulation_is_deterministic() {
     for _ in 0..300 {
         autopilot::step(&mut d, &c);
     }
-    assert_ne!(serde_json::to_string(&a).unwrap(), serde_json::to_string(&d).unwrap(), "different seeds should diverge");
+    assert_ne!(serde_json::to_string(&a).unwrap(), serde_json::to_string(&d).unwrap(), "des graines différentes doivent diverger");
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn save_roundtrip_continues_identically() {
         autopilot::step(&mut s, &c);
     }
     let data = to_save_string(&s, "test");
-    let mut loaded = from_save_string(&data, &c).expect("save loads");
+    let mut loaded = from_save_string(&data, &c).expect("la sauvegarde se charge");
     for _ in 0..150 {
         autopilot::step(&mut s, &c);
         autopilot::step(&mut loaded, &c);
@@ -56,7 +56,7 @@ fn corrupt_and_incompatible_saves_are_rejected() {
     let c = content();
     let s = GameState::new(&c, 5);
     let data = to_save_string(&s, "test");
-    // Flip a value inside the checksummed state.
+    // Modifie une valeur dans l'état protégé par la somme de contrôle.
     let mut env: serde_json::Value = serde_json::from_str(&data).unwrap();
     let state = env["state"].as_str().unwrap().replacen("\"day\":0", "\"day\":7", 1);
     env["state"] = serde_json::Value::String(state);
@@ -72,12 +72,12 @@ fn corrupt_and_incompatible_saves_are_rejected() {
 fn the_simulation_pauses_for_intro_and_events() {
     let c = content();
     let mut s = GameState::new(&c, 1);
-    assert!(!s.tick(&c), "intro must block the clock");
+    assert!(!s.tick(&c), "l'intro doit bloquer l'horloge");
     skip_intro(&mut s, &c);
     assert!(s.tick(&c));
     s.fire_event(&c, "kubernetes", false);
     let day = s.day;
-    assert!(!s.tick(&c), "pending event must block the clock");
+    assert!(!s.tick(&c), "un événement en attente doit bloquer l'horloge");
     assert_eq!(s.day, day);
 }
 
@@ -86,7 +86,7 @@ fn event_choices_have_real_consequences() {
     let c = content();
     let mut s = GameState::new(&c, 1);
     skip_intro(&mut s, &c);
-    // Kubernetes: keep it -> higher hosting, more resilience.
+    // Kubernetes : on le garde -> hébergement plus cher, plus de résilience.
     s.fire_event(&c, "kubernetes", false);
     let hosting = s.product.hosting_extra;
     let resilience = s.product.resilience;
@@ -94,11 +94,11 @@ fn event_choices_have_real_consequences() {
     assert!(s.product.hosting_extra > hosting);
     assert!(s.product.resilience > resilience);
     assert!(s.flags.contains("k8s"));
-    // Intern incident, ignored: a delayed consequence is scheduled.
+    // Incident du stagiaire, ignoré : une conséquence différée est programmée.
     s.fire_event(&c, "intern_api_key", false);
     s.apply(&c, Command::ResolveEvent { choice: 1 }).unwrap();
     assert_eq!(s.events.delayed.len(), 1);
-    // A choice with unmet requirements is refused.
+    // Un choix dont les conditions ne sont pas remplies est refusé.
     s.finance.cash = 1_000.0;
     s.fire_event(&c, "linkedin_influencer", false);
     assert!(s.apply(&c, Command::ResolveEvent { choice: 0 }).is_err());
@@ -109,10 +109,10 @@ fn event_choices_have_real_consequences() {
 fn reckless_hiring_leads_to_bankruptcy() {
     let c = content();
     let mut s = GameState::new(&c, 3);
-    // Jump to level 2 conditions: recruitment unlocked.
+    // Saut aux conditions du niveau 2 : le recrutement est débloqué.
     s.campaign.unlocks.insert("recruitment".into());
     skip_intro(&mut s, &c);
-    // Hire every ESN consultant we can find, do nothing else.
+    // Recruter tous les consultants d'ESN disponibles, et ne rien faire d'autre.
     for _ in 0..400 {
         if s.campaign.phase == Phase::Bankrupt {
             break;
@@ -132,7 +132,7 @@ fn reckless_hiring_leads_to_bankruptcy() {
         }
         s.tick(&c);
     }
-    assert_eq!(s.campaign.phase, Phase::Bankrupt, "cash {}", s.finance.cash);
+    assert_eq!(s.campaign.phase, Phase::Bankrupt, "trésorerie {}", s.finance.cash);
 }
 
 #[test]
@@ -146,7 +146,7 @@ fn growth_without_retention_is_punished() {
     let inp = s.funnel_inputs(&c);
     let seg = s.market.seg(Segment::Smb).clone();
     let poor = game_core::customers::churn_rate(&c, Segment::Smb, &seg, &inp);
-    // Better product, retention features and support staff lower churn.
+    // Un meilleur produit, des fonctionnalités de rétention et du support font baisser le churn.
     s.product.feature_score = 70.0;
     s.product.model_accuracy = 88.0;
     s.product.fpr = 2.0;
@@ -154,8 +154,8 @@ fn growth_without_retention_is_punished() {
     s.last_work.ops = 6.0;
     let inp = s.funnel_inputs(&c);
     let good = game_core::customers::churn_rate(&c, Segment::Smb, &seg, &inp);
-    assert!(poor > good * 2.0, "poor {poor} vs good {good}");
-    // Raising prices raises churn.
+    assert!(poor > good * 2.0, "mauvais {poor} contre bon {good}");
+    // Augmenter les prix augmente le churn.
     let mut pricey = seg.clone();
     pricey.price *= 2.0;
     assert!(game_core::customers::churn_rate(&c, Segment::Smb, &pricey, &inp) > good);
@@ -168,7 +168,7 @@ fn tasks_progress_with_assigned_staff_and_ship() {
     skip_intro(&mut s, &c);
     s.apply(&c, Command::StartTask { task: "mvp_text".into(), approach: Approach::Standard }).unwrap();
     let inst = s.tasks[0].instance;
-    // Nobody assigned: no progress.
+    // Personne d'affecté : aucune progression.
     for _ in 0..5 {
         s.tick(&c);
         while s.events.pending.is_some() {
@@ -210,7 +210,7 @@ fn quick_approach_creates_more_debt_than_clean() {
     };
     let (quick_debt, quick_days) = run(Approach::Quick);
     let (clean_debt, clean_days) = run(Approach::Clean);
-    assert!(quick_debt > clean_debt, "quick {quick_debt} clean {clean_debt}");
+    assert!(quick_debt > clean_debt, "vite fait {quick_debt} propre {clean_debt}");
     assert!(quick_days < clean_days);
 }
 
@@ -219,15 +219,15 @@ fn office_placement_rules() {
     let c = content();
     let mut s = GameState::new(&c, 2);
     let o = &mut s.office;
-    // Out of bounds, overlap, door, unreachable.
+    // Hors des murs, chevauchement, porte, inaccessible.
     assert!(o.can_place(&c, "plant", -1, 0, false, None).is_err());
     let (dx, dy) = game_core::office::door(c.office(0).unwrap());
     assert_eq!(o.can_place(&c, "plant", dx, dy, false, None), Err(game_core::office::PlaceError::BlocksDoor));
     let first = o.items[0].clone();
     assert_eq!(o.can_place(&c, "plant", first.x, first.y, false, None), Err(game_core::office::PlaceError::Overlap));
-    let spot = o.find_spot(&c, "plant").expect("free spot");
+    let spot = o.find_spot(&c, "plant").expect("emplacement libre");
     assert!(o.place(&c, "plant", spot.0, spot.1, spot.2).is_ok());
-    // Placing furniture is locked until level 2.
+    // Le placement de mobilier est verrouillé jusqu'au niveau 2.
     assert!(s.apply(&c, Command::PlaceFurniture { item: "plant".into(), x: 0, y: 2, rotated: false }).is_err());
 }
 
@@ -236,8 +236,8 @@ fn walls_of_furniture_cannot_trap_seats() {
     let c = content();
     let s = GameState::new(&c, 2);
     let mut o = s.office.clone();
-    // Fill the apartment with plants until no spot remains: every item must
-    // stay reachable from the door.
+    // Remplir l'appartement de plantes jusqu'à ce qu'il n'y ait plus de place : chaque objet
+    // doit rester accessible depuis la porte.
     while let Some((x, y, r)) = o.find_spot(&c, "plant") {
         o.place(&c, "plant", x, y, r).unwrap();
     }
@@ -287,7 +287,7 @@ fn grants_take_paperwork_and_time() {
     let mut s = GameState::new(&c, 21);
     skip_intro(&mut s, &c);
     s.apply(&c, Command::StartApplication { program: "france_travail".into() }).unwrap();
-    // Without anyone on admin, nothing moves.
+    // Sans personne sur l'administratif, rien n'avance.
     for _ in 0..5 {
         s.tick(&c);
         while s.events.pending.is_some() {
@@ -333,17 +333,17 @@ fn level_one_can_be_completed_by_hand() {
         }
         s.tick(&c);
     }
-    assert_eq!(s.campaign.phase, Phase::LevelComplete, "day {} quests {:?}", s.day, s.campaign.quests_done);
+    assert_eq!(s.campaign.phase, Phase::LevelComplete, "jour {} objectifs {:?}", s.day, s.campaign.quests_done);
 }
 
-/// The headline balancing guarantee: a scripted player using only
-/// player commands completes all twelve levels.
+/// La garantie d'équilibrage principale : un joueur scripté qui n'utilise que
+/// les commandes du joueur termine les douze niveaux.
 #[test]
 fn autopilot_completes_the_campaign() {
     let c = content();
     for seed in [1u64, 2, 3] {
         let s = autopilot::play_campaign(&c, seed, 2000);
-        assert_eq!(s.campaign.phase, Phase::Victory, "seed {seed}: stuck at level {} day {}", s.campaign.level, s.day);
+        assert_eq!(s.campaign.phase, Phase::Victory, "graine {seed} : bloqué au niveau {} jour {}", s.campaign.level, s.day);
         assert_eq!(s.campaign.results.len(), 12);
         assert!(s.campaign.ending.is_some());
     }
@@ -353,8 +353,8 @@ fn autopilot_completes_the_campaign() {
 fn every_ending_is_reachable_in_principle() {
     let c = content();
     let mut s = autopilot::play_campaign(&c, 1, 2000);
-    // Rewind the final decision and check each choice's requirements are
-    // satisfiable by plausible end-game states.
+    // On revient sur la décision finale et on vérifie que les conditions de chaque choix
+    // sont atteignables par des états de fin de partie plausibles.
     s.campaign.phase = Phase::Playing;
     s.flags.retain(|f| !f.starts_with("ending_") && f != "final_choice");
     s.reputation = 70.0;
@@ -362,6 +362,6 @@ fn every_ending_is_reachable_in_principle() {
     s.fire_event(&c, "final_decision", true);
     let def = s.events.pending_def(&c).unwrap().clone();
     let allowed: Vec<bool> = (0..def.choices.len()).map(|i| s.choice_allowed(&c, i)).collect();
-    // Unicorn, acquisition and commons are open; profitable depends on burn.
+    // Licorne, acquisition et communs sont ouverts ; « rentable » dépend du burn.
     assert!(allowed[0] && allowed[2] && allowed[3], "{allowed:?}");
 }

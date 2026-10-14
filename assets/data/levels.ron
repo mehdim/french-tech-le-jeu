@@ -1,5 +1,5 @@
-// The twelve-level campaign. Quests: Reach = latches once true;
-// Maintain = must hold when every other quest is done.
+// La campagne en douze niveaux. Objectifs : Reach = acquis une fois atteint ;
+// Maintain = doit être vrai quand tous les autres objectifs sont remplis.
 [
     (
         id: 1, title: "France Travail Simulator", subtitle: "Niveau 1",

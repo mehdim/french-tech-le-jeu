@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Split each dist/pkg-*/ftt_bg.wasm into parts of at most $MB MiB, for static
-# hosts with a per-file size cap. The loader joins them (parts.json).
+# Découpe chaque dist/pkg-*/ftt_bg.wasm en morceaux d'au plus $MB Mio, pour les
+# hébergeurs statiques qui limitent la taille par fichier. Le chargeur les réassemble (parts.json).
 #   tools/split-wasm.sh dist 12
 set -euo pipefail
 DIST="${1:-dist}"; MB="${2:-12}"
