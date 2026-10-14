@@ -85,6 +85,12 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
         let Some(e) = c.game.0.employee(id).cloned() else { continue };
         let selected = c.ui.inspect_employee == Some(id);
         let frame = if selected { card().stroke(egui::Stroke::new(1.5, GREEN)) } else { card() };
+        // Clic sur la carte enregistré AVANT son contenu (rectangle de l'image
+        // précédente) : dans egui, le dernier élément enregistré gagne le clic,
+        // donc le sélecteur d'affectation dessiné ensuite reste prioritaire.
+        let card_id = ui.id().with(("carte_salarie", id));
+        let prev_rect = ui.ctx().data(|d| d.get_temp::<egui::Rect>(card_id));
+        let card_click = prev_rect.map(|r| ui.interact(r, card_id, egui::Sense::click()));
         let resp = frame
             .show(ui, |ui| {
                 ui.set_width(ui.available_width());
@@ -108,7 +114,8 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
                 });
             })
             .response;
-        if resp.interact(egui::Sense::click()).clicked() {
+        ui.ctx().data_mut(|d| d.insert_temp(card_id, resp.rect));
+        if card_click.is_some_and(|r| r.clicked()) {
             c.ui.inspect_employee = Some(id);
             c.selection.employee = Some(id);
         }
