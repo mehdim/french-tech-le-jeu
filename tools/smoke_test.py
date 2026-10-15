@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test de fumée navigateur pour le build web de French Tech Tycoon.
+"""Test de fumée navigateur pour le build web d'A la French (le jeu).
 
     python tools/smoke_test.py dist [--renderer auto|webgl2|webgpu] [--shots DOSSIER]
 

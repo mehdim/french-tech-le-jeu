@@ -1,6 +1,6 @@
 [package]
 name = "game-client"
-description = "French Tech Tycoon — couche de présentation Bevy (bureau, HUD, menus, audio)."
+description = "A la French (le jeu) — couche de présentation Bevy (bureau, HUD, menus, audio)."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

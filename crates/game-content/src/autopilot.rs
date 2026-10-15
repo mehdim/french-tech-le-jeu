@@ -78,6 +78,7 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
         Effect::Resilience(v) => v * 30.0,
         Effect::RentMonthly(v) => -v / 100.0,
         Effect::PriceAll(f) => f * 10.0,
+        Effect::ChooseMentor(_) => 1.0,
         Effect::FounderProductivity(f) => (f - 1.0) * 60.0,
         Effect::Modifier { kind, value, days } => {
             use game_core::types::ModKind::*;
@@ -149,7 +150,20 @@ pub fn step(s: &mut GameState, c: &Content) -> bool {
     true
 }
 
+/// Consulte chaque mentor dès qu'il est disponible (le joueur scripté écoute ses mentors).
+fn consult_mentors(s: &mut GameState, c: &Content) {
+    if s.mentors.main.is_none() {
+        let _ = s.apply(c, Command::ChooseMentor { mentor: "steeve".into() });
+    }
+    for m in &c.mentors {
+        if s.mentor_wait(m) == 0 && s.mentor_advice(m).is_some() {
+            let _ = s.apply(c, Command::ConsultMentor { mentor: m.id.clone() });
+        }
+    }
+}
+
 fn manage(s: &mut GameState, c: &Content) {
+    consult_mentors(s, c);
     let level = s.campaign.level;
     let cash = s.finance.cash;
     let burn = s.metrics.net_burn.max(1.0);

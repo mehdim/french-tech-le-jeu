@@ -156,6 +156,9 @@ impl GameState {
                 label: label.clone(),
             }),
             Effect::TriggerEvent(id) => self.fire_event(content, id, true),
+            Effect::ChooseMentor(id) => {
+                let _ = self.choose_mentor(content, id);
+            }
             Effect::Resilience(v) => {
                 self.product.resilience = (self.product.resilience + v).clamp(0.0, 0.8)
             }

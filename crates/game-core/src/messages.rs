@@ -19,6 +19,8 @@ pub enum Tone {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Msg {
     Text(String),
+    MentorChosen { mentor: String },
+    MentorAdvice { mentor: String, text: String },
     Hired { name: String, role: Role },
     Resigned { name: String },
     Fired { name: String, severance: f64 },

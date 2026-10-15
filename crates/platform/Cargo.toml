@@ -1,6 +1,6 @@
 [package]
 name = "platform"
-description = "French Tech Tycoon — adaptateurs de plateforme (stockage des sauvegardes, horloge, environnement)."
+description = "A la French (le jeu) — adaptateurs de plateforme (stockage des sauvegardes, horloge, environnement)."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

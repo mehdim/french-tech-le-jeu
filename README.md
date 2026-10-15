@@ -1,4 +1,6 @@
-# French Tech Tycoon — De France Travail à la licorne
+# A la French — le jeu
+
+*De France Travail à la licorne*
 
 > « La France est une startup nation. À vous de payer l'URSSAF. »
 
@@ -12,13 +14,17 @@ Bpifrance, business angels de l'ère du Minitel, une série A pitchée sur
 PowerPoint, achats publics, une facture GPU qui explose, et un choix final :
 **licorne, entreprise rentable, rachat ou communs open source**.
 
-Écrit en Rust avec Bevy, compilé en WebAssembly, joué dans le navigateur.
+Avec trois mentors venus tout droit du podcast **A la French** : Mehdi,
+Steeve et Jean-Baptiste. Écrit en Rust avec Bevy, compilé en WebAssembly,
+joué dans le navigateur.
 
 ![Écran titre](docs/screenshots/menu.png)
 
 | Niveau 2 — le garage | Niveau 6 — Station F | Niveau 12 — siège européen |
 |---|---|---|
 | ![Premier bureau avec le panneau Produit & R&D](docs/screenshots/garage.png) | ![Bureau en milieu de partie avec le panneau Équipe](docs/screenshots/station-f.png) | ![Siège en fin de partie avec le panneau Financement](docs/screenshots/hq.png) |
+
+![Le panneau Mentors, avec Mehdi en mentor principal, et les affiches du podcast au mur](docs/screenshots/mentors.png)
 
 ## Jouer
 
@@ -79,7 +85,7 @@ silencieusement en WebGL2.
 | Sélectionner un salarié ou un meuble | clic | |
 | Pause / reprise | ⏸ dans la barre du haut | `Espace` |
 | Vitesse 1× / 2× / 4× | barre du haut | `1` `2` `3`/`4` |
-| Panneaux : Équipe, Produit & R&D, Ventes, Financement, Finances, Bureau | onglets du panneau de droite | `E` `P` `V` `F` `C` `B` |
+| Panneaux : Équipe, Produit & R&D, Ventes, Financement, Finances, Bureau, Mentors | onglets du panneau de droite | `E` `P` `V` `F` `C` `B` `M` |
 | Pivoter un meuble pendant le placement | | `R` |
 | Poser plusieurs exemplaires | | maintenir `Maj` |
 | Annuler le placement | clic droit | `Échap` |
@@ -97,6 +103,24 @@ déplacement se fait donc avec ZQSD.
   conclusion humoristique. De « France Travail Simulator » à « Licorne ou
   Poney ? ».
 - **4 fins illustrées** : licorne, entreprise rentable, rachat, communs.
+- **Trois mentors d'A la French.** Au début de la campagne, vous choisissez
+  un mentor principal, dont le bonus est permanent :
+  - **Mehdi** (APIs, écosystème, business) : conversion grands comptes et ETI, réputation ;
+  - **Steeve** (infra, inférence, performance) : coût d'inférence et résilience ;
+  - **Jean-Baptiste** (open source, souveraineté, recrutement) : réputation, moral, rétention.
+
+  Pendant la partie, le panneau Mentors (`M`) permet de demander conseil à
+  chacun : il donne le premier de ses conseils qui correspond à votre situation
+  (pas d'API, dette technique, marge qui part en GPU, équipe épuisée…), avec un
+  effet réel, puis il faut attendre 7 semaines (mentor principal) ou 14 avant
+  de le solliciter à nouveau.
+- **Des clins d'œil au podcast** : événements tirés des épisodes (« Ils ont
+  effacé la prod ! », vibecoding, datacenters dans l'espace, les 7 business
+  models de l'open source, la soirée A la French, « pas une colonie
+  numérique », robots humanoïdes), affiches au mur (ON AIR, « Traitez avec. »,
+  « Le monde avec l'accent », systèmes critiques triplés…), un studio podcast à
+  trois micros, des cônes de chantier et un échiquier dans la boutique du
+  bureau. Le mentor principal laisse aussi un souvenir au mur.
 - **Une simulation quotidienne déterministe** (1 tick = 1 jour, mois comptables
   de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
@@ -118,7 +142,7 @@ déplacement se fait donc avec ZQSD.
   versements échelonnés ; allègements façon JEI/CIR ; quatre business angels
   récurrents (Jean-Michel Exit 2001, Patrick Blockchain, Bernard EBITDA,
   Sophie Term Sheet) ; des VC du seed à la série B, avec dilution.
-- **60 événements aléatoires pilotés par les données**, avec conditions,
+- **68 événements pilotés par les données** (52 aléatoires, 16 scénarisés), avec conditions,
   pondérations, délais de carence et choix aux effets immédiats et différés
   (l'incident Kubernetes, le dilemme du modèle open-weight chinois,
   l'influenceur LinkedIn, la clé d'API publiée par le stagiaire…).
@@ -338,7 +362,9 @@ Ceci est une satire. France Travail, Bpifrance, Station F et les autres
 institutions y apparaissent sous forme de mécaniques de jeu simplifiées et
 romancées. Rien ici n'est un conseil juridique, fiscal ou de financement, et
 toutes les personnes, tous les investisseurs et toutes les entreprises du jeu
-sont fictifs.
+sont fictifs, à l'exception des trois animateurs d'A la French, qui ont donné
+leur accord pour apparaître comme mentors. Leurs portraits sont des pixel arts
+stylisés (casque de podcast, accessoire lié à leur domaine).
 
 ## Licence
 

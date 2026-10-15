@@ -138,6 +138,16 @@ pub fn validate(content: &Content) -> Vec<String> {
         problems.push("le profil `founder` est obligatoire".into());
     }
 
+    for m in &content.mentors {
+        effects.extend(m.passive.iter().map(|x| (format!("mentor {}", m.id), x)));
+        for a in &m.advice {
+            conditions.extend(a.conditions.iter().map(|c| (format!("mentor {}", m.id), c)));
+            effects.extend(a.effects.iter().map(|x| (format!("mentor {}", m.id), x)));
+        }
+        if m.advice.last().is_none_or(|a| !a.conditions.is_empty()) {
+            problems.push(format!("mentor {} : le dernier conseil doit être sans condition", m.id));
+        }
+    }
     let mut flat = Vec::new();
     for (ctx, c) in &conditions {
         flat.clear();
@@ -167,6 +177,10 @@ pub fn validate(content: &Content) -> Vec<String> {
             Effect::Unlock(u)
                 if !unlocks.contains(u.as_str()) => {
                     problems.push(format!("{ctx} : déblocage inconnu `{u}`"));
+                }
+            Effect::ChooseMentor(m)
+                if content.mentor(m).is_none() => {
+                    problems.push(format!("{ctx} : mentor inconnu `{m}`"));
                 }
             _ => {}
         }

@@ -66,8 +66,8 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
                 ui.add(egui::Image::from_texture(egui::load::SizedTexture::new(id, egui::vec2(406.0, 228.0))).texture_options(egui::TextureOptions::NEAREST));
             }
             ui.add_space(6.0);
-            ui.label(RichText::new("FRENCH TECH").font(pixel(44.0)).color(GREEN));
-            ui.label(RichText::new("TYCOON").font(pixel(44.0)).color(OFFWHITE));
+            ui.label(RichText::new("A LA").font(pixel(44.0)).color(OFFWHITE));
+            ui.label(RichText::new("FRENCH").font(pixel(44.0)).color(GREEN));
             ui.label(RichText::new("De France Travail à la licorne").font(pixel(11.0)).color(LIGHTGRAY));
             ui.add_space(4.0);
             ui.add(egui::Label::new(RichText::new("« La France est une startup nation. À vous de payer l'URSSAF. »").italics().size(14.0).color(LIGHTGRAY)).wrap());
@@ -216,11 +216,12 @@ fn confirm_reset(ui: &mut egui::Ui, c: &mut Ctx) {
 fn credits_page(ui: &mut egui::Ui, c: &mut Ctx) {
     ui.label(RichText::new("Crédits").font(pixel(22.0)).color(GREEN));
     for (k, v) in [
-        ("Jeu", "French Tech Tycoon — un jeu de gestion satirique et affectueux sur l'écosystème tech français."),
+        ("Jeu", "A la French — un jeu de gestion satirique et affectueux sur l'écosystème tech français, inspiré du podcast du même nom."),
+        ("Mentors", "Mehdi, Steeve et Jean-Baptiste, qui refont le monde chaque semaine dans A la French… avec l'accent."),
         ("Moteur", "Rust, Bevy 0.19 (ECS, wgpu/WebGPU), egui pour les panneaux de gestion."),
         ("Graphismes", "Pixel art procédural original (tools/art), police « Veridix Pixel » originale, DejaVu Sans pour le texte."),
         ("Musique & sons", "Chiptune et électro synthétisés de zéro (tools/audio)."),
-        ("Inspirations", "Game Dev Tycoon, E-Startup 2, Two Point Hospital, Software Inc., Papers, Please — et l'esprit de l'émission À la French."),
+        ("Inspirations", "Game Dev Tycoon, E-Startup 2, Two Point Hospital, Software Inc., Papers, Please — et l'esprit du podcast A la French."),
         ("Avertissement", "Les dispositifs (France Travail, Bpifrance, CIR, JEI…) sont des versions satiriques et simplifiées. Ceci n'est ni un conseil juridique, ni un conseil financier, ni un business plan."),
         ("Merci", "Aux ingénieur·es, chercheur·ses et entrepreneur·es qui construisent vraiment des choses. Et à la machine à café."),
     ] {

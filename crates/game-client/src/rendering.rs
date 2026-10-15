@@ -67,6 +67,7 @@ fn signature(game: &Game) -> u64 {
         (it.uid, &it.item, it.x, it.y, it.rotated).hash(&mut h);
     }
     game.0.flags.contains("bpi_certificate").hash(&mut h);
+    game.0.mentors.main.hash(&mut h);
     h.finish()
 }
 
@@ -141,28 +142,54 @@ fn sync_office(
     if game.0.flags.contains("bpi_certificate") {
         decor.push("bpi_certificate".into());
     }
+    // Un souvenir du mentor principal accroché au mur, en bonne place.
+    for (flag, item) in [("mentor_mehdi", "poster_api"), ("mentor_steeve", "poster_gpu"), ("mentor_jb", "cone_shelf")] {
+        if game.0.flags.contains(flag) {
+            decor.insert(1.min(decor.len()), item.into());
+        }
+    }
+    // Une affiche d'environ 30 px couvre deux pans de mur (16 px de large chacun
+    // en projection) : on réserve tous les pans qu'elle couvre, pour que deux
+    // décorations ne se chevauchent jamais.
     let mut left_slots: Vec<i32> = (0..h).filter(|i| !is_window(*i)).collect();
     let mut right_slots: Vec<i32> = (1..w).filter(|i| !is_window(*i)).collect();
     left_slots.reverse();
     right_slots.reverse();
-    for (i, name) in decor.iter().enumerate() {
+    let mut next_free = [0i32, 0i32];
+    let mut placed = 0usize;
+    for name in decor.iter() {
         if name == "window_roofs" || name.starts_with("window") {
             continue;
         }
-        let on_left = i % 2 == 0;
-        let slot = if on_left { left_slots.pop() } else { right_slots.pop() };
-        let Some(slot) = slot else { continue };
-        let key = format!("{name}_{}", if on_left { "L" } else { "R" });
-        let Some(meta) = atlas.decor(&key) else { continue };
-        // Ancre : haut de la décoration, accrochée ~44 px au-dessus de la ligne du sol.
-        let base = if on_left {
-            iso(0.0, slot as f32 + 0.1)
-        } else {
-            iso(slot as f32 + 0.1, 0.0)
-        };
-        let z = 2.0 + i as f32 * 0.001;
-        let (spr, tf) = anchored_sprite(atlas.decor.clone(), meta, base + Vec2::new(0.0, 46.0), z, false);
-        commands.spawn((spr, tf, OfficeEntity));
+        // On alterne les murs ; si l'un est plein, on essaie l'autre.
+        let mut done = false;
+        for attempt in 0..2 {
+            let on_left = (placed + attempt).is_multiple_of(2);
+            let wall = if on_left { 0 } else { 1 };
+            let key = format!("{name}_{}", if on_left { "L" } else { "R" });
+            let Some(meta) = atlas.decor(&key) else { continue };
+            let cells = (meta.rect[2] / 16.0).ceil().max(1.0) as i32;
+            let slots = if on_left { &mut left_slots } else { &mut right_slots };
+            while slots.last().is_some_and(|s| *s < next_free[wall]) {
+                slots.pop();
+            }
+            let Some(slot) = slots.pop() else { continue };
+            next_free[wall] = slot + cells;
+            // Ancre : haut de la décoration, accrochée ~44 px au-dessus de la ligne du sol.
+            let base = if on_left {
+                iso(0.0, slot as f32 + 0.1)
+            } else {
+                iso(slot as f32 + 0.1, 0.0)
+            };
+            let z = 2.0 + placed as f32 * 0.001;
+            let (spr, tf) = anchored_sprite(atlas.decor.clone(), meta, base + Vec2::new(0.0, 46.0), z, false);
+            commands.spawn((spr, tf, OfficeEntity));
+            done = true;
+            break;
+        }
+        if done {
+            placed += 1;
+        }
     }
     // Mobilier.
     for it in &game.0.office.items {

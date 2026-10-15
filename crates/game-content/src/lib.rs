@@ -12,7 +12,7 @@ pub mod dialogue;
 pub mod levels;
 
 use game_core::content::{
-    ArchetypeDef, ChannelDef, Content, EndingDef, EventDef, FurnitureDef, InvestorDef, LevelDef, MarketDef,
+    MentorDef, ArchetypeDef, ChannelDef, Content, EndingDef, EventDef, FurnitureDef, InvestorDef, LevelDef, MarketDef,
     NamePools, OfficeTierDef, ProgramDef, RoundDef, SegmentDef, TaskDef,
 };
 use serde::Deserialize;
@@ -25,6 +25,7 @@ const MARKET: &str = include_str!("../../../assets/data/market.ron");
 const EVENTS: &str = include_str!("../../../assets/data/events.ron");
 const LEVELS: &str = include_str!("../../../assets/data/levels.ron");
 const BALANCING: &str = include_str!("../../../assets/data/balancing.ron");
+const MENTORS: &str = include_str!("../../../assets/data/mentors.ron");
 
 #[derive(Deserialize)]
 struct EmployeesFile {
@@ -78,8 +79,10 @@ pub fn try_load() -> Result<Content, ContentError> {
     let events: Vec<EventDef> = parse("events.ron", EVENTS)?;
     let levels: Vec<LevelDef> = parse("levels.ron", LEVELS)?;
     let balancing = balancing::parse(BALANCING)?;
+    let mentors: Vec<MentorDef> = parse("mentors.ron", MENTORS)?;
     let content = Content {
         balancing,
+        mentors,
         tasks,
         archetypes: emp.archetypes,
         channels: emp.channels,

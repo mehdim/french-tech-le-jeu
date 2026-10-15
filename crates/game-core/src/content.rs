@@ -446,10 +446,42 @@ pub struct SegmentDef {
     pub tam_per_market: f64,
 }
 
+/// Un conseil de mentor : donné quand toutes ses conditions sont remplies.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AdviceDef {
+    #[serde(default)]
+    pub conditions: Vec<Condition>,
+    /// La réplique du mentor.
+    pub text: String,
+    #[serde(default)]
+    pub effects: Vec<Effect>,
+}
+
+/// Un mentor d'A la French (voir `mentors.rs`).
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MentorDef {
+    pub id: String,
+    pub name: String,
+    /// Sous-titre affiché sous le nom.
+    pub title: String,
+    pub bio: String,
+    /// Domaines de compétence, affichés comme étiquettes.
+    pub skills: Vec<String>,
+    /// Bonus permanent appliqué une fois, s'il devient mentor principal.
+    pub passive: Vec<Effect>,
+    pub passive_label: String,
+    /// Jours entre deux consultations (mentor principal / autres).
+    pub cooldown_main: u32,
+    pub cooldown: u32,
+    /// Conseils, du plus prioritaire au plus général ; le dernier devrait toujours s'appliquer.
+    pub advice: Vec<AdviceDef>,
+}
+
 /// Tout le contenu statique du jeu.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Content {
     pub balancing: Balancing,
+    pub mentors: Vec<MentorDef>,
     pub tasks: Vec<TaskDef>,
     pub archetypes: Vec<ArchetypeDef>,
     pub channels: Vec<ChannelDef>,
@@ -490,6 +522,9 @@ impl Content {
     }
     pub fn round(&self, kind: RoundKind) -> Option<&RoundDef> {
         self.rounds.iter().find(|r| r.kind == kind)
+    }
+    pub fn mentor(&self, id: &str) -> Option<&MentorDef> {
+        self.mentors.iter().find(|m| m.id == id)
     }
     pub fn event(&self, id: &str) -> Option<&EventDef> {
         self.events.iter().find(|e| e.id == id)

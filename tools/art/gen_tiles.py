@@ -362,4 +362,85 @@ def decor_images():
     img = new(18, 23)
     shelf(img)
     out["bookshelf"] = img
+    # --- Clins d'œil au podcast A la French ---------------------------------
+    def onair(img):
+        rect(img, 1, 1, img.width - 2, img.height - 2, (150, 30, 34, 255))
+        tiny_text(img, 4, 3, "ON AIR", OFFWHITE)
+        rect(img, 2, 10, img.width - 4, 1, RED)
+    out["onair_sign"] = poster(30, 13, INK, onair)
+
+    def alf_cover(img):
+        tiny_text(img, 3, 3, "A LA", OFFWHITE)
+        tiny_text(img, 3, 9, "FRENCH", GREEN)
+        for k in range(3):
+            x = 5 + k * 7
+            rect(img, x, 17, 3, 4, METAL_L)
+            rect(img, x + 1, 21, 1, 2, METAL_M)
+            rect(img, x - 1, 23, 5, 1, METAL_D)
+    out["poster_alf"] = poster(28, 27, INK, alf_cover)
+
+    def triple(img):
+        # « Les systèmes critiques sont triplés » : trois serveurs identiques.
+        for k in range(3):
+            x = 3 + k * 7
+            rect(img, x, 3, 5, 10, GRAPHITE_2)
+            for yy in (5, 8, 11):
+                px(img, x + 1, yy, GREEN); rect(img, x + 2, yy, 2, 1, METAL_M)
+        tiny_text(img, 6, 16, "X3", GREEN)
+    out["poster_triple"] = poster(25, 23, INK, triple)
+
+    def engineers(img):
+        tiny_text(img, 2, 3, "TRAITEZ", INK)
+        tiny_text(img, 2, 9, "AVEC.", DEEP_GREEN)
+        rect(img, 2, 15, 27, 1, BLUE); rect(img, 2, 16, 27, 1, OFFWHITE); rect(img, 2, 17, 27, 1, RED)
+    out["poster_engineers"] = poster(31, 21, OFFWHITE, engineers)
+
+    def prod(img):
+        tiny_text(img, 2, 3, "ILS ONT", INK)
+        tiny_text(img, 2, 9, "EFFACE", INK)
+        tiny_text(img, 2, 15, "LA PROD", RED)
+    out["poster_prod"] = poster(31, 22, OFFWHITE, prod)
+
+    def accent(img):
+        tiny_text(img, 1, 3, "LE MONDE", OFFWHITE)
+        tiny_text(img, 1, 9, "AVEC", MIDGRAY)
+        tiny_text(img, 1, 15, "L'ACCENT", GREEN)
+    out["poster_accent"] = poster(33, 22, GRAPHITE, accent)
+
+    def space(img):
+        for (x, y) in [(3, 3), (20, 4), (8, 15), (22, 16), (14, 2), (4, 11)]:
+            px(img, x, y, OFFWHITE)
+        rect(img, 10, 7, 5, 5, METAL_L)
+        rect(img, 11, 8, 3, 3, GREEN_DIM)
+        rect(img, 3, 9, 6, 1, BLUE); rect(img, 3, 8, 6, 1, NAVY)
+        rect(img, 16, 9, 6, 1, BLUE); rect(img, 16, 8, 6, 1, NAVY)
+        tiny_text(img, 4, 14, "DC", GREEN)
+    out["poster_space"] = poster(25, 20, NAVY, space)
+
+    # Décors liés au mentor principal.
+    def api(img):
+        tiny_text(img, 3, 3, "API", GREEN)
+        tiny_text(img, 3, 9, "DAYS", OFFWHITE)
+        tiny_text(img, 3, 15, "PARIS", MIDGRAY)
+    out["poster_api"] = poster(24, 22, INK, api)
+
+    def gpu(img):
+        rect(img, 4, 3, 13, 9, GREEN_DIM)
+        rect(img, 6, 5, 9, 5, INK)
+        for k in range(5):
+            px(img, 5 + 2 * k, 2, METAL_L); px(img, 5 + 2 * k, 12, METAL_L)
+        tiny_text(img, 3, 15, "-50%", GREEN)
+    out["poster_gpu"] = poster(21, 22, GRAPHITE, gpu)
+
+    def cone_shelf(img):
+        rect(img, 0, img.height - 3, img.width, 2, WOOD_D)
+        rect(img, 1, img.height - 1, 2, 1, WOOD_DD); rect(img, img.width - 3, img.height - 1, 2, 1, WOOD_DD)
+        base = img.height - 4
+        for y in range(10):
+            w = 1 + y // 2
+            rect(img, 8 - w, base - 10 + y, 2 * w + 1, 1, ORANGE if y % 4 not in (2,) else OFFWHITE)
+        rect(img, 2, base, 13, 1, shade(ORANGE, 0.75))
+    img = new(17, 18)
+    cone_shelf(img)
+    out["cone_shelf"] = img
     return out

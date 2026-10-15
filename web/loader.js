@@ -1,4 +1,4 @@
-// French Tech Tycoon — chargeur pour le navigateur.
+// A la French (le jeu) — chargeur pour le navigateur.
 //
 // 1. Détecte WebAssembly et une API GPU utilisable (WebGPU d'abord, puis WebGL2).
 // 2. Télécharge le build wasm correspondant, avec une barre de progression.

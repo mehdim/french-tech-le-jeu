@@ -17,6 +17,7 @@ pub mod effects;
 pub mod employees;
 pub mod events;
 pub mod funding;
+pub mod mentors;
 pub mod messages;
 pub mod missions;
 pub mod office;

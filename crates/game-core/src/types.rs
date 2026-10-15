@@ -276,6 +276,8 @@ pub enum Effect {
     RentMonthly(f64),
     /// Multiplie le prix de chaque segment par (1 + f).
     PriceAll(f64),
+    /// Choisit le mentor principal (sans effet si un mentor est déjà choisi).
+    ChooseMentor(String),
 }
 
 /// Les niveaux d'ancienneté influent sur le salaire et la production.

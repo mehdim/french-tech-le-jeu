@@ -64,7 +64,15 @@ pub fn segment_name(s: Segment) -> &'static str {
 /// Clé du sprite de portrait pour un nom de personnage utilisé dans les dialogues.
 pub fn portrait_for(speaker: &str) -> &'static str {
     let s = speaker.to_lowercase();
-    if s.contains("vous") {
+    if s.contains("mehdi") {
+        "mehdi"
+    } else if s.contains("steeve") {
+        "steeve"
+    } else if s.contains("jean-baptiste") {
+        "jb"
+    } else if s.contains("a la french") || s.contains("à la french") {
+        "alf"
+    } else if s.contains("vous") {
         "founder"
     } else if s.contains("france travail") || s.contains("conseill") {
         "advisor"

@@ -300,7 +300,7 @@ fn help(ctx: &egui::Context, c: &mut Ctx) {
             for (k, v) in [
                 ("Espace", "Pause / reprise"),
                 ("1 · 2 · 3", "Vitesse 1× · 2× · 4×"),
-                ("E P V F C B", "Équipe · Produit · Ventes · Financement · Finances · Bureau"),
+                ("E P V F C B M", "Équipe · Produit · Ventes · Financement · Finances · Bureau · Mentors"),
                 ("Clic sur quelqu'un", "Fiche, affectation, salaire"),
                 ("Clic sur un objet", "Inspecter / déplacer (tableau blanc → R&D)"),
                 ("Glisser / ZQSD / flèches", "Déplacer la caméra"),

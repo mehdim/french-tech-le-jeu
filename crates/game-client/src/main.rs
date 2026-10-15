@@ -1,4 +1,4 @@
-//! FRENCH TECH TYCOON — couche de présentation Bevy.
+//! A LA FRENCH (le jeu) — couche de présentation Bevy.
 //!
 //! La simulation vit dans `game-core` (Rust pur, déterministe). Cette crate
 //! l'affiche : un bureau isométrique en pixel art, des salariés animés, une interface
@@ -57,7 +57,7 @@ fn main() {
         DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "French Tech Tycoon — De France Travail à la licorne".into(),
+                    title: "A la French — De France Travail à la licorne".into(),
                     resolution: WindowResolution::from((1280u32, 720u32)),
                     canvas: Some("#game-canvas".into()),
                     fit_canvas_to_parent: true,

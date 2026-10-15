@@ -93,6 +93,7 @@ fn dev_start(
             "funding" => Tab::Funding,
             "finance" => Tab::Finance,
             "office" => Tab::Office,
+            "mentors" => Tab::Mentors,
             _ => Tab::Team,
         };
     }

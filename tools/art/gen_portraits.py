@@ -126,6 +126,68 @@ def narrator():
     return img
 
 
+# --- Mentors d'A la French ---------------------------------------------------
+# Portraits stylisés : casque de podcast, fond noir/vert de l'émission, et un
+# accessoire par domaine (badge API, puce GPU, cône de chantier).
+ALF_BG = (16, 20, 18, 255)
+
+
+def podcast_frame(img):
+    """Liseré vert de l'émission et petit micro dans le coin."""
+    for i in range(P):
+        px(img, i, 0, GREEN_DIM); px(img, i, P - 1, GREEN_DIM)
+        px(img, 0, i, GREEN_DIM); px(img, P - 1, i, GREEN_DIM)
+    rect(img, 34, 3, 3, 4, METAL_L)
+    rect(img, 35, 7, 1, 3, METAL_M)
+    rect(img, 33, 10, 5, 1, METAL_M)
+
+
+def mentor(skin, hair, style, shirt, prop, extras=None):
+    e = {"headphones": True, "mouth": "smile"}
+    e.update(extras or {})
+    img = bust(ALF_BG, skin, hair, style, shirt, e)
+    if prop == "api":
+        # cordon de badge + badge « API »
+        for i in range(6):
+            px(img, 15 + i // 2, 29 + i, GREEN); px(img, 25 - i // 2, 29 + i, GREEN)
+        rect(img, 14, 33, 13, 7, OFFWHITE)
+        tiny_text(img, 15, 34, "API", DEEP_GREEN)
+    elif prop == "gpu":
+        # puce GPU épinglée sur le sweat
+        rect(img, 24, 32, 7, 6, GREEN_DIM)
+        rect(img, 25, 33, 5, 4, INK)
+        px(img, 27, 34, GREEN); px(img, 28, 35, GREEN)
+        for k in range(3):
+            px(img, 25 + 2 * k, 31, METAL_L); px(img, 25 + 2 * k, 38, METAL_L)
+    elif prop == "cone":
+        # petit cône de chantier orange à bandes blanches
+        for y in range(6):
+            w = 1 + y // 2
+            rect(img, 27 - w, 31 + y, 2 * w + 1, 1, ORANGE)
+        rect(img, 25, 33, 5, 1, OFFWHITE)
+        rect(img, 24, 35, 7, 1, OFFWHITE)
+        rect(img, 23, 37, 9, 1, shade(ORANGE, 0.8))
+    podcast_frame(img)
+    return img
+
+
+def alf_logo():
+    """Portrait générique de l'émission : le titre et trois micros."""
+    img = new(P, P)
+    rect(img, 0, 0, P, P, ALF_BG)
+    podcast_frame(img)
+    tiny_text(img, 4, 6, "A LA", OFFWHITE)
+    tiny_text(img, 4, 13, "FRENCH", GREEN)
+    for k in range(3):
+        x = 7 + k * 10
+        rect(img, x, 24, 4, 6, METAL_L)
+        rect(img, x + 1, 25, 2, 4, METAL_M)
+        rect(img, x + 1, 30, 2, 3, METAL_D)
+        rect(img, x - 1, 33, 6, 1, METAL_D)
+    return img
+
+
+
 def portraits():
     S, H = SKINS, HAIRS
     return {
@@ -142,6 +204,10 @@ def portraits():
         "official": bust((50, 70, 130, 255), S[0], H[1], "slick", NAVY, {"sash": True, "collar": OFFWHITE, "mouth": "smile"}),
         "vc": bust((60, 120, 90, 255), S[1], H[1], "short", (110, 150, 220, 255), {"vest": (40, 50, 70, 255), "mouth": "grin"}),
         "generic": bust((90, 96, 90, 255), S[2], H[6], "short", ORANGE, {}),
+        "mehdi": mentor(S[2], H[0], "short", GRAPHITE_2, "api"),
+        "steeve": mentor(S[1], H[1], "slick", INK, "gpu"),
+        "jb": mentor(S[1], H[6], "short", NAVY, "cone"),
+        "alf": alf_logo(),
     }
 
 

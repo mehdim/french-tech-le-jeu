@@ -18,7 +18,7 @@ edition = "2024"
 # Bevy 0.19 exige rustc >= 1.95. Vérifié avec rustc 1.97.0.
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
-authors = ["French Tech Tycoon contributors"]
+authors = ["Contributeurs d'A la French"]
 
 [workspace.dependencies]
 game-core = { path = "crates/game-core" }

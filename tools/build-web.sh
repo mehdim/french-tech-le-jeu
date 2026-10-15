@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile la version navigateur de French Tech Tycoon dans ./dist
+# Compile la version navigateur d'A la French (le jeu) dans ./dist
 #
 #   tools/build-web.sh                   # les deux rendus (WebGPU + repli WebGL2)
 #   RENDERERS=webgl2 tools/build-web.sh  # un seul (itération plus rapide)

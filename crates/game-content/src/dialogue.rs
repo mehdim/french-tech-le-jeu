@@ -53,6 +53,8 @@ pub fn months(v: f64) -> String {
 pub fn format(msg: &Msg) -> String {
     match msg {
         Msg::Text(t) => t.clone(),
+        Msg::MentorChosen { mentor } => format!("{mentor} devient votre mentor principal."),
+        Msg::MentorAdvice { mentor, text } => format!("{mentor} : « {text} »"),
         Msg::Hired { name, role } => format!("{name} rejoint l'équipe ({}). Bienvenue ! 🎉", role_name(*role)),
         Msg::Resigned { name } => format!("{name} a démissionné. Le pot de départ est prévu jeudi."),
         Msg::Fired { name, severance } => {
@@ -192,6 +194,7 @@ pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
         Effect::PriceAll(f) => (format!("Prix {}", signed(f * 100.0, " %")), *f >= 0.0),
         Effect::Launch => ("Lancement commercial".into(), true),
         Effect::SetFlag(_) | Effect::ClearFlag(_) | Effect::TriggerEvent(_) | Effect::Unlock(_) => return None,
+        Effect::ChooseMentor(_) => ("Mentor principal".into(), true),
     })
 }
 

@@ -289,6 +289,76 @@ def doormat():
     return finish(img, o)
 
 
+# --- Clins d'œil au podcast A la French ---------------------------------------
+def podcast_studio():
+    """Table de podcast : trois micros sur pied, casques, lampe ON AIR."""
+    img, o = canvas(2, 1, 44)
+    table(img, o, 0, 0, 2, 1, 14, GRAPHITE_2, leg_col=METAL_D)
+    for k, gx in enumerate((0.45, 1.0, 1.55)):
+        base = iso_pt(o, gx, 0.45, 14)
+        rect(img, base[0], base[1] - 9, 1, 9, METAL_M)
+        rect(img, base[0] - 1, base[1] - 13, 3, 5, METAL_L)
+        rect(img, base[0], base[1] - 12, 1, 3, METAL_M)
+        h = iso_pt(o, gx, 0.8, 14)
+        rect(img, h[0] - 2, h[1] - 2, 5, 1, INK)
+        px(img, h[0] - 2, h[1] - 1, GREEN); px(img, h[0] + 2, h[1] - 1, GREEN)
+    lamp = iso_pt(o, 1.0, 0.1, 30)
+    rect(img, lamp[0] - 5, lamp[1] - 4, 11, 5, (150, 30, 34, 255))
+    rect(img, lamp[0] - 4, lamp[1] - 3, 9, 3, RED)
+    rect(img, lamp[0], lamp[1] + 1, 1, 6, METAL_D)
+    return finish(img, o)
+
+
+def vlc_cone():
+    """Cône de chantier orange à bandes blanches."""
+    img, o = canvas(1, 1, 30)
+    c = iso_pt(o, 0.5, 0.5, 0)
+    rect(img, c[0] - 7, c[1] - 2, 15, 3, shade(ORANGE, 0.7))
+    for y in range(20):
+        w = 1 + (y * 6) // 20
+        col = OFFWHITE if y in (6, 7, 8, 13, 14, 15) else ORANGE
+        rect(img, c[0] - w, c[1] - 22 + y, 2 * w + 1, 1, col)
+        px(img, c[0] + w, c[1] - 22 + y, shade(col, 0.8))
+    outline_alpha(img)
+    return finish(img, o)
+
+
+def humanoid_robot():
+    """Robot humanoïde de démonstration, debout."""
+    img, o = canvas(1, 1, 48)
+    c = iso_pt(o, 0.5, 0.5, 0)
+    x = c[0]
+    y = c[1]
+    rect(img, x - 4, y - 16, 3, 16, METAL_M)      # jambes
+    rect(img, x + 1, y - 16, 3, 16, METAL_D)
+    rect(img, x - 6, y - 30, 12, 15, METAL_L)    # torse
+    rect(img, x - 3, y - 26, 6, 4, INK)
+    px(img, x - 2, y - 25, GREEN); px(img, x, y - 24, GREEN); px(img, x + 2, y - 25, GREEN)
+    rect(img, x - 8, y - 29, 2, 12, METAL_M)     # bras
+    rect(img, x + 6, y - 29, 2, 12, METAL_D)
+    rect(img, x - 4, y - 38, 8, 8, METAL_L)      # tête
+    rect(img, x - 3, y - 35, 6, 2, INK)
+    px(img, x - 2, y - 35, GREEN); px(img, x + 1, y - 35, GREEN)
+    outline_alpha(img)
+    return finish(img, o)
+
+
+def chess_table():
+    """Guéridon avec un échiquier en pleine partie contre l'IA."""
+    img, o = canvas(1, 1, 30)
+    table(img, o, 0.1, 0.1, 0.8, 0.8, 13, WOOD_D)
+    for i in range(4):
+        for j in range(4):
+            a = iso_pt(o, 0.2 + i * 0.15, 0.2 + j * 0.15, 13)
+            col = OFFWHITE if (i + j) % 2 == 0 else INK
+            rect(img, a[0] - 1, a[1] - 1, 3, 2, col)
+    k = iso_pt(o, 0.35, 0.4, 13)
+    rect(img, k[0], k[1] - 5, 1, 4, OFFWHITE); px(img, k[0], k[1] - 6, OFFWHITE)
+    q = iso_pt(o, 0.65, 0.6, 13)
+    rect(img, q[0], q[1] - 5, 1, 4, INK); px(img, q[0], q[1] - 6, GREEN)
+    return finish(img, o)
+
+
 FURNITURE = {
     "desk": desk,
     "workstation": workstation,
@@ -306,4 +376,8 @@ FURNITURE = {
     "arcade": arcade,
     "bookshelf_item": bookshelf_item,
     "doormat": doormat,
+    "podcast_studio": podcast_studio,
+    "vlc_cone": vlc_cone,
+    "humanoid_robot": humanoid_robot,
+    "chess_table": chess_table,
 }

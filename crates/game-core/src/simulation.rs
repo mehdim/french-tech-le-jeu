@@ -80,6 +80,9 @@ pub struct GameState {
     /// Production de l'équipe le dernier jour travaillé (pour les explications de l'interface).
     #[serde(default)]
     pub last_work: WorkSummary,
+    /// Mentors d'A la French (absent des anciennes sauvegardes : valeur par défaut).
+    #[serde(default)]
+    pub mentors: crate::mentors::MentorState,
     #[serde(skip)]
     pub metrics: Metrics,
     #[serde(skip)]
@@ -113,6 +116,8 @@ pub enum Command {
     ResolveEvent { choice: usize },
     DismissIntro,
     AdvanceLevel,
+    ChooseMentor { mentor: String },
+    ConsultMentor { mentor: String },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -214,6 +219,7 @@ impl GameState {
             week_new: 0,
             week_churn: 0,
             last_work: WorkSummary::default(),
+            mentors: Default::default(),
             metrics: Metrics::default(),
             cues: Vec::new(),
         };
@@ -1823,6 +1829,8 @@ impl GameState {
                 }
                 Ok(())
             }
+            Command::ChooseMentor { mentor } => self.choose_mentor(content, &mentor),
+            Command::ConsultMentor { mentor } => self.consult_mentor(content, &mentor),
             Command::DismissIntro => {
                 self.campaign.intro_pending = false;
                 Ok(())

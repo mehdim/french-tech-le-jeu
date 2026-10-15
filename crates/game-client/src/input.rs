@@ -196,6 +196,9 @@ fn shortcuts(
         (KeyCode::KeyF, Tab::Funding),
         (KeyCode::KeyC, Tab::Finance),
         (KeyCode::KeyB, Tab::Office),
+        // M : sur un clavier AZERTY, la touche M est à la place du « ; » QWERTY.
+        (KeyCode::KeyM, Tab::Mentors),
+        (KeyCode::Semicolon, Tab::Mentors),
     ];
     for (k, t) in tabs {
         if keys.just_pressed(k) {

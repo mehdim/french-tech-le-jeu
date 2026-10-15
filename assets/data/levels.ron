@@ -24,6 +24,7 @@
         unlocks: ["product_dev", "france_travail"],
         unlock_text: ["Développement produit", "Accompagnement France Travail"],
         boss_event: "page4", boss_trigger: Day(4),
+        start_effects: [TriggerEvent("mentors_intro")],
         failure_risk: "Trésorerie à zéro : retour au CDI.",
         outro: [
             (speaker: "Narrateur", text: "Trois bêta-testeurs : un lycée de Montreuil, une journaliste pigiste et votre ancienne prof de philo."),

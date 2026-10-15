@@ -8,6 +8,7 @@ mod feed;
 mod finance;
 mod funding;
 mod hud;
+mod mentors;
 mod menu;
 mod office;
 mod product;
@@ -36,6 +37,7 @@ pub enum Tab {
     Funding,
     Finance,
     Office,
+    Mentors,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -310,6 +312,7 @@ fn right_panel(ui: &mut egui::Ui, c: &mut Ctx) {
             (Tab::Funding, "🏦 Financement", "F", true),
             (Tab::Finance, "📊 Finances", "C", true),
             (Tab::Office, "🏢 Bureau", "B", true),
+            (Tab::Mentors, "🎙 Mentors", "M", true),
         ];
         for (tab, label, key, enabled) in tabs {
             let selected = c.ui.tab == tab;
@@ -333,5 +336,6 @@ fn right_panel(ui: &mut egui::Ui, c: &mut Ctx) {
         Tab::Funding => funding::show(ui, c),
         Tab::Finance => finance::show(ui, c),
         Tab::Office => office::show(ui, c),
+        Tab::Mentors => mentors::show(ui, c),
     });
 }

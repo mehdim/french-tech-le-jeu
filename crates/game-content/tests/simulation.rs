@@ -12,9 +12,13 @@ fn content() -> game_core::Content {
     game_content::load()
 }
 
+/// Passe l'intro du niveau 1, puis choisit le premier mentor proposé.
 fn skip_intro(s: &mut GameState, c: &game_core::Content) {
     if s.campaign.intro_pending {
         s.apply(c, Command::DismissIntro).unwrap();
+    }
+    if s.events.pending.as_ref().is_some_and(|p| p.event_id == "mentors_intro") {
+        s.apply(c, Command::ResolveEvent { choice: 0 }).unwrap();
     }
 }
 
@@ -365,3 +369,56 @@ fn every_ending_is_reachable_in_principle() {
     // Licorne, acquisition et communs sont ouverts ; « rentable » dépend du burn.
     assert!(allowed[0] && allowed[2] && allowed[3], "{allowed:?}");
 }
+
+#[test]
+fn mentor_choice_opens_the_campaign_and_applies_once() {
+    let c = content();
+    let mut s = GameState::new(&c, 3);
+    s.apply(&c, Command::DismissIntro).unwrap();
+    let pending = s.events.pending.as_ref().map(|p| p.event_id.clone());
+    assert_eq!(pending.as_deref(), Some("mentors_intro"), "le choix du mentor ouvre la campagne");
+    let cost = s.product.inference_cost_per_k;
+    // Choix 1 = Steeve : coût d'inférence -12 %.
+    s.apply(&c, Command::ResolveEvent { choice: 1 }).unwrap();
+    assert_eq!(s.mentors.main.as_deref(), Some("steeve"));
+    assert!(s.flags.contains("mentor_steeve"));
+    assert!((s.product.inference_cost_per_k - cost * 0.88).abs() < 1e-9);
+    // Un seul mentor principal : le bonus ne se cumule pas.
+    assert!(s.apply(&c, Command::ChooseMentor { mentor: "jb".into() }).is_err());
+    assert!((s.product.inference_cost_per_k - cost * 0.88).abs() < 1e-9);
+}
+
+#[test]
+fn mentor_advice_depends_on_the_situation_and_has_a_cooldown() {
+    let c = content();
+    let mut s = GameState::new(&c, 4);
+    skip_intro(&mut s, &c); // mentor principal : Mehdi (choix 0)
+    let mehdi = c.mentor("mehdi").unwrap().clone();
+    let jb = c.mentor("jb").unwrap().clone();
+    // Sans produit ni équipe, Mehdi n'a que son conseil général.
+    let general = s.mentor_advice(&mehdi).unwrap().text.clone();
+    assert_eq!(general, mehdi.advice.last().unwrap().text);
+    // Une fois le MVP livré sans API, son conseil change.
+    s.product.shipped.insert("mvp_text".into());
+    let specific = s.mentor_advice(&mehdi).unwrap().text.clone();
+    assert_ne!(specific, general);
+    s.apply(&c, Command::ConsultMentor { mentor: "mehdi".into() }).unwrap();
+    assert_eq!(s.mentors.last_advice.get("mehdi"), Some(&specific));
+    // Délai : 49 jours pour le mentor principal, 98 pour les autres.
+    assert!(s.apply(&c, Command::ConsultMentor { mentor: "mehdi".into() }).is_err());
+    assert_eq!(s.mentor_wait(&mehdi), mehdi.cooldown_main);
+    s.apply(&c, Command::ConsultMentor { mentor: "jb".into() }).unwrap();
+    assert_eq!(s.mentor_wait(&jb), jb.cooldown);
+    assert!(mehdi.cooldown_main < jb.cooldown);
+}
+
+#[test]
+fn saves_from_before_the_mentors_still_load() {
+    let c = content();
+    let s = GameState::new(&c, 5);
+    let mut v = serde_json::to_value(&s).unwrap();
+    v.as_object_mut().unwrap().remove("mentors");
+    let old: GameState = serde_json::from_value(v).expect("une ancienne sauvegarde sans mentors se charge");
+    assert!(old.mentors.main.is_none());
+}
+
