@@ -1,4 +1,8 @@
 //! Musique et effets sonores. Tout l'audio est généré par `tools/audio/gen_audio.py`.
+//!
+//! Musique : des airs traditionnels français revisités en 8-bit. Le menu boucle sur
+//! « Au clair de la lune » ; au bureau, une playlist enchaîne « Frère Jacques »,
+//! « Ah ! vous dirai-je, maman » et « La Marseillaise ».
 
 use crate::saves::Settings;
 use crate::sim::Cues;
@@ -9,7 +13,7 @@ use game_core::messages::Cue;
 
 #[derive(Resource)]
 struct Sounds {
-    music_office: Handle<AudioSource>,
+    music_office: Vec<Handle<AudioSource>>,
     music_menu: Handle<AudioSource>,
     cash: Handle<AudioSource>,
     alert: Handle<AudioSource>,
@@ -48,10 +52,13 @@ impl Plugin for GameAudioPlugin {
     }
 }
 
+/// Nombre de morceaux de la playlist du bureau (`music_office_1.ogg`, `_2`, …).
+const OFFICE_TRACKS: usize = 3;
+
 fn load(mut commands: Commands, server: Res<AssetServer>) {
     let l = |n: &str| server.load(format!("audio/{n}.ogg"));
     commands.insert_resource(Sounds {
-        music_office: l("music_office"),
+        music_office: (1..=OFFICE_TRACKS).map(|i| l(&format!("music_office_{i}"))).collect(),
         music_menu: l("music_menu"),
         cash: l("sfx_cash"),
         alert: l("sfx_alert"),
@@ -73,6 +80,7 @@ fn music(
     sounds: Option<Res<Sounds>>,
     settings: Res<Settings>,
     current: Query<(Entity, &Music)>,
+    mut next_office: Local<usize>,
 ) {
     let Some(sounds) = sounds else { return };
     let want = match state.get() {
@@ -85,10 +93,18 @@ fn music(
     for (e, _) in &current {
         commands.entity(e).despawn();
     }
-    let handle = if want == "menu" { sounds.music_menu.clone() } else { sounds.music_office.clone() };
+    // Le menu boucle ; au bureau, chaque morceau se retire à la fin (DESPAWN) et le
+    // suivant de la playlist prend le relais à l'image d'après.
+    let (handle, playback) = if want == "menu" {
+        (sounds.music_menu.clone(), PlaybackSettings::LOOP)
+    } else {
+        let h = sounds.music_office[*next_office % sounds.music_office.len()].clone();
+        *next_office += 1;
+        (h, PlaybackSettings::DESPAWN)
+    };
     commands.spawn((
         AudioPlayer::new(handle),
-        PlaybackSettings::LOOP.with_volume(Volume::Linear(settings.music_volume * 0.6)),
+        playback.with_volume(Volume::Linear(settings.music_volume * 0.6)),
         Music(want),
     ));
 }

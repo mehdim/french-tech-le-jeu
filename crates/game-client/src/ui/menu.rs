@@ -220,7 +220,7 @@ fn credits_page(ui: &mut egui::Ui, c: &mut Ctx) {
         ("Mentors", "Mehdi, Steeve et Jean-Baptiste, qui refont le monde chaque semaine dans A la French… avec l'accent."),
         ("Moteur", "Rust, Bevy 0.19 (ECS, wgpu/WebGPU), egui pour les panneaux de gestion."),
         ("Graphismes", "Pixel art procédural original (tools/art), police « Veridix Pixel » originale, DejaVu Sans pour le texte."),
-        ("Musique & sons", "Chiptune et électro synthétisés de zéro (tools/audio)."),
+        ("Musique & sons", "Airs traditionnels français revisités en 8-bit, synthétisés de zéro (tools/audio)."),
         ("Inspirations", "Game Dev Tycoon, E-Startup 2, Two Point Hospital, Software Inc., Papers, Please — et l'esprit du podcast A la French."),
         ("Avertissement", "Les dispositifs (France Travail, Bpifrance, CIR, JEI…) sont des versions satiriques et simplifiées. Ceci n'est ni un conseil juridique, ni un conseil financier, ni un business plan."),
         ("Merci", "Aux ingénieur·es, chercheur·ses et entrepreneur·es qui construisent vraiment des choses. Et à la machine à café."),
