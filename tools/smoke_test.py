@@ -166,7 +166,7 @@ def main() -> int:
         page.wait_for_timeout(500)
         page.screenshot(path=str(args.shots / "3-playing.png"))
 
-        # Attend la sauvegarde mensuelle auto (28 jours en 4x = ~11 s à pleine vitesse ;
+        # Attend la sauvegarde mensuelle auto (28 jours en 4x = ~22 s à pleine vitesse ;
         # le rendu logiciel est plus lent, on laisse donc beaucoup de temps).
         save = None
         deadline = time.time() + 150

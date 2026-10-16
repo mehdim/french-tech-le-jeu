@@ -121,8 +121,8 @@ déplacement se fait donc avec ZQSD.
   « Le monde avec l'accent », systèmes critiques triplés…), un studio podcast à
   trois micros, des cônes de chantier et un échiquier dans la boutique du
   bureau. Le mentor principal laisse aussi un souvenir au mur.
-- **Une simulation quotidienne déterministe** (1 tick = 1 jour, mois comptables
-  de 28 jours) : leads → conversion → abonnements → churn par segment de
+- **Une simulation quotidienne déterministe** (1 tick = 1 jour, soit 3,2 s
+  à la vitesse 1× ; mois comptables de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
   runway, CAC, LTV, ARPA, valorisation et table de capitalisation.
 - **Une R&D en IA qui ne « résout » jamais la détection** : 52 chantiers

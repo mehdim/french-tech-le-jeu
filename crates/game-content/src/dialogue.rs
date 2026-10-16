@@ -17,6 +17,22 @@ pub fn money(v: f64) -> String {
     if neg { format!("-{body}") } else { body }
 }
 
+/// Lit un montant saisi par le joueur : « 49 », « 1 250 € », « 2,5 k », « 1,2 M€ ».
+/// Accepte la virgule ou le point décimal et ignore espaces et symbole €.
+pub fn parse_money(text: &str) -> Option<f64> {
+    let t: String = text.chars().filter(|c| !c.is_whitespace() && *c != '€').collect();
+    let t = t.to_lowercase().replace(',', ".");
+    let (num, mult) = if let Some(n) = t.strip_suffix('k') {
+        (n, 1_000.0)
+    } else if let Some(n) = t.strip_suffix('m') {
+        (n, 1_000_000.0)
+    } else {
+        (t.as_str(), 1.0)
+    };
+    let v: f64 = num.parse().ok()?;
+    v.is_finite().then_some(v * mult)
+}
+
 /// Entier avec séparateurs de milliers à la française (espace insécable).
 pub fn thousands(v: f64) -> String {
     let n = v.round() as i64;
@@ -262,5 +278,23 @@ pub fn condition_text(c: &Condition) -> String {
         Condition::All(v) => v.iter().map(condition_text).collect::<Vec<_>>().join(" et "),
         Condition::Any(v) => v.iter().map(condition_text).collect::<Vec<_>>().join(" ou "),
         Condition::Not(c) => format!("pas ({})", condition_text(c)),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn typed_amounts_are_read_back() {
+        assert_eq!(parse_money("49"), Some(49.0));
+        assert_eq!(parse_money("1\u{a0}250 €"), Some(1250.0));
+        assert_eq!(parse_money("2,5 k"), Some(2500.0));
+        assert_eq!(parse_money("1,25 M€"), Some(1_250_000.0));
+        assert_eq!(parse_money("abc"), None);
+        // Ce que l'interface affiche se relit à l'identique.
+        for v in [49.0, 1250.0, 99_000.0] {
+            assert_eq!(parse_money(&money(v)), Some(v));
+        }
     }
 }

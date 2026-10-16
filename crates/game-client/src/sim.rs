@@ -18,7 +18,7 @@ pub struct GameContent(pub Content);
 pub struct Game(pub GameState);
 
 /// Secondes réelles par jour simulé à 1×.
-pub const SECONDS_PER_DAY: f32 = 1.6;
+pub const SECONDS_PER_DAY: f32 = 3.2;
 /// Jamais plus de ticks que cela en une seule image.
 const MAX_TICKS_PER_FRAME: u32 = 4;
 

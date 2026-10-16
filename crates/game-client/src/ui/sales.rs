@@ -31,12 +31,17 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
     muted(ui, format!("Capacité commerciale : {:.1} pts/jour · marketing : {:.1} pts/jour · ops/support : {:.1}", w.sales, w.marketing, w.ops));
 
     subheading(ui, "Budget marketing mensuel");
-    let mut budget = c.game.0.market.marketing_budget as f32;
-    let max = (c.game.0.metrics.mrr as f32 * 1.5).clamp(20_000.0, 400_000.0);
-    let r = ui.add(egui::Slider::new(&mut budget, 0.0..=max).step_by(100.0).custom_formatter(|v, _| dialogue::money(v)));
-    r.clone().on_hover_text("Publicité, salons, sponsoring. Rendement décroissant : chaque marché a un nombre limité de prospects, et les enchères montent avec la concurrence.");
-    if r.drag_stopped() || (r.changed() && !r.dragged()) {
-        c.run(Command::SetMarketingBudget(budget as f64));
+    let budget = c.game.0.market.marketing_budget;
+    let max = (c.game.0.metrics.mrr * 1.5).clamp(20_000.0, 400_000.0).max(budget);
+    if let Some(b) = money_slider(
+        ui,
+        "budget_marketing",
+        budget,
+        0.0..=max,
+        100.0,
+        "Publicité, salons, sponsoring. Rendement décroissant : chaque marché a un nombre limité de prospects, et les enchères montent avec la concurrence.",
+    ) {
+        c.run(Command::SetMarketingBudget(b));
     }
 
     let inp = c.game.0.funnel_inputs(&c.content.0);
@@ -83,21 +88,26 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
             }
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Prix/mois").size(12.5));
-                let mut price = s.price as f32;
-                let r = ui.add(
-                    egui::DragValue::new(&mut price)
-                        .range(def.min_price as f32..=def.max_price as f32)
-                        .speed(def.reference_price as f32 / 100.0)
-                        .custom_formatter(|v, _| dialogue::money(v)),
-                );
-                r.clone().on_hover_text(format!(
-                    "Référence marché : {}. Plus cher = moins de conversions et plus de churn ; une hausse de plus de 10 % fait partir des clients existants pendant un mois.",
+                let hover = format!(
+                    "Référence marché : {}. Plus cher = moins de conversions et plus de churn ; une hausse de plus de 10 % fait partir des clients existants pendant un mois. Glissez, ou cliquez sur le montant pour le saisir.",
                     dialogue::money(def.reference_price)
-                ));
-                if r.drag_stopped() || r.lost_focus() {
-                    c.run(Command::SetPrice { segment: seg, price: price as f64 });
+                );
+                let step = if def.reference_price >= 1000.0 { 10.0 } else { 1.0 };
+                if let Some(p) = money_slider(ui, ("prix", seg as u8), s.price, def.min_price..=def.max_price, step, &hover) {
+                    let p = (p / step).round() * step;
+                    if c.run(Command::SetPrice { segment: seg, price: p }) {
+                        c.toasts.push_good(format!("Nouveau prix {} : {}/mois", segment_name(seg), dialogue::money(p)));
+                    }
                 }
             });
+            if (s.price - def.reference_price).abs() > 0.5
+                && ui
+                    .small_button(format!("Revenir au prix du marché ({})", dialogue::money(def.reference_price)))
+                    .clicked()
+                && c.run(Command::SetPrice { segment: seg, price: def.reference_price })
+            {
+                c.toasts.push_good(format!("Prix {} : retour au prix du marché", segment_name(seg)));
+            }
         });
     }
 

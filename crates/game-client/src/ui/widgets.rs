@@ -226,6 +226,48 @@ pub fn placement_hint(ctx: &egui::Context, c: &Ctx, item: &str, rect: egui::Rect
         });
 }
 
+/// Curseur de montant qui ne modifie la partie qu'une fois le geste terminé.
+///
+/// La valeur affichée est relue dans l'état du jeu à chaque image : pendant un
+/// glisser ou une saisie, on la garde donc en mémoire egui, sinon chaque image
+/// repartirait de l'ancienne valeur. Renvoie `Some(valeur)` quand le joueur
+/// relâche le curseur, clique sur la piste, ou valide une saisie.
+pub fn money_slider(
+    ui: &mut egui::Ui,
+    id_salt: impl std::hash::Hash + std::fmt::Debug,
+    current: f64,
+    range: std::ops::RangeInclusive<f64>,
+    step: f64,
+    hover: &str,
+) -> Option<f64> {
+    let id = ui.id().with(("curseur_montant", id_salt));
+    let mut value = ui.data(|d| d.get_temp::<f64>(id)).unwrap_or(current);
+    // La piste prend la place disponible (moins la case du montant), et reste
+    // visible sur les cartes, dont le fond a la même couleur que la piste par défaut.
+    let r = ui
+        .scope(|ui| {
+            ui.spacing_mut().slider_width = (ui.available_width() - 90.0).clamp(80.0, 260.0);
+            ui.visuals_mut().widgets.inactive.bg_fill = NEAR_BLACK;
+            ui.add(
+                egui::Slider::new(&mut value, range)
+                    .step_by(step)
+                    .trailing_fill(true)
+                    .custom_formatter(|v, _| dialogue::money(v))
+                    .custom_parser(dialogue::parse_money),
+            )
+        })
+        .inner;
+    let r = r.on_hover_text(hover);
+    let editing = r.dragged() || r.has_focus();
+    let commit = r.drag_stopped() || r.lost_focus() || (r.changed() && !editing);
+    if editing && !commit {
+        ui.data_mut(|d| d.insert_temp(id, value));
+    } else {
+        ui.data_mut(|d| d.remove::<f64>(id));
+    }
+    (commit && (value - current).abs() > f64::EPSILON).then_some(value)
+}
+
 /// Un grand bouton cliquable en forme de carte, pour les menus et les choix d'événements.
 pub fn big_button(ui: &mut egui::Ui, text: &str, enabled: bool, width: f32) -> egui::Response {
     let b = egui::Button::new(RichText::new(text).font(pixel(22.0)).color(if enabled { OFFWHITE } else { MUTED }))
