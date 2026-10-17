@@ -1,4 +1,4 @@
-"""Airs traditionnels français revisités en 8-bit moderne, et effets sonores originaux.
+"""Thème d'« À la French » en 16 bits, airs traditionnels français en 8-bit, effets sonores.
 
 Synthèse en numpy pur -> WAV -> Ogg Vorbis (ffmpeg). Tout est généré
 de zéro : le jeu n'embarque aucun audio tiers.
@@ -286,11 +286,180 @@ def music_au_clair():
     return buf[: int(SR * beat * 4 * bars)]
 
 
+# --------------------------------------------------------------- thème À la French
+# Le thème du générique de la chaîne « À la French » (0:12 à 0:27), relevé à
+# l'oreille et au spectrogramme, puis réarrangé façon console 16 bits : lead
+# « guitare synthé » saw + pulse avec vibrato et écho, basse glissée façon 808,
+# nappes de cordes, arpèges, batterie échantillonnée. Ré mineur, 89 bpm.
+
+THEME_BPM = 89
+# Mélodie : (double croche de départ, note MIDI, durée en doubles croches), 6 mesures.
+THEME_LEAD = [
+    (0, 62, 1), (2, 62, 2), (4, 57, 1), (6, 57, 2), (9, 67, 1), (10, 65, 1), (11, 65, 1), (12, 67, 2), (14, 65, 2),
+    (16, 62, 1), (17, 62, 1), (18, 62, 2), (24, 65, 1), (25, 64, 1), (26, 64, 1), (27, 65, 2), (30, 62, 1), (31, 62, 1),
+    (32, 62, 1), (33, 62, 2), (41, 62, 1), (42, 62, 2),
+    (49, 65, 1), (50, 65, 1), (51, 67, 1), (52, 65, 2), (55, 62, 1), (56, 62, 1), (57, 62, 1), (58, 62, 2),
+    (61, 52, 1), (62, 53, 1), (63, 54, 1),
+    (64, 55, 1), (65, 62, 1), (66, 62, 1), (67, 67, 1), (68, 65, 1), (70, 67, 1), (71, 67, 1), (73, 60, 1), (74, 60, 1),
+    (76, 64, 1), (77, 62, 1), (78, 62, 1), (79, 62, 1),
+    (80, 62, 1), (81, 60, 1), (82, 60, 1), (84, 65, 1), (85, 64, 1), (86, 64, 1), (87, 62, 1), (88, 62, 1), (89, 62, 1),
+    (90, 62, 1), (91, 62, 1), (93, 62, 1), (94, 62, 2),
+]
+# Basse : (départ, durée, note de départ, note d'arrivée du glissando).
+THEME_BASS = [
+    (0, 8, 38, 38), (9, 7, 45, 48),
+    (16, 8, 38, 38), (24, 6, 41, 44), (30, 2, 40, 38),
+    (32, 4, 39, 38), (36, 2, 46, 47), (38, 3, 43, 40), (41, 7, 38, 38),
+    (48, 4, 36, 36), (52, 8, 38, 38), (60, 2, 38, 38), (62, 2, 51, 51),
+    (64, 2, 48, 48), (66, 4, 44, 41), (71, 3, 36, 36), (75, 2, 39, 39), (78, 2, 38, 38),
+    (80, 3, 38, 38), (83, 2, 41, 41), (85, 4, 38, 38), (90, 2, 36, 36), (92, 4, 38, 38),
+]
+# Un accord par demi-mesure (ré m, si♭, sol m, do…).
+DM, BB, GM, CM = [50, 53, 57, 62], [46, 50, 53, 58], [43, 46, 50, 55], [48, 52, 55, 60]
+THEME_CHORDS = [DM, BB, DM, GM, DM, DM, CM, DM, GM, CM, DM, DM]
+
+
+def onepole(x, alpha):
+    """Passe-bas à un pôle, vectorisé si scipy est là."""
+    try:
+        from scipy.signal import lfilter
+        return lfilter([alpha], [1, alpha - 1], x)
+    except ImportError:
+        return lowpass(x, alpha)
+
+
+def glide_osc(f0, f1, dur, shape="saw", vib=0.0):
+    """Oscillateur à fréquence glissante (portamento exponentiel) avec vibrato optionnel."""
+    t = t_axis(dur)
+    k = np.clip(t / max(dur * 0.8, 1e-3), 0, 1)
+    f = f0 * (f1 / f0) ** k
+    if vib:
+        f = f * (1 + vib * np.sin(2 * np.pi * 5.5 * t) * np.clip((t - 0.12) * 6, 0, 1))
+    ph = np.cumsum(f) / SR % 1
+    if shape == "saw":
+        return 2 * ph - 1
+    if shape == "pulse":
+        return np.where(ph < 0.3, 1.0, -1.0)
+    return 2 * np.abs(2 * ph - 1) - 1
+
+
+def echo(x, delay, fb, mix):
+    """Écho à réinjection, comme le tampon d'écho des consoles 16 bits."""
+    d = int(delay * SR)
+    y = x.copy()
+    for i in range(d, len(y), d):
+        j = min(len(y), i + d)
+        y[i:j] += fb * y[i - d:i - d + (j - i)]
+    return x + (y - x) * mix
+
+
+def lead16(n, dur, vol=0.36):
+    f = note(n)
+    sig = 0.55 * glide_osc(f, f, dur, "saw", vib=0.006) + 0.35 * glide_osc(f * 1.004, f * 1.004, dur, "pulse", vib=0.006)
+    sig += 0.2 * glide_osc(f * 2, f * 2, dur, "tri")
+    t = t_axis(dur)
+    sig = onepole(sig * (0.45 + 0.55 * np.exp(-t * 9)), 0.45)
+    return env(sig, 0.003, 0.12, 0.55, min(0.05, dur / 3)) * vol
+
+
+def bass16(n0, n1, dur, vol=0.3):
+    sig = glide_osc(note(n0), note(n1), dur, "saw") * 0.7 + glide_osc(note(n0) / 2, note(n1) / 2, dur, "tri") * 0.6
+    t = t_axis(dur)
+    sig = onepole(sig, 0.05 + 0.08 * np.exp(-t * 12).mean())
+    return env(sig, 0.004, 0.08, 0.75, 0.03) * vol
+
+
+def pad16(chord, dur, vol=0.06):
+    sig = sum(saw(note(n + 12), dur) + saw(note(n + 12) * 1.006, dur) for n in chord)
+    return env(onepole(sig, 0.035), 0.12, 0.2, 0.8, 0.15) * vol
+
+
+def kick16(vol=0.8):
+    t = t_axis(0.22)
+    return np.sin(2 * np.pi * (52 * t + 90 * (1 - np.exp(-t * 28)) / 28)) * np.exp(-t * 14) * vol
+
+
+def snare16(seed, vol=0.3):
+    t = t_axis(0.16)
+    body = np.sin(2 * np.pi * 185 * t) * np.exp(-t * 30)
+    n = onepole(noise(0.16, seed), 0.55) * np.exp(-t * 18)
+    return (body * 0.5 + n) * vol
+
+
+def hat16(seed, open_=False, vol=0.07):
+    dur = 0.18 if open_ else 0.04
+    t = t_axis(dur)
+    n = noise(dur, seed)
+    n = n - onepole(n, 0.6)   # passe-haut grossier
+    return n * np.exp(-t * (14 if open_ else 70)) * vol
+
+
+def music_alafrench():
+    """Le thème « À la French » en 16 bits : 2 passages de 6 mesures + 1 mesure de relance, en boucle."""
+    beat = 60 / THEME_BPM
+    s16 = beat / 4
+    bars = 13
+    total = bars * 16 * s16
+    lead_bus = np.zeros(int(SR * total) + SR)
+    buf = np.zeros_like(lead_bus)
+    for rep in range(2):
+        base = rep * 96 * s16
+        for st, n, ln in THEME_LEAD:
+            mix_into(lead_bus, lead16(n, ln * s16 * 0.92), base + st * s16)
+            if rep == 1:   # second passage : doublure à l'octave et tierce en pulse fine
+                mix_into(lead_bus, lead16(n + 12, ln * s16 * 0.92, 0.07), base + st * s16)
+        for st, ln, n0, n1 in THEME_BASS:
+            vol = 0.3 if (rep == 1 or st >= 9) else 0.18
+            mix_into(buf, bass16(n0, n1, ln * s16 * 0.95, vol), base + st * s16)
+        for h, chord in enumerate(THEME_CHORDS):
+            t0 = base + h * 8 * s16
+            mix_into(buf, pad16(chord, 8 * s16, 0.012 if rep == 0 else 0.022), t0)
+            if rep == 1:   # arpèges en doubles croches, typiques des consoles 16 bits
+                for k in range(8):
+                    n = chord[[0, 1, 2, 3, 2, 1, 2, 3][k]] + 12
+                    mix_into(lead_bus, pulse_note(n, s16 * 0.8, 0.125, 0.035, d=0.03, s=0.3), t0 + k * s16)
+        # Batterie : au premier passage, coups d'ouverture puis montée ; au second, groove complet.
+        for bar in range(6):
+            b0 = base + bar * 16 * s16
+            full = rep == 1 or bar >= 4
+            if rep == 0 and bar == 0:
+                for p in (0, 4, 5, 8, 12, 13):
+                    mix_into(buf, kick16(0.8), b0 + p * s16)
+                    mix_into(buf, snare16(p, 0.22), b0 + p * s16)
+                continue
+            if rep == 0 and bar == 3:
+                for p in range(8, 16):   # roulement de caisse claire
+                    mix_into(buf, snare16(100 + p, 0.08 + 0.025 * (p - 8)), b0 + p * s16)
+            if full:
+                for p in (0, 6, 8, 11, 14):
+                    mix_into(buf, kick16(0.75), b0 + p * s16)
+                for p in (4, 12):
+                    mix_into(buf, snare16(bar * 16 + p + rep * 7, 0.3), b0 + p * s16)
+                mix_into(buf, snare16(bar + 300, 0.06), b0 + 15 * s16)   # note fantôme
+            for p in range(0, 16, 2 if not full else 1):
+                mix_into(buf, hat16(bar * 16 + p, open_=(full and p % 8 == 6), vol=0.05 if p % 2 else 0.07),
+                         b0 + p * s16)
+    # Mesure de relance : basse en ré, roulement, retour au début de la boucle.
+    b0 = 12 * 16 * s16
+    mix_into(buf, bass16(38, 38, 8 * s16), b0)
+    mix_into(buf, bass16(45, 49, 8 * s16), b0 + 8 * s16)
+    mix_into(buf, pad16(DM, 16 * s16, 0.02), b0)
+    for p in range(16):
+        mix_into(buf, snare16(500 + p, 0.05 + 0.015 * p), b0 + p * s16)
+    mix_into(buf, kick16(0.8), b0)
+    out = buf + echo(lead_bus, 3 * s16, 0.35, 0.5)
+    # Couleur 16 bits : léger passe-bas (interpolation gaussienne) puis réduction à 32 kHz.
+    out = onepole(out, 0.6)
+    return out[: int(SR * total)]
+
+
+# Le thème sert au menu et ouvre la playlist du bureau ; les airs traditionnels suivent.
 MUSIC = {
-    "music_menu": music_au_clair,
+    "music_theme": music_alafrench,
     "music_office_1": music_frere_jacques,
     "music_office_2": music_ah_vous_dirai_je,
     "music_office_3": music_marseillaise,
+    "music_office_4": music_au_clair,
 }
 
 

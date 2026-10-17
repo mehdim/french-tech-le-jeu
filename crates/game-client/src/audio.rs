@@ -1,8 +1,9 @@
 //! Musique et effets sonores. Tout l'audio est généré par `tools/audio/gen_audio.py`.
 //!
-//! Musique : des airs traditionnels français revisités en 8-bit. Le menu boucle sur
-//! « Au clair de la lune » ; au bureau, une playlist enchaîne « Frère Jacques »,
-//! « Ah ! vous dirai-je, maman » et « La Marseillaise ».
+//! Musique : le thème du générique d'« À la French » en version 16 bits, qui boucle au
+//! menu et ouvre la playlist du bureau ; suivent des airs traditionnels français
+//! revisités en 8-bit (« Frère Jacques », « Ah ! vous dirai-je, maman »,
+//! « La Marseillaise », « Au clair de la lune »).
 
 use crate::saves::Settings;
 use crate::sim::Cues;
@@ -52,14 +53,17 @@ impl Plugin for GameAudioPlugin {
     }
 }
 
-/// Nombre de morceaux de la playlist du bureau (`music_office_1.ogg`, `_2`, …).
-const OFFICE_TRACKS: usize = 3;
+/// Nombre d'airs traditionnels de la playlist du bureau (`music_office_1.ogg`, `_2`, …).
+const OFFICE_TRACKS: usize = 4;
 
 fn load(mut commands: Commands, server: Res<AssetServer>) {
     let l = |n: &str| server.load(format!("audio/{n}.ogg"));
     commands.insert_resource(Sounds {
-        music_office: (1..=OFFICE_TRACKS).map(|i| l(&format!("music_office_{i}"))).collect(),
-        music_menu: l("music_menu"),
+        // Le thème ouvre la playlist du bureau, puis les airs traditionnels.
+        music_office: std::iter::once(l("music_theme"))
+            .chain((1..=OFFICE_TRACKS).map(|i| l(&format!("music_office_{i}"))))
+            .collect(),
+        music_menu: l("music_theme"),
         cash: l("sfx_cash"),
         alert: l("sfx_alert"),
         typing: l("sfx_typing"),

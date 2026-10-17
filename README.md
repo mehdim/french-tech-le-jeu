@@ -156,11 +156,13 @@ déplacement se fait donc avec ZQSD.
   de niveau, plus 3 emplacements manuels. Les sauvegardes portent une version
   de schéma et une somme de contrôle, les sauvegardes corrompues sont
   détectées, et la progression peut être réinitialisée.
-- **Audio original** : des airs traditionnels français revisités en 8-bit
-  moderne : « Au clair de la lune » en French touch au menu, et au bureau une
-  playlist qui enchaîne « Frère Jacques » en canon chiptune à quatre voix,
-  « Ah ! vous dirai-je, maman » et sa variation en arpèges, et « La Marseillaise »
-  en marche de console. Plus des effets sonores (caisse enregistreuse, alertes, financement, frappe au
+- **Musique** : le thème du générique d'*À la French* réarrangé en 16 bits
+  (lead synthé avec écho, basse glissée, nappes, arpèges, batterie), en boucle
+  au menu. Au bureau, une playlist enchaîne ce thème puis des airs traditionnels
+  français revisités en 8-bit : « Frère Jacques » en canon chiptune à quatre
+  voix, « Ah ! vous dirai-je, maman » et sa variation en arpèges,
+  « La Marseillaise » en marche de console et « Au clair de la lune » en
+  French touch. Plus des effets sonores (caisse enregistreuse, alertes, financement, frappe au
   clavier, machine à café, jingle de faillite). Réglages de volume et mode
   basse consommation à 30 FPS.
 
@@ -344,7 +346,8 @@ isométrique.
 ## Graphismes et audio
 
 Tous les éléments visuels et sonores sont originaux et générés par les scripts
-de `tools/`. Aucun graphisme, musique ou son tiers n'est inclus : les airs
+de `tools/`. Aucun graphisme, musique ou son tiers n'est inclus : le thème
+d'*À la French* (fourni par l'équipe de la chaîne) et les airs
 traditionnels (domaine public) sont réarrangés et synthétisés par
 `tools/audio/gen_audio.py`. La police du
 texte de l'interface est un sous-ensemble de DejaVu Sans (licence Bitstream
