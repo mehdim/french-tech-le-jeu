@@ -97,6 +97,11 @@ pub struct ArchetypeDef {
     pub day_rate: Option<f64>,
     #[serde(default)]
     pub quotes: Vec<String>,
+    /// Prénoms propres à ce profil (recrues à l'étranger) ; sinon la réserve commune.
+    #[serde(default)]
+    pub first_names: Vec<String>,
+    #[serde(default)]
+    pub last_names: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -120,6 +125,9 @@ pub struct ChannelDef {
     /// Prime versée à l'embauche (prime de cooptation).
     #[serde(default)]
     pub hire_bonus: f64,
+    /// Effets appliqués à chaque embauche par ce canal (compteur de recrues locales…).
+    #[serde(default)]
+    pub on_hire: Vec<Effect>,
     /// Multiplicateur de qualité sur les compétences tirées.
     #[serde(default = "one")]
     pub quality: f64,
@@ -259,6 +267,7 @@ pub enum RoundKind {
     Seed,
     SeriesA,
     SeriesB,
+    SeriesC,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -394,6 +403,18 @@ pub struct LevelDef {
     /// Niveau de bureau vers lequel l'histoire vous fait déménager au début de ce niveau (s'il est inférieur).
     #[serde(default)]
     pub min_office: Option<u32>,
+    /// Effectif minimum pour que le produit tienne la charge à ce niveau.
+    #[serde(default)]
+    pub staffing: Option<Staffing>,
+}
+
+/// Effectif minimum d'un niveau : en dessous, la dette, la dérive et la fatigue s'emballent.
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub struct Staffing {
+    /// Ingénieur·es à plein temps sur le développement ou l'infrastructure.
+    pub engineers: u32,
+    /// Salariés au total.
+    pub headcount: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -405,6 +426,12 @@ pub struct MarketDef {
     pub languages_required: u32,
     pub lead_mult: f64,
     pub description: String,
+    /// Déblocage nécessaire en plus de l'internationalisation (USA, Chine, monde).
+    #[serde(default)]
+    pub requires_unlock: Option<String>,
+    /// Coût mensuel d'une filiale sur place (bureaux, juristes, comptable local).
+    #[serde(default)]
+    pub monthly_cost: f64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

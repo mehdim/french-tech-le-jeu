@@ -152,7 +152,38 @@ def ending_acquisition():
     rect(img, 24, 74, 18, 8, WOOD_L)
     rect(img, 31, 70, 4, 4, METAL_L)
     outline_alpha(img)
-    tiny_text(img, 4, 4, "EARN-OUT: 4 ANS", NAVY)
+    tiny_text(img, 4, 4, "PAYE EN GPU", NAVY)
+    return img
+
+
+def ending_ipo():
+    img = new(160, 90)
+    sky(img, (230, 236, 244, 255), (250, 214, 160, 255), stars=False)
+    # façade néoclassique de la Bourse : fronton, colonnes, marches
+    for i in range(10):
+        for x in range(40 + i * 4, 120 - i * 4):
+            px(img, x, 22 - i // 2, (226, 214, 190, 255))
+    rect(img, 36, 24, 88, 4, (210, 198, 172, 255))
+    for cx in range(42, 122, 12):
+        rect(img, cx, 28, 5, 40, (236, 228, 208, 255))
+        rect(img, cx + 4, 28, 1, 40, (190, 178, 150, 255))
+    rect(img, 36, 68, 88, 3, (200, 188, 162, 255))
+    rect(img, 30, 71, 100, 3, (186, 174, 150, 255))
+    rect(img, 24, 74, 112, 3, (170, 160, 138, 255))
+    # bandeau de cotation lumineux
+    rect(img, 0, 79, 160, 11, (18, 22, 21, 255))
+    tiny_text(img, 4, 82, "VRDX +38%", GREEN)
+    tiny_text(img, 70, 82, "CAC +0,2%", OFFWHITE)
+    # flèche verte qui monte au-dessus du fronton
+    pts = [(10, 60), (30, 50), (48, 54), (70, 34), (96, 30), (124, 12), (150, 4)]
+    for a, b in zip(pts, pts[1:]):
+        line(img, a, b, GREEN); line(img, (a[0], a[1] + 1), (b[0], b[1] + 1), GREEN_DIM)
+    # la cloche
+    for y in range(6):
+        w = 2 + y // 2
+        rect(img, 76 - w, 32 + y, 2 * w + 1, 1, YELLOW)
+    px(img, 76, 39, ORANGE)
+    tiny_text(img, 4, 4, "INTRODUCTION EN BOURSE", NAVY)
     return img
 
 

@@ -20,10 +20,15 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
         }
         kv(ui, "  Inférence (COGS)", format!("-{}", money(rr.inference)), RED, "Coût des analyses : clients × usage × coût/1000 analyses.");
         kv(ui, "  Hébergement (COGS)", format!("-{}", money(rr.hosting)), RED, "Serveurs, stockage, base + coût par client.");
+        if rr.energy > 0.0 {
+            let help = format!("{} MWh par mois × {} €/MWh. Baissez l'énergie par analyse (chantiers « Sobriété »).",
+                dialogue::decimal(m.energy_mwh, 0), dialogue::decimal(game_core::economy::ENERGY_PRICE_PER_MWH, 0));
+            kv(ui, "  Électricité des datacenters (COGS)", format!("-{}", money(rr.energy)), RED, &help);
+        }
         kv(ui, "Marge brute", if m.mrr > 0.0 { dialogue::pct(m.gross_margin * 100.0) } else { "—".into() }, if m.gross_margin >= 0.7 { GREEN } else { ORANGE },
             "(MRR − COGS) / MRR.");
         kv(ui, "  Salaires chargés", format!("-{}", money(rr.payroll)), RED, "Brut + charges patronales (≈45 %, 20 % pour la R&D sous statut JEI).");
-        kv(ui, "  Loyer", format!("-{}", money(rr.rent)), RED, "");
+        kv(ui, "  Loyer", format!("-{}", money(rr.rent)), RED, "Bureaux, plus les filiales à l'étranger.");
         kv(ui, "  Marketing", format!("-{}", money(rr.marketing)), RED, "");
         kv(ui, "  Outils SaaS", format!("-{}", money(rr.tools)), RED, "Slack, Notion, Jira, Figma… par personne.");
         if rr.furniture > 0.0 {

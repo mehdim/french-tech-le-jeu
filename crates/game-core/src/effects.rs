@@ -156,6 +156,11 @@ impl GameState {
                 label: label.clone(),
             }),
             Effect::TriggerEvent(id) => self.fire_event(content, id, true),
+            Effect::Counter(key, n) => {
+                let v = self.counters.entry(key.clone()).or_insert(0);
+                *v = (*v as i64 + *n as i64).max(0) as u32;
+            }
+            Effect::EnergyMul(f) => self.product.energy_per_k *= f.max(0.01),
             Effect::ChooseMentor(id) => {
                 let _ = self.choose_mentor(content, id);
             }

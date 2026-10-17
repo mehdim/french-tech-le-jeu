@@ -9,10 +9,12 @@
 Un jeu de gestion satirique sur **VERIDIX**, une startup parisienne d'IA qui
 prétend détecter les contenus générés par IA (son premier modèle obtient 53 %
 sur son propre benchmark). Emmenez-la d'un appartement à deux laptops et d'un
-rendez-vous France Travail jusqu'à un siège européen. En chemin : dossiers
-Bpifrance, business angels de l'ère du Minitel, une série A pitchée sur
-PowerPoint, achats publics, une facture GPU qui explose, et un choix final :
-**licorne, entreprise rentable, rachat ou communs open source**.
+rendez-vous France Travail jusqu'à Davos. En chemin : dossiers Bpifrance,
+business angels de l'ère du Minitel, une série A pitchée sur PowerPoint,
+achats publics, une facture GPU qui explose, une filiale à San Francisco, des
+fabricants de modèles chinois, des chefs d'État à convaincre, des datacenters
+trop gourmands, et un choix final : **Série C, introduction en Bourse, rachat
+par NVIDIA, entreprise rentable ou communs open source**.
 
 Avec trois mentors venus tout droit du podcast **A la French** : Mehdi,
 Steeve et Jean-Baptiste. Écrit en Rust avec Bevy, compilé en WebAssembly,
@@ -98,11 +100,33 @@ déplacement se fait donc avec ZQSD.
 
 ## Contenu du jeu
 
-- **Une campagne de 12 niveaux**, chacun avec une introduction, 2 à 4
+- **Une campagne de 16 niveaux**, chacun avec une introduction, 2 à 5
   objectifs mesurables, un événement majeur unique, un déblocage et une
-  conclusion humoristique. De « France Travail Simulator » à « Licorne ou
-  Poney ? ».
-- **4 fins illustrées** : licorne, entreprise rentable, rachat, communs.
+  conclusion humoristique. De « France Travail Simulator » à « Sobriété ou
+  Surchauffe ». Les quatre derniers chapitres :
+  - **13 — Le Rêve Américain** : ouvrir une filiale à San Francisco (900 k€,
+    puis 90 k€/mois), recruter sur place, passer SOC 2… pendant que deux
+    anciens salariés lancent « Veridupe », un concurrent financé à 20 M$ ;
+  - **14 — La Grande Muraille des Tokens** : apprendre le mandarin, recruter
+    des commerciaux chinois, vendre un SDK de watermarking aux fabricants de
+    modèles chinois, et ne pas se faire espionner (clé USB en forme de panda) ;
+  - **15 — Davos, Mon Amour** : le fondateur part au Forum, reçoit cinq chefs
+    d'État et doit négocier politiques industrielles et investissements pour
+    éviter les lois taillées sur mesure contre Veridix ; puis préparer la
+    suite : Série C, IPO ou rendez-vous avec NVIDIA ;
+  - **16 — Sobriété ou Surchauffe** : Veridix a ses propres datacenters et
+    consomme trop d'électricité. Il faut diviser l'énergie par analyse par
+    deux, récupérer la chaleur, signer de l'électricité bas carbone, garder ses
+    marges… avant la décision finale.
+- **Un effectif minimum à partir du niveau 10** : 20 salariés dont
+  4 ingénieur·es à plein temps (développement ou infrastructure). En dessous,
+  la dette technique, la dérive et la fatigue s'emballent. Les chantiers de fin
+  de partie (SOC 2, région cloud américaine, copilote agentique, modèle de
+  fondation maison, préparation à l'IPO…) coûtent des centaines de milliers
+  d'euros et des mois d'ingénierie. Au niveau 11, Veridix s'installe d'office
+  au campus Station F si ce n'est pas déjà fait.
+- **5 fins illustrées** : licorne mondiale (Série C), introduction en
+  Bourse, rachat par NVIDIA, entreprise rentable, communs.
 - **Trois mentors d'A la French.** Au début de la campagne, vous choisissez
   un mentor principal, dont le bonus est permanent :
   - **Mehdi** (APIs, écosystème, business) : conversion grands comptes et ETI, réputation ;
@@ -125,7 +149,7 @@ déplacement se fait donc avec ZQSD.
   à la vitesse 1× ; mois comptables de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
   runway, CAC, LTV, ARPA, valorisation et table de capitalisation.
-- **Une R&D en IA qui ne « résout » jamais la détection** : 52 chantiers
+- **Une R&D en IA qui ne « résout » jamais la détection** : 70 chantiers
   produit, recherche, entreprise et pivot IA native, avec dépendances, points
   d'ingénierie et de recherche, coût, risque de dette technique et approche
   « vite fait » ou « propre ». La dérive des données et les nouveaux modèles
@@ -133,16 +157,17 @@ déplacement se fait donc avec ZQSD.
 - **Des salariés qui sont de vraies entités** : plus de 12 profils
   (Polytechnicien, dev de 42, évangéliste Rust, ex-GAFAM, consultant d'ESN,
   docteur·e en IA, growth hacker, PM fan de Jira…) avec compétences, moral,
-  fatigue, loyauté et traits de caractère. Recrutement via 7 canaux
+  fatigue, loyauté et traits de caractère. Recrutement via 11 canaux
   (LinkedIn, France Travail, grandes écoles, 42, open source, cabinets,
-  cooptation). Licencier coûte des indemnités et du moral.
+  cooptation, ESN, et sur place à San Francisco et à Shanghai, avec des
+  salaires… locaux). Licencier coûte des indemnités et du moral.
 - **L'écosystème français comme mécanique de jeu** : accompagnement France
   Travail, dispositifs Bpifrance satiriques (subventions, aide à
   l'innovation, prêts, deeptech, export) avec dossiers, paperasse, délais et
   versements échelonnés ; allègements façon JEI/CIR ; quatre business angels
   récurrents (Jean-Michel Exit 2001, Patrick Blockchain, Bernard EBITDA,
-  Sophie Term Sheet) ; des VC du seed à la série B, avec dilution.
-- **68 événements pilotés par les données** (52 aléatoires, 16 scénarisés), avec conditions,
+  Sophie Term Sheet) ; des VC du seed à la série C, avec dilution.
+- **98 événements pilotés par les données** (72 aléatoires, 26 scénarisés), avec conditions,
   pondérations, délais de carence et choix aux effets immédiats et différés
   (l'incident Kubernetes, le dilemme du modèle open-weight chinois,
   l'influenceur LinkedIn, la clé d'API publiée par le stagiaire…).
@@ -158,16 +183,14 @@ déplacement se fait donc avec ZQSD.
   détectées, et la progression peut être réinitialisée.
 - **Musique** : le thème du générique d'*À la French* réarrangé en 16 bits
   (lead synthé avec écho, basse glissée, nappes, arpèges, batterie), en boucle
-  au menu. Au bureau, une playlist enchaîne ce thème puis des airs traditionnels
-  français revisités en 8-bit : « Frère Jacques » en canon chiptune à quatre
-  voix, « Ah ! vous dirai-je, maman » et sa variation en arpèges,
-  « La Marseillaise » en marche de console et « Au clair de la lune » en
-  French touch. Plus des effets sonores (caisse enregistreuse, alertes, financement, frappe au
+  au menu. Au bureau, une playlist enchaîne ce thème, « La Marseillaise » en
+  marche de console 8-bit, et une gigue celtique originale en 16 bits (violon,
+  flûte irlandaise, bodhrán, harpe et bourdon). Plus des effets sonores (caisse enregistreuse, alertes, financement, frappe au
   clavier, machine à café, jingle de faillite). Réglages de volume et mode
   basse consommation à 30 FPS.
 
 Quelques répliques restent volontairement en anglais : le pitch d'un VC
-américain et le communiqué de presse du géant qui rachète Veridix.
+américain, les recrues de San Francisco et le communiqué de presse de NVIDIA.
 
 ## Compiler depuis les sources
 
@@ -193,7 +216,7 @@ Les tests de la simulation sont dans les crates en Rust pur (`game-core`,
 `game-content`, `platform`) et n'ont pas besoin de GPU. `cargo test` sans
 `--workspace` ne lance que ces crates et ne demande aucune bibliothèque
 système. La suite comprend un autopilote scripté qui joue **toute la campagne
-de 12 niveaux jusqu'à la victoire** sur plusieurs graines, ainsi que des tests
+de 16 niveaux jusqu'à la victoire** sur plusieurs graines, ainsi que des tests
 de déterminisme, d'aller-retour des sauvegardes, de rejet des sauvegardes
 corrompues, de faillite par recrutement imprudent, de churn qui punit la
 croissance sans rétention, de dette technique, de règles de placement du

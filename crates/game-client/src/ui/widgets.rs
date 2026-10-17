@@ -258,8 +258,11 @@ pub fn money_slider(
         })
         .inner;
     let r = r.on_hover_text(hover);
-    let editing = r.dragged() || r.has_focus();
-    let commit = r.drag_stopped() || r.lost_focus() || (r.changed() && !editing);
+    // Seule une action du joueur valide : au premier affichage, egui arrondit parfois la
+    // valeur au pas du curseur (56,12 € → 56 €) et signale un « changement » fantôme.
+    // Un clic sur la piste place la valeur à l'appui et la valide au relâchement.
+    let editing = r.dragged() || r.has_focus() || r.is_pointer_button_down_on();
+    let commit = r.drag_stopped() || r.lost_focus() || r.clicked();
     if editing && !commit {
         ui.data_mut(|d| d.insert_temp(id, value));
     } else {

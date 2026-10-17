@@ -164,11 +164,17 @@ pub struct RunRate {
     pub furniture: f64,
     pub loans: f64,
     pub other_income: f64,
+    /// Facture d'électricité des datacenters en propre (niveau 16).
+    #[serde(default)]
+    pub energy: f64,
 }
+
+/// Prix de l'électricité pour les datacenters en propre, en € par MWh.
+pub const ENERGY_PRICE_PER_MWH: f64 = 180.0;
 
 impl RunRate {
     pub fn cogs(&self) -> f64 {
-        self.inference + self.hosting
+        self.inference + self.hosting + self.energy
     }
     pub fn expenses(&self) -> f64 {
         self.payroll
@@ -176,6 +182,7 @@ impl RunRate {
             + self.marketing
             + self.hosting
             + self.inference
+            + self.energy
             + self.tools
             + self.furniture
             + self.loans
@@ -212,6 +219,9 @@ pub struct Metrics {
     pub employees: u32,
     pub inference_cost_per_k: f64,
     pub innovation_score: f64,
+    /// Énergie consommée par mois, en MWh.
+    #[serde(default)]
+    pub energy_mwh: f64,
 }
 
 pub fn safe_div(a: f64, b: f64) -> f64 {

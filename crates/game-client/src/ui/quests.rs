@@ -25,7 +25,8 @@ fn body(ui: &mut egui::Ui, c: &mut Ctx) {
     let level = c.game.0.campaign.level;
     let Some(def) = c.content.0.level(level) else { return };
     ui.horizontal(|ui| {
-        ui.label(RichText::new(format!("NIVEAU {level}/12")).font(pixel(11.0)).color(MUTED));
+        let total = c.content.0.levels.len();
+        ui.label(RichText::new(format!("NIVEAU {level}/{total}")).font(pixel(11.0)).color(MUTED));
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if ui.small_button("◂").on_hover_text("Masquer").clicked() {
                 c.ui.left_open = false;

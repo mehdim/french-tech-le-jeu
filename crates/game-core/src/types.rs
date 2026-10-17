@@ -201,6 +201,16 @@ pub enum Condition {
     NetBurnAtMost(f64),
     ValuationAtLeast(f64),
     OfficeTierAtLeast(u32),
+    /// Le marché (ou la filiale) est ouvert.
+    MarketOpened(String),
+    /// Un compteur d'histoire (recrues locales, accords d'État, contrats…) a atteint ce seuil.
+    CounterAtLeast(String, u32),
+    /// Ingénieur·es (backend, frontend, recherche, DevOps) affecté·es à plein temps
+    /// au développement ou à l'infrastructure.
+    EngineersFullTimeAtLeast(u32),
+    /// L'énergie consommée pour 1 000 analyses a baissé d'au moins cette fraction
+    /// par rapport au début du niveau.
+    EnergyReducedBy(f64),
     DayInLevelAtLeast(u32),
     LeadsAtLeast(f64),
     Launched,
@@ -278,6 +288,10 @@ pub enum Effect {
     PriceAll(f64),
     /// Choisit le mentor principal (sans effet si un mentor est déjà choisi).
     ChooseMentor(String),
+    /// Ajoute (ou retire) une valeur à un compteur d'histoire.
+    Counter(String, i32),
+    /// Multiplie durablement l'énergie consommée pour 1 000 analyses.
+    EnergyMul(f64),
 }
 
 /// Les niveaux d'ancienneté influent sur le salaire et la production.

@@ -43,6 +43,14 @@ pub struct ProductState {
     /// Croissance organique cumulée de l'usage (plafonnée).
     #[serde(default)]
     pub usage_creep: f64,
+    /// Énergie consommée pour 1 000 analyses, en kWh (calcul, refroidissement compris).
+    #[serde(default = "default_energy_per_k")]
+    pub energy_per_k: f64,
+}
+
+/// Valeur de départ (et des anciennes sauvegardes) de l'énergie par 1 000 analyses.
+pub fn default_energy_per_k() -> f64 {
+    4.0
 }
 
 impl ProductState {
@@ -65,6 +73,7 @@ impl ProductState {
             hosting_extra: 0.0,
             resilience: 0.0,
             usage_creep: 0.0,
+            energy_per_k: default_energy_per_k(),
         }
     }
 

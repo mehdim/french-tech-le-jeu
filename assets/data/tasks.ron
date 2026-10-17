@@ -350,6 +350,140 @@
         benefit: "Rétention +8-10 % partout, réputation +10.",
     ),
 
+    // ------------------------------------------------------ ÉTATS-UNIS (niv. 13)
+    (
+        id: "soc2", name: "Conformité SOC 2 Type II", category: Enterprise,
+        description: "Six mois d'observation par un auditeur de Boston, 140 contrôles, et une politique de mots de passe signée par chaque salarié, y compris le chat du bureau.",
+        eng: 1200.0, research: 0.0, cost: 180000.0, deps: ["audit_logs"], requires_unlock: Some("usa"),
+        effects: [ConversionBonus(Enterprise, 0.25), Retention(Enterprise, 0.08), Reputation(3.0)], debt: 2.0, meaningful: true,
+        benefit: "Indispensable aux acheteurs américains. Conversion grands comptes +25 %.",
+    ),
+    (
+        id: "us_region", name: "Région cloud américaine (us-east-1, évidemment)", category: Engineering,
+        description: "Les clients américains veulent leurs données aux États-Unis. Les clients européens veulent qu'elles n'y soient pas. Il faut donc tout dupliquer.",
+        eng: 1350.0, research: 0.0, cost: 250000.0, deps: ["sovereign_hosting"], requires_unlock: Some("usa"),
+        effects: [ConversionBonus(Enterprise, 0.15), ConversionBonus(Mid, 0.15), HostingMonthly(40000.0), Resilience(0.05)], debt: 5.0, risk: 0.15, meaningful: true,
+        benefit: "Conversion +15 % (ETI et grands comptes). +40 k€/mois d'hébergement.",
+    ),
+    (
+        id: "frontier_eval", name: "Évaluation continue des modèles frontière", category: AiResearch,
+        description: "Chaque nouveau modèle américain est testé le jour de sa sortie. Il en sort trois par semaine. L'équipe recherche ne dort plus, le cluster GPU non plus.",
+        eng: 900.0, research: 1950.0, cost: 400000.0, deps: ["hybrid"], requires_unlock: Some("usa"),
+        effects: [Accuracy(3.0), Robustness(0.12), DriftMul(0.4), HostingMonthly(25000.0)], debt: 3.0, meaningful: true,
+        benefit: "Précision +3, robustesse +12 %, dérive -60 %. +25 k€/mois de GPU.",
+    ),
+    (
+        id: "agent_copilot", name: "Copilote d'enquête agentique (IA native)", category: AiNative,
+        description: "Des agents qui enquêtent sur l'origine d'un document, interrogent des bases, écrivent le rapport et prennent rendez-vous avec le juriste. Ils consomment un datacenter au petit-déjeuner.",
+        eng: 1950.0, research: 1650.0, cost: 350000.0, deps: ["trust_platform"], requires_unlock: Some("usa"),
+        effects: [FeatureScore(12.0), ConversionBonus(Mid, 0.25), ConversionBonus(Enterprise, 0.20), PriceAll(0.08), UsageMul(1.35)], debt: 8.0, risk: 0.2, meaningful: true,
+        benefit: "Conversion +20-25 %, prix +8 %… et +35 % de calcul consommé.",
+    ),
+
+    // ----------------------------------------------------------- CHINE (niv. 14)
+    (
+        id: "zh_language", name: "Support du mandarin", category: AiResearch,
+        description: "Un tokenizer qui comprend les caractères, un corpus de 40 milliards de tokens, et trois linguistes qui débattent depuis six semaines d'un seul idéogramme.",
+        eng: 900.0, research: 1350.0, cost: 220000.0, deps: ["multilingual_2"], requires_unlock: Some("china"),
+        effects: [Languages(1), Accuracy(1.0)], debt: 3.0, meaningful: true,
+        benefit: "+1 langue (7 au total) : nécessaire pour la Chine et le reste du monde.",
+    ),
+    (
+        id: "watermark_sdk", name: "SDK de watermarking pour fabricants de modèles", category: AiResearch,
+        description: "Une signature invisible insérée directement dans la génération des modèles. Robuste aux paraphrases, aux traductions, et aux stagiaires qui copient-collent dans Word.",
+        eng: 1500.0, research: 2100.0, cost: 450000.0, deps: ["watermark"], requires_unlock: Some("china"),
+        effects: [Accuracy(2.0), Fpr(-0.5), Reputation(4.0)], debt: 4.0, meaningful: true,
+        benefit: "Ouvre les contrats avec les fabricants de modèles. Précision +2.",
+    ),
+    (
+        id: "oem_integration", name: "Intégration chez un fabricant de modèles", category: Enterprise,
+        description: "Une équipe part six semaines à Hangzhou intégrer le SDK dans un modèle de 400 milliards de paramètres. Elle revient avec un contrat, 4 kilos de plus et un nouveau mot de passe Wi-Fi.",
+        eng: 840.0, research: 480.0, cost: 180000.0, deps: ["watermark_sdk"], requires_unlock: Some("china"),
+        effects: [Counter("cn_oem", 1), AddCustomers(Enterprise, 12), Reputation(1.0)], debt: 3.0, repeatable: true, meaningful: true,
+        benefit: "+1 fabricant de modèles sous contrat (12 licences grands comptes).",
+    ),
+    (
+        id: "zero_trust", name: "Sécurité zero trust", category: Enterprise,
+        description: "Plus personne ne fait confiance à personne. Ni au réseau, ni au badge, ni à la machine à café connectée. Surtout pas à la machine à café connectée.",
+        eng: 975.0, research: 0.0, cost: 250000.0, deps: ["sso"], requires_unlock: Some("china"),
+        effects: [SetFlag("zero_trust"), Resilience(0.08), Reputation(2.0)], debt: 2.0, meaningful: true,
+        benefit: "Ferme la porte aux espions (et à la moitié des outils internes). Incidents -8 %.",
+    ),
+
+    // ----------------------------------------------------------- MONDE (niv. 15)
+    (
+        id: "policy_lab", name: "Cellule d'affaires publiques", category: Enterprise,
+        description: "Trois anciens conseillers ministériels, un tableur des parlements du monde, et une note de 80 pages expliquant pourquoi Veridix est « d'intérêt général ».",
+        eng: 160.0, research: 80.0, cost: 600000.0, requires_unlock: Some("world"),
+        effects: [Counter("targeted_laws", -1), Reputation(3.0)], debt: 0.0, meaningful: true,
+        benefit: "Fait abroger une loi ciblée. Réputation +3.",
+    ),
+    (
+        id: "multi_region", name: "Infrastructure multi-régions (Tokyo, Mumbai, São Paulo)", category: Engineering,
+        description: "Neuf régions, trois fuseaux d'astreinte, et un runbook traduit en six langues que personne ne lit dans aucune.",
+        eng: 1800.0, research: 0.0, cost: 600000.0, deps: ["us_region"], requires_unlock: Some("world"),
+        effects: [ConversionBonus(Smb, 0.15), ConversionBonus(Mid, 0.15), ConversionBonus(Enterprise, 0.10), Resilience(0.10), HostingMonthly(90000.0)], debt: 6.0, risk: 0.15, meaningful: true,
+        benefit: "Conversion +10-15 % partout, incidents -10 %. +90 k€/mois.",
+    ),
+    (
+        id: "ipo_readiness", name: "Préparation à l'IPO (audit, IFRS, contrôle interne)", category: Enterprise,
+        description: "Deux banques, quatre cabinets d'avocats, un commissaire aux comptes et 2 300 pages de prospectus, dont un paragraphe sur les risques liés à la canicule.",
+        eng: 900.0, research: 0.0, cost: 3500000.0, deps: ["soc2"], requires_unlock: Some("series_c"),
+        effects: [SetFlag("ipo_ready"), Reputation(5.0)], debt: 1.0, meaningful: true,
+        benefit: "Ouvre la voie à l'introduction en Bourse.",
+    ),
+    (
+        id: "foundation_detector", name: "Modèle de fondation de la détection", category: AiResearch,
+        description: "Entraîner son propre grand modèle, dédié à l'authenticité. 4 000 GPU pendant trois mois, et un post de blog intitulé « Pourquoi nous avons entraîné notre propre modèle ».",
+        eng: 1650.0, research: 3000.0, cost: 2500000.0, deps: ["frontier_eval"], requires_unlock: Some("world"),
+        effects: [Accuracy(4.0), Fpr(-1.0), Robustness(0.15), DriftMul(0.3), FeatureScore(8.0), Reputation(6.0)], debt: 4.0, risk: 0.15, meaningful: true,
+        benefit: "Précision +4, faux positifs -1, robustesse +15 %, réputation +6.",
+    ),
+
+    // -------------------------------------------------- SOBRIÉTÉ (niv. 16)
+    (
+        id: "liquid_cooling", name: "Refroidissement liquide des datacenters", category: Engineering,
+        description: "On plonge les serveurs dans un bain d'huile diélectrique. Ça ressemble à une friteuse géante. Ça consomme 20 % de moins.",
+        eng: 1680.0, research: 240.0, cost: 900000.0, requires_unlock: Some("green"),
+        effects: [EnergyMul(0.78), HostingMonthly(-10000.0)], debt: 3.0, risk: 0.1, meaningful: true,
+        benefit: "Énergie par analyse -22 %.",
+    ),
+    (
+        id: "model_pruning", name: "Élagage et distillation des modèles", category: AiResearch,
+        description: "On retire 60 % des poids du modèle. Il perd 0,3 point de précision et gagne une conscience écologique.",
+        eng: 1080.0, research: 2400.0, cost: 300000.0, requires_unlock: Some("green"),
+        effects: [EnergyMul(0.72), InferenceCostMul(0.85)], debt: 2.0, meaningful: true,
+        benefit: "Énergie par analyse -28 %, coût d'inférence -15 %.",
+    ),
+    (
+        id: "carbon_scheduler", name: "Calcul aux heures creuses et bas carbone", category: Engineering,
+        description: "Les analyses par lots attendent que le vent souffle en mer du Nord. Les clients ne voient rien, sauf les rapports qui arrivent à 3 h du matin.",
+        eng: 1320.0, research: 480.0, cost: 150000.0, requires_unlock: Some("green"),
+        effects: [EnergyMul(0.88), Reputation(2.0)], debt: 2.0, meaningful: true,
+        benefit: "Énergie par analyse -12 %, réputation +2.",
+    ),
+    (
+        id: "dc_consolidation", name: "Consolidation des datacenters", category: Engineering,
+        description: "Fermer le datacenter de démonstration du désert. Le climatiseur consommait plus que les serveurs.",
+        eng: 1920.0, research: 0.0, cost: 400000.0, requires_unlock: Some("green"),
+        effects: [EnergyMul(0.85), HostingMonthly(-40000.0)], debt: 4.0, risk: 0.15, meaningful: true,
+        benefit: "Énergie par analyse -15 %, hébergement -40 k€/mois.",
+    ),
+    (
+        id: "dc_heat_reuse", name: "Récupération de chaleur (piscine municipale de Valence)", category: Engineering,
+        description: "La chaleur des serveurs part dans le réseau de chaleur urbain. Une piscine, un lycée et une serre de tomates vous remercient.",
+        eng: 1200.0, research: 0.0, cost: 700000.0, requires_unlock: Some("green"),
+        effects: [EnergyMul(0.95), Reputation(6.0)], debt: 1.0, meaningful: true,
+        benefit: "Réputation +6, énergie -5 %.",
+    ),
+    (
+        id: "green_ppa", name: "Contrat d'électricité bas carbone (PPA)", category: Enterprise,
+        description: "Quinze ans d'électricité d'un parc éolien en mer et d'une centrale nucléaire. Le contrat fait 300 pages. Le juriste demande un congé sabbatique.",
+        eng: 360.0, research: 0.0, cost: 1200000.0, requires_unlock: Some("green"),
+        effects: [Reputation(5.0), Retention(Enterprise, 0.05)], debt: 0.0, meaningful: true,
+        benefit: "Électricité décarbonée : réputation +5, rétention grands comptes +5 %.",
+    ),
+
     // ---------------------------------------------------------- MAINTENANCE
     (
         id: "retrain", name: "Réentraînement sur données fraîches", category: Maintenance,

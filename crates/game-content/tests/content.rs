@@ -3,7 +3,7 @@ use game_core::GameState;
 #[test]
 fn content_parses_and_validates() {
     let c = game_content::try_load().unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(c.levels.len(), 12);
+    assert_eq!(c.levels.len(), 16);
     assert!(c.events.iter().filter(|e| !e.scripted).count() >= 40);
     assert!(c.tasks.len() >= 40);
 }

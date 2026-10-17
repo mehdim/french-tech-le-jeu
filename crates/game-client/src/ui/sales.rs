@@ -112,8 +112,12 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
     }
 
     if c.game.0.is_unlocked("international") {
-        subheading(ui, "Marchés européens");
+        subheading(ui, "Marchés et filiales");
         for mk in c.content.0.markets.clone() {
+            // Les marchés des chapitres suivants restent cachés jusqu'à leur déblocage.
+            if mk.requires_unlock.as_ref().is_some_and(|u| !c.game.0.is_unlocked(u)) {
+                continue;
+            }
             let open = c.game.0.market.markets.contains(&mk.id);
             card().show(ui, |ui| {
                 ui.set_width(ui.available_width());
@@ -130,7 +134,8 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
                         }
                     });
                 });
-                muted(ui, format!("{} · leads ×{} · {} langue(s) requise(s)", mk.description, dialogue::decimal(mk.lead_mult, 2), mk.languages_required));
+                let monthly = if mk.monthly_cost > 0.0 { format!(" · filiale {}/mois", money(mk.monthly_cost)) } else { String::new() };
+                muted(ui, format!("{} · leads ×{} · {} langue(s) requise(s){monthly}", mk.description, dialogue::decimal(mk.lead_mult, 2), mk.languages_required));
             });
         }
     }

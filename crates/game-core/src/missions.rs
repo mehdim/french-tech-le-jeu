@@ -19,6 +19,9 @@ pub struct LevelSnapshot {
     pub inference_cost_per_k: f64,
     pub mrr: f64,
     pub employees: u32,
+    /// kWh pour 1 000 analyses au début du niveau.
+    #[serde(default)]
+    pub energy_per_k: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

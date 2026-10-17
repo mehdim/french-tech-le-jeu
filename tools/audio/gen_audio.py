@@ -1,4 +1,4 @@
-"""Thème d'« À la French » en 16 bits, airs traditionnels français en 8-bit, effets sonores.
+"""Thème d'« À la French » en 16 bits, « La Marseillaise » en 8-bit, air celtique original, effets sonores.
 
 Synthèse en numpy pur -> WAV -> Ogg Vorbis (ffmpeg). Tout est généré
 de zéro : le jeu n'embarque aucun audio tiers.
@@ -86,7 +86,7 @@ def write(path, x, vol=0.8):
 
 
 # --------------------------------------------------------------- musique
-# Airs traditionnels français (domaine public) revisités en 8-bit moderne :
+# « La Marseillaise » (domaine public) revisitée en 8-bit moderne :
 # ondes carrées façon console, basse triangle, batterie en bruit blanc, et
 # pour le menu des accords filtrés qui « pompent » façon French touch.
 
@@ -128,83 +128,6 @@ def bass_bar(buf, bar_t0, beat, root, pattern=(0, 0, 12, 0, 0, 0, 12, 7), vol=0.
         mix_into(buf, tri_note(root - 12 + off, beat / 2 * 0.9, vol), bar_t0 + k * beat / 2)
 
 
-# « Frère Jacques » (fa majeur) : huit mesures, chantées en canon.
-FRERE_JACQUES = [
-    (65, 1), (67, 1), (69, 1), (65, 1), (65, 1), (67, 1), (69, 1), (65, 1),
-    (69, 1), (70, 1), (72, 2), (69, 1), (70, 1), (72, 2),
-    (72, .5), (74, .5), (72, .5), (70, .5), (69, 1), (65, 1),
-    (72, .5), (74, .5), (72, .5), (70, .5), (69, 1), (65, 1),
-    (65, 1), (60, 1), (65, 2), (65, 1), (60, 1), (65, 2),
-]
-
-
-def music_frere_jacques():
-    """« Frère Jacques » en canon chiptune à quatre voix, 128 bpm, 24 mesures."""
-    bpm = 128
-    beat = 60 / bpm
-    bars = 24
-    buf = np.zeros(int(SR * beat * 4 * bars) + SR)
-    voices = [
-        (0, lambda n, d: pulse_note(n, d, 0.5, 0.15)),            # meneur
-        (2, lambda n, d: pulse_note(n + 12, d, 0.25, 0.09)),      # une octave au-dessus
-        (4, lambda n, d: tri_note(n - 12, d, 0.30)),              # en bas, au triangle
-        (6, lambda n, d: pulse_note(n + 12, d, 0.125, 0.08)),     # scintillement NES
-    ]
-    for start, voice in voices:
-        t = start * 4 * beat
-        for _ in range(2):
-            t = play_line(buf, FRERE_JACQUES, t, beat, voice)
-    for bar in range(bars):
-        t0 = bar * 4 * beat
-        bass_bar(buf, t0, beat, 53)   # pédale de fa
-        if bar >= 2:
-            drums(buf, t0, beat, bar, vol=0.9 if bar < 22 else 0.5, seed=10)
-    return buf[: int(SR * beat * 4 * bars)]
-
-
-# « Ah ! vous dirai-je, maman » (do majeur), l'air des variations de Mozart.
-AH_VOUS_DIRAI_JE = [
-    (60, 1), (60, 1), (67, 1), (67, 1), (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1), (62, 1), (62, 1), (60, 2),
-    (67, 1), (67, 1), (65, 1), (65, 1), (64, 1), (64, 1), (62, 2),
-    (67, 1), (67, 1), (65, 1), (65, 1), (64, 1), (64, 1), (62, 2),
-    (60, 1), (60, 1), (67, 1), (67, 1), (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1), (62, 1), (62, 1), (60, 2),
-]
-# Une fondamentale par demi-mesure (do, fa, sol…), pour la basse et les arpèges.
-AH_ROOTS = [48, 48, 53, 48, 53, 48, 55, 48, 48, 53, 48, 55, 48, 53, 48, 55,
-            48, 48, 53, 48, 53, 48, 55, 48]
-
-
-def music_ah_vous_dirai_je():
-    """« Ah ! vous dirai-je, maman » : le thème, puis une variation en doubles croches. 120 bpm."""
-    bpm = 120
-    beat = 60 / bpm
-    bars = 24
-    buf = np.zeros(int(SR * beat * 4 * bars) + SR)
-    # Thème (mesures 0 à 11), puis reprise doublée à l'octave (12 à 23).
-    play_line(buf, AH_VOUS_DIRAI_JE, 0, beat, lambda n, d: pulse_note(n + 12, d, 0.5, 0.15))
-    t = 12 * 4 * beat
-    play_line(buf, AH_VOUS_DIRAI_JE, t, beat, lambda n, d: pulse_note(n + 12, d, 0.5, 0.12))
-    play_line(buf, AH_VOUS_DIRAI_JE, t, beat, lambda n, d: pulse_note(n + 24, d, 0.125, 0.06))
-    for bar in range(bars):
-        t0 = bar * 4 * beat
-        for half in range(2):
-            root = AH_ROOTS[(bar * 2 + half) % len(AH_ROOTS)]
-            third = 4
-            chord = [root, root + third, root + 7]
-            th = t0 + half * 2 * beat
-            for k in range(4):
-                mix_into(buf, tri_note(root - 12 + (12 if k == 2 else 0), beat / 2 * 0.9, 0.36), th + k * beat / 2)
-            if bar >= 12:   # la variation : arpèges en doubles croches, à la Mozart en 8-bit
-                for k in range(8):
-                    n = chord[[0, 1, 2, 1][k % 4]] + 24
-                    mix_into(buf, pulse_note(n, beat / 4 * 0.85, 0.25, 0.06, d=0.03, s=0.3), th + k * beat / 4)
-        if bar >= 4:
-            drums(buf, t0, beat, bar, snare=(1, 3) if bar >= 12 else (2,), hats=8 if bar >= 12 else 4, vol=0.8, seed=20)
-    return buf[: int(SR * beat * 4 * bars)]
-
-
 # Début de « La Marseillaise » (sol majeur), en marche 8-bit.
 MARSEILLAISE_A = [
     (62, .75), (62, .25),                                   # Al-lons (levée)
@@ -241,48 +164,6 @@ def music_marseillaise():
         root = MARSEILLAISE_ROOTS[(bar - 4) % len(MARSEILLAISE_ROOTS)]
         bass_bar(buf, t0, beat, root + 12, pattern=(0, 7, 12, 7, 0, 7, 12, 7), vol=0.34)
         drums(buf, t0, beat, bar, kick=(0, 1, 2, 3), snare=(1, 3), hats=8, vol=0.75, seed=30)
-    return buf[: int(SR * beat * 4 * bars)]
-
-
-# « Au clair de la lune » (do majeur) : la mélodie, une note par temps.
-AU_CLAIR = [
-    (72, 1), (72, 1), (72, 1), (74, 1), (76, 2), (74, 2), (72, 1), (76, 1), (74, 1), (74, 1), (72, 4),
-    (72, 1), (72, 1), (72, 1), (74, 1), (76, 2), (74, 2), (72, 1), (76, 1), (74, 1), (74, 1), (72, 4),
-    (74, 1), (74, 1), (74, 1), (74, 1), (69, 2), (69, 2), (74, 1), (72, 1), (71, 1), (69, 1), (67, 4),
-    (72, 1), (72, 1), (72, 1), (74, 1), (76, 2), (74, 2), (72, 1), (76, 1), (74, 1), (74, 1), (72, 4),
-]
-# Un accord par mesure (Cmaj7, G6, Am7, D7…), joué en nappe filtrée.
-AU_CLAIR_CHORDS = [
-    [48, 52, 55, 59], [48, 52, 55, 59], [43, 47, 50, 52], [48, 52, 55, 59],
-    [48, 52, 55, 59], [48, 52, 55, 59], [43, 47, 50, 52], [48, 52, 55, 59],
-    [43, 47, 50, 53], [45, 48, 52, 55], [50, 54, 57, 60], [43, 47, 50, 53],
-    [48, 52, 55, 59], [48, 52, 55, 59], [43, 47, 50, 52], [48, 52, 55, 59],
-]
-
-
-def music_au_clair():
-    """Menu : « Au clair de la lune » en French touch 8-bit : nappe filtrée qui pompe, kick, mélodie carrée. 112 bpm."""
-    bpm = 112
-    beat = 60 / bpm
-    bars = 24
-    buf = np.zeros(int(SR * beat * 4 * bars) + SR)
-    for bar in range(bars):
-        t0 = bar * 4 * beat
-        chord = AU_CLAIR_CHORDS[bar % 8 if bar < 8 else (bar - 8) % 16]
-        cutoff = 0.04 + 0.22 * min(bar, 8) / 8
-        for k in range(4):
-            stab = lowpass(sum(saw(note(n + 12), beat * 0.45) for n in chord) / 4, cutoff)
-            mix_into(buf, env(stab, 0.01, 0.15, 0.4, 0.05) * 0.42, t0 + k * beat + beat / 2)
-            b = lowpass(saw(note(chord[0] - 12), beat * 0.4), 0.08)
-            mix_into(buf, env(b, 0.005, 0.1, 0.6, 0.05) * 0.5, t0 + k * beat + beat / 2)
-            t = t_axis(0.18)
-            mix_into(buf, np.sin(2 * np.pi * (95 * t - 200 * t * t)) * np.exp(-t * 22) * 0.7, t0 + k * beat)
-            mix_into(buf, env(noise(0.04, bar * 4 + k), 0.001, 0.03, 0.0, 0.0) * 0.08, t0 + k * beat + beat / 2)
-    # La mélodie entre après 8 mesures d'intro, en onde carrée avec un écho.
-    t = 8 * 4 * beat
-    lead = lambda n, d: pulse_note(n, d, 0.25, 0.13, d=0.1, s=0.45, r=0.08)
-    play_line(buf, AU_CLAIR, t, beat, lead)
-    play_line(buf, AU_CLAIR, t + beat * 0.75, beat, lambda n, d: lead(n, d) * 0.35)
     return buf[: int(SR * beat * 4 * bars)]
 
 
@@ -453,13 +334,103 @@ def music_alafrench():
     return out[: int(SR * total)]
 
 
-# Le thème sert au menu et ouvre la playlist du bureau ; les airs traditionnels suivent.
+# --------------------------------------------------------------- air celtique
+# Une gigue originale en 6/8 (ré mixolydien), composée pour le jeu : violon et
+# flûte irlandaise façon 16 bits, bodhrán, harpe en arpèges et bourdon de cornemuse.
+
+JIG_A = [
+    [69, 74, 74, 78, 74, 74], [69, 74, 74, 76, 78, 79], [81, 78, 74, 79, 76, 72], [74, 72, 69, 71, 72, 74],
+    [69, 74, 74, 78, 74, 74], [81, 79, 78, 79, 81, 83], [84, 81, 79, 78, 76, 74], [76, 74, 72, 74, None, None],
+]
+JIG_B = [
+    [78, 81, 81, 83, 81, 79], [78, 81, 81, 86, 81, 79], [78, 79, 81, 79, 78, 76], [74, 76, 78, 76, 74, 72],
+    [78, 81, 81, 83, 81, 79], [78, 81, 86, 84, 81, 79], [81, 79, 78, 76, 74, 72], [74, 69, 72, 74, None, None],
+]
+# Un accord par demi-mesure (noire pointée) : ré, do, sol.
+D_, C_, G_ = [50, 54, 57], [48, 52, 55], [43, 47, 50]
+JIG_A_CHORDS = [D_, D_, D_, D_, D_, G_, C_, C_, D_, D_, D_, G_, C_, G_, C_, D_]
+JIG_B_CHORDS = [D_, D_, D_, G_, D_, G_, D_, C_, D_, D_, D_, G_, D_, C_, C_, D_]
+
+
+def fiddle(n, dur, vol=0.26):
+    f = note(n)
+    sig = 0.6 * glide_osc(f, f, dur, "saw", vib=0.008) + 0.3 * glide_osc(f * 1.003, f * 1.003, dur, "pulse", vib=0.008)
+    return env(onepole(sig, 0.35), 0.015, 0.06, 0.8, min(0.04, dur / 3)) * vol
+
+
+def whistle(n, dur, vol=0.12):
+    t = t_axis(dur)
+    f = note(n) * (1 + 0.006 * np.sin(2 * np.pi * 6 * t) * np.clip((t - 0.08) * 8, 0, 1))
+    ph = np.cumsum(f) / SR
+    sig = np.sin(2 * np.pi * ph) + 0.12 * np.sin(6 * np.pi * ph) + 0.05 * onepole(noise(dur, int(n * 7)), 0.3)
+    return env(sig, 0.02, 0.05, 0.85, min(0.04, dur / 3)) * vol
+
+
+def harp(n, dur, vol=0.09):
+    t = t_axis(dur)
+    sig = tri(note(n), dur) * 0.7 + saw(note(n), dur) * 0.3
+    return onepole(sig, 0.25) * np.exp(-t * 5) * vol
+
+
+def bodhran(accent, seed):
+    t = t_axis(0.2)
+    thump = np.sin(2 * np.pi * (70 * t + 60 * (1 - np.exp(-t * 30)) / 30)) * np.exp(-t * 16)
+    skin = onepole(noise(0.2, seed), 0.2) * np.exp(-t * 35)
+    return (thump * 0.5 + skin * 0.3) * (0.45 if accent else 0.15)
+
+
+def music_celtic():
+    """Air celtique original en 16 bits : intro, A A B B (la flûte rejoint à la reprise). Noire pointée = 112."""
+    e8 = 60 / 112 / 3
+    bar = 6 * e8
+    plan = [None] * 4 + [("A", 0), ("A", 1), ("B", 0), ("B", 1)]
+    bars = 4 + 4 * 8
+    lead = np.zeros(int(SR * bars * bar) + SR)
+    buf = np.zeros_like(lead)
+    t = 0.0
+    for part in plan:
+        if part is None:   # intro : bourdon et bodhrán
+            mix_into(buf, env(onepole(saw(note(38), bar) + saw(note(45), bar) * 0.7, 0.03), 0.3, 0.1, 0.9, 0.05) * 0.12, t)
+            for k in range(6):
+                mix_into(buf, bodhran(k % 3 == 0, int(t * 100) + k), t + k * e8)
+            t += bar
+            continue
+        name, rep = part
+        melody = JIG_A if name == "A" else JIG_B
+        chords = JIG_A_CHORDS if name == "A" else JIG_B_CHORDS
+        for b, notes in enumerate(melody):
+            t0 = t + b * bar
+            k = 0
+            while k < 6:
+                n = notes[k]
+                ln = 1
+                while k + ln < 6 and notes[k + ln] is None:
+                    ln += 1
+                if n is not None:
+                    mix_into(lead, fiddle(n, ln * e8 * 0.95), t0 + k * e8)
+                    if rep == 1:   # reprise : la flûte double une tierce au-dessus (ou à l'octave en B)
+                        h = n + 12 if name == "B" else n + (4 if (n % 12) in (2, 7, 9) else 3)
+                        mix_into(lead, whistle(h, ln * e8 * 0.95, 0.07), t0 + k * e8)
+                k += ln
+            for half in range(2):
+                ch = chords[b * 2 + half]
+                th = t0 + half * 3 * e8
+                for j, n in enumerate([ch[0], ch[1], ch[2]]):
+                    mix_into(buf, harp(n + 12, 3 * e8), th + j * e8)
+                mix_into(buf, env(onepole(saw(note(ch[0] - 12), 3 * e8), 0.04), 0.01, 0.1, 0.7, 0.04) * 0.14, th)
+            mix_into(buf, env(onepole(saw(note(38), bar) * 0.6 + saw(note(45), bar) * 0.4, 0.03), 0.05, 0.1, 0.9, 0.05) * 0.07, t0)
+            for k in range(6):
+                mix_into(buf, bodhran(k % 3 == 0, b * 6 + k + rep * 50), t0 + k * e8)
+        t += 8 * bar
+    out = buf + echo(lead, 3 * e8, 0.3, 0.4)
+    return onepole(out, 0.6)[: int(SR * bars * bar)]
+
+
+# Le thème sert au menu et ouvre la playlist du bureau ; « La Marseillaise » et l'air celtique suivent.
 MUSIC = {
     "music_theme": music_alafrench,
-    "music_office_1": music_frere_jacques,
-    "music_office_2": music_ah_vous_dirai_je,
-    "music_office_3": music_marseillaise,
-    "music_office_4": music_au_clair,
+    "music_office_1": music_marseillaise,
+    "music_office_2": music_celtic,
 }
 
 

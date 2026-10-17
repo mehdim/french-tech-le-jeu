@@ -156,6 +156,29 @@ fn seg(s: &Segment) -> &'static str {
     segment_name(*s)
 }
 
+/// Libellé d'un compteur d'histoire, et si l'augmenter est une bonne nouvelle.
+pub fn counter_label(key: &str) -> (&'static str, bool) {
+    match key {
+        "hires_us" => ("recrue(s) à San Francisco", true),
+        "hires_cn" => ("commercial·e(s) chinois·es", true),
+        "cn_oem" => ("fabricant(s) de modèles chinois sous contrat", true),
+        "state_deals" => ("accord(s) avec des chefs d'État", true),
+        "targeted_laws" => ("loi(s) ciblée(s) contre Veridix", false),
+        "spy_leaks" => ("fuite(s) industrielle(s)", false),
+        "ex_competitors" => ("ancien(s) salarié(s) devenu(s) concurrent(s)", false),
+        _ => ("événement(s)", true),
+    }
+}
+
+/// Nom lisible d'un marché pour les textes de conditions.
+fn market_label(id: &str) -> String {
+    match id {
+        "us" => "la filiale de San Francisco".into(),
+        "cn" => "l'implantation en Chine".into(),
+        other => format!("le marché « {other} »"),
+    }
+}
+
 /// Court résumé en français d'un effet, et s'il est bon pour le joueur.
 /// Renvoie None pour les effets purement internes (indicateurs, enchaînements).
 pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
@@ -211,6 +234,11 @@ pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
         Effect::Launch => ("Lancement commercial".into(), true),
         Effect::SetFlag(_) | Effect::ClearFlag(_) | Effect::TriggerEvent(_) | Effect::Unlock(_) => return None,
         Effect::ChooseMentor(_) => ("Mentor principal".into(), true),
+        Effect::Counter(key, n) => {
+            let (label, up_is_good) = counter_label(key);
+            (format!("{}{n} {label}", if *n >= 0 { "+" } else { "" }), (*n >= 0) == up_is_good)
+        }
+        Effect::EnergyMul(f) => (format!("Énergie par analyse {}", signed((f - 1.0) * 100.0, " %")), *f <= 1.0),
     })
 }
 
@@ -275,6 +303,10 @@ pub fn condition_text(c: &Condition) -> String {
         Condition::DayInLevelAtLeast(d) => format!("{d} jours dans le niveau"),
         Condition::LeadsAtLeast(v) => format!("{} leads", decimal(*v, 0)),
         Condition::Launched => "produit lancé".into(),
+        Condition::MarketOpened(m) => format!("ouvrir {}", market_label(m)),
+        Condition::CounterAtLeast(k, n) => format!("{n} {}", counter_label(k).0),
+        Condition::EngineersFullTimeAtLeast(n) => format!("{n} ingénieur·es à plein temps"),
+        Condition::EnergyReducedBy(f) => format!("énergie par analyse -{}", pct(f * 100.0)),
         Condition::All(v) => v.iter().map(condition_text).collect::<Vec<_>>().join(" et "),
         Condition::Any(v) => v.iter().map(condition_text).collect::<Vec<_>>().join(" ou "),
         Condition::Not(c) => format!("pas ({})", condition_text(c)),

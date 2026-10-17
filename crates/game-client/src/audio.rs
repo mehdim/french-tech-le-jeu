@@ -1,9 +1,8 @@
 //! Musique et effets sonores. Tout l'audio est généré par `tools/audio/gen_audio.py`.
 //!
 //! Musique : le thème du générique d'« À la French » en version 16 bits, qui boucle au
-//! menu et ouvre la playlist du bureau ; suivent des airs traditionnels français
-//! revisités en 8-bit (« Frère Jacques », « Ah ! vous dirai-je, maman »,
-//! « La Marseillaise », « Au clair de la lune »).
+//! menu et ouvre la playlist du bureau ; suivent « La Marseillaise » en 8-bit et un air
+//! celtique original en 16 bits.
 
 use crate::saves::Settings;
 use crate::sim::Cues;
@@ -53,13 +52,13 @@ impl Plugin for GameAudioPlugin {
     }
 }
 
-/// Nombre d'airs traditionnels de la playlist du bureau (`music_office_1.ogg`, `_2`, …).
-const OFFICE_TRACKS: usize = 4;
+/// Nombre de morceaux de la playlist du bureau après le thème (`music_office_1.ogg`, `_2`, …).
+const OFFICE_TRACKS: usize = 2;
 
 fn load(mut commands: Commands, server: Res<AssetServer>) {
     let l = |n: &str| server.load(format!("audio/{n}.ogg"));
     commands.insert_resource(Sounds {
-        // Le thème ouvre la playlist du bureau, puis les airs traditionnels.
+        // Le thème ouvre la playlist du bureau, puis La Marseillaise et l'air celtique.
         music_office: std::iter::once(l("music_theme"))
             .chain((1..=OFFICE_TRACKS).map(|i| l(&format!("music_office_{i}"))))
             .collect(),

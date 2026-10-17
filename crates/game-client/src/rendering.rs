@@ -148,33 +148,34 @@ fn sync_office(
             decor.insert(1.min(decor.len()), item.into());
         }
     }
-    // Une affiche d'environ 30 px couvre deux pans de mur (16 px de large chacun
-    // en projection) : on réserve tous les pans qu'elle couvre, pour que deux
-    // décorations ne se chevauchent jamais.
-    let mut left_slots: Vec<i32> = (0..h).filter(|i| !is_window(*i)).collect();
-    let mut right_slots: Vec<i32> = (1..w).filter(|i| !is_window(*i)).collect();
-    left_slots.reverse();
-    right_slots.reverse();
-    let mut next_free = [0i32, 0i32];
+    // Une affiche d'environ 30 px couvre deux pans de mur (16 px de large chacun en
+    // projection). Une décoration n'est accrochée que si tous les pans qu'elle couvre
+    // sont libres, sans fenêtre, et à l'intérieur du mur : sinon on essaie l'autre mur,
+    // puis on y renonce (les petits bureaux n'ont pas la place pour tout).
+    let mut used: [Vec<bool>; 2] = [vec![false; h as usize], vec![false; w as usize]];
+    // Le premier pan du mur droit touche le coin : on le laisse libre.
+    if let Some(first) = used[1].first_mut() {
+        *first = true;
+    }
     let mut placed = 0usize;
     for name in decor.iter() {
         if name == "window_roofs" || name.starts_with("window") {
             continue;
         }
         // On alterne les murs ; si l'un est plein, on essaie l'autre.
-        let mut done = false;
         for attempt in 0..2 {
             let on_left = (placed + attempt).is_multiple_of(2);
             let wall = if on_left { 0 } else { 1 };
             let key = format!("{name}_{}", if on_left { "L" } else { "R" });
             let Some(meta) = atlas.decor(&key) else { continue };
-            let cells = (meta.rect[2] / 16.0).ceil().max(1.0) as i32;
-            let slots = if on_left { &mut left_slots } else { &mut right_slots };
-            while slots.last().is_some_and(|s| *s < next_free[wall]) {
-                slots.pop();
-            }
-            let Some(slot) = slots.pop() else { continue };
-            next_free[wall] = slot + cells;
+            // +0,1 pan : la décoration est décalée d'un dixième de pan depuis son ancre.
+            let cells = (meta.rect[2] / 16.0 + 0.1).ceil().max(1.0) as usize;
+            let len = used[wall].len();
+            let fits = |start: usize| {
+                start + cells <= len && (start..start + cells).all(|i| !used[wall][i] && !is_window(i as i32))
+            };
+            let Some(slot) = (0..len).find(|&s| fits(s)) else { continue };
+            used[wall][slot..slot + cells].fill(true);
             // Ancre : haut de la décoration, accrochée ~44 px au-dessus de la ligne du sol.
             let base = if on_left {
                 iso(0.0, slot as f32 + 0.1)
@@ -184,11 +185,8 @@ fn sync_office(
             let z = 2.0 + placed as f32 * 0.001;
             let (spr, tf) = anchored_sprite(atlas.decor.clone(), meta, base + Vec2::new(0.0, 46.0), z, false);
             commands.spawn((spr, tf, OfficeEntity));
-            done = true;
-            break;
-        }
-        if done {
             placed += 1;
+            break;
         }
     }
     // Mobilier.

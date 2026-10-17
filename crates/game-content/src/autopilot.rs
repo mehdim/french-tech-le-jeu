@@ -1,6 +1,6 @@
 //! Un joueur scripté. Il n'utilise que des [`Command`], exactement ce qu'un humain
 //! peut faire depuis l'interface, et sert à :
-//!  * le test de campagne (prouve que les douze niveaux sont réalisables),
+//!  * le test de campagne (prouve que les seize niveaux sont réalisables),
 //!  * le rapport d'équilibrage (`cargo run -p game-content --example balance`),
 //!  * le « mode démo » de l'écran titre du client.
 
@@ -21,7 +21,24 @@ const TASK_PRIORITY: &[&str] = &[
     "audit_logs", "sso", "gdpr", "hybrid", "sla", "rbac", "retention_policies", "red_team", "quantization",
     "small_model", "gpu_migration", "sovereign_hosting", "multilingual_2", "provenance", "hitl", "agent_analysis",
     "authenticity_workflow", "trust_platform", "rust_rewrite",
+    "soc2", "frontier_eval", "us_region", "zh_language", "watermark_sdk", "zero_trust", "agent_copilot",
+    "ipo_readiness", "multi_region", "foundation_detector",
+    "model_pruning", "liquid_cooling", "carbon_scheduler", "dc_consolidation", "dc_heat_reuse", "green_ppa",
 ];
+
+/// Chantiers à passer en tête de file selon le niveau (les objectifs du chapitre d'abord).
+fn level_focus(level: u32) -> &'static [&'static str] {
+    match level {
+        13 => &["soc2"],
+        14 => &["zh_language", "watermark_sdk", "zero_trust"],
+        15 => &["ipo_readiness"],
+        16 => &["model_pruning", "liquid_cooling", "carbon_scheduler", "dc_consolidation", "dc_heat_reuse", "green_ppa"],
+        _ => &[],
+    }
+}
+
+/// Marchés que le joueur scripté ouvre, dans l'ordre.
+const MARKETS: &[&str] = &["benelux", "de", "es", "it", "nordics", "us", "cn", "in", "jp", "br", "gulf"];
 
 /// Équipe souhaitée (rôle, nombre) par niveau.
 fn target_team(level: u32) -> Vec<(Role, usize)> {
@@ -36,6 +53,7 @@ fn target_team(level: u32) -> Vec<(Role, usize)> {
         8 => vec![(Role::Backend, 3), (Role::AiResearcher, 3), (Role::Sales, 3), (Role::Growth, 1), (Role::DevOps, 1), (Role::Cfo, 1), (Role::ProductManager, 1)],
         9 => vec![(Role::Backend, 4), (Role::AiResearcher, 3), (Role::Sales, 5), (Role::Growth, 2), (Role::DevOps, 2), (Role::Cfo, 1), (Role::ProductManager, 1), (Role::Hr, 1)],
         10 => vec![(Role::Backend, 5), (Role::AiResearcher, 4), (Role::Sales, 7), (Role::Growth, 2), (Role::DevOps, 2), (Role::Cfo, 1), (Role::ProductManager, 1), (Role::Hr, 1)],
+        13.. => vec![(Role::Backend, 7), (Role::AiResearcher, 6), (Role::Sales, 12), (Role::Growth, 3), (Role::DevOps, 3), (Role::Cfo, 1), (Role::ProductManager, 2), (Role::Hr, 2)],
         _ => vec![(Role::Backend, 6), (Role::AiResearcher, 5), (Role::Sales, 10), (Role::Growth, 3), (Role::DevOps, 3), (Role::Cfo, 1), (Role::ProductManager, 2), (Role::Hr, 1)],
     }
 }
@@ -79,6 +97,17 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
         Effect::RentMonthly(v) => -v / 100.0,
         Effect::PriceAll(f) => f * 10.0,
         Effect::ChooseMentor(_) => 1.0,
+        Effect::Counter(key, n) => {
+            let w = match key.as_str() {
+                "state_deals" => 250.0,
+                "targeted_laws" | "spy_leaks" => -250.0,
+                "cn_oem" => 15.0,
+                _ => 1.0,
+            };
+            w * *n as f64
+        }
+        Effect::EnergyMul(f) => (1.0 - f) * 40.0,
+        Effect::SetFlag(f) if f == "nvidia_interest" => 6.0,
         Effect::FounderProductivity(f) => (f - 1.0) * 60.0,
         Effect::Modifier { kind, value, days } => {
             use game_core::types::ModKind::*;
@@ -98,7 +127,7 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
 fn pick_choice(s: &GameState, c: &Content) -> usize {
     let Some(def) = s.events.pending_def(c) else { return 0 };
     if def.id == "final_decision" {
-        for pref in ["ending_commons", "ending_profitable", "ending_unicorn", "ending_acquisition"] {
+        for pref in ["ending_commons", "ending_profitable", "ending_ipo", "ending_unicorn", "ending_acquisition"] {
             if let Some(i) = def.choices.iter().position(|ch| {
                 ch.effects.iter().any(|e| matches!(e, Effect::SetFlag(f) if f == pref))
             })
@@ -183,7 +212,9 @@ fn manage(s: &mut GameState, c: &Content) {
         6 | 7 => if s.metrics.runway < 10.0 || cash < 200_000.0 { Some(RoundKind::Seed) } else { None },
         8 => Some(RoundKind::SeriesA),
         9 | 10 => if s.metrics.runway < 8.0 { Some(RoundKind::SeriesA) } else { None },
-        11 | 12 => if s.metrics.runway < 10.0 { Some(RoundKind::SeriesB) } else { None },
+        11..=14 => if s.metrics.runway < 10.0 { Some(RoundKind::SeriesB) } else { None },
+        15 => Some(RoundKind::SeriesC),
+        16 => if s.metrics.runway < 10.0 { Some(RoundKind::SeriesC) } else { None },
         _ => None,
     };
     if let Some(round) = want_round {
@@ -230,7 +261,14 @@ fn manage(s: &mut GameState, c: &Content) {
     if s.product.tech_debt > 30.0 && !s.tasks.iter().any(|t| t.task_id == "refactor") {
         let _ = s.apply(c, Command::StartTask { task: "refactor".into(), approach: Approach::Standard });
     }
-    for id in TASK_PRIORITY {
+    // Chantiers répétables propres aux derniers chapitres.
+    if level >= 14 && s.counter("cn_oem") < 4 && !s.tasks.iter().any(|t| t.task_id == "oem_integration") {
+        let _ = s.apply(c, Command::StartTask { task: "oem_integration".into(), approach: Approach::Clean });
+    }
+    if s.counter("targeted_laws") >= 1 && !s.product.has("policy_lab") {
+        let _ = s.apply(c, Command::StartTask { task: "policy_lab".into(), approach: Approach::Clean });
+    }
+    for id in level_focus(level).iter().chain(TASK_PRIORITY.iter()) {
         if s.tasks.len() >= max_tasks {
             break;
         }
@@ -250,6 +288,22 @@ fn manage(s: &mut GameState, c: &Content) {
                 let ch = channel_for(role, s, c);
                 let _ = s.apply(c, Command::StartRecruitment { channel: ch.into(), role });
             }
+        }
+    }
+    // Recrutements sur place : San Francisco (niveau 13+), Shanghai (niveau 14+).
+    for (channel, market, counter, need, roles) in [
+        ("sf_local", "us", "hires_us", 4, [Role::Backend, Role::Sales]),
+        ("cn_local", "cn", "hires_cn", 3, [Role::Sales, Role::Sales]),
+    ] {
+        if !s.market.markets.iter().any(|m| m == market) || s.counter(counter) >= need || s.finance.cash < 200_000.0 {
+            continue;
+        }
+        if !s.searches.iter().any(|x| x.channel == channel) && !s.candidates.iter().any(|x| x.channel == channel) {
+            let role = roles[s.counter(counter) as usize % 2];
+            let _ = s.apply(c, Command::StartRecruitment { channel: channel.into(), role });
+        }
+        if let Some(id) = s.candidates.iter().filter(|cd| cd.channel == channel).map(|cd| cd.id).next() {
+            let _ = s.apply(c, Command::Hire { candidate: id });
         }
     }
     // Recrute le meilleur candidat pour chaque rôle manquant.
@@ -302,9 +356,10 @@ fn manage(s: &mut GameState, c: &Content) {
 
     // --- marchés et prix ------------------------------------------------------
     if s.is_unlocked("international") {
-        for m in ["benelux", "de", "es", "it", "nordics"] {
-            if s.market.markets.len() < 6 && cash > 200_000.0 {
-                let _ = s.apply(c, Command::OpenMarket { market: m.into() });
+        for m in MARKETS {
+            let Some(def) = c.market(m) else { continue };
+            if s.finance.cash > def.cost + 400_000.0 + def.monthly_cost * 6.0 {
+                let _ = s.apply(c, Command::OpenMarket { market: m.to_string() });
             }
         }
     }

@@ -1,7 +1,8 @@
 //! Évaluation des [`Condition`] sur l'état du jeu.
 
 use crate::simulation::GameState;
-use crate::types::{Condition, Segment};
+use crate::employees::Assignment;
+use crate::types::{Condition, Role, Segment};
 
 /// Progression vers une condition, pour les barres de l'interface : (actuel, cible, plus_haut_est_mieux).
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -33,6 +34,28 @@ impl Progress {
 impl GameState {
     pub fn day_in_level(&self) -> u32 {
         self.day.saturating_sub(self.campaign.level_start_day)
+    }
+
+    /// Ingénieur·es (backend, frontend, recherche, DevOps) qui font de l'ingénierie à plein
+    /// temps : développement, infrastructure, ou disponibles entre deux chantiers. Ne comptent
+    /// pas le fondateur, les stagiaires, les consultants d'ESN, ni les ingénieur·es détourné·es
+    /// vers les ventes, le marketing, l'administratif, la levée de fonds ou le management.
+    pub fn full_time_engineers(&self) -> u32 {
+        self.employees
+            .iter()
+            .filter(|e| matches!(e.role, Role::Backend | Role::Frontend | Role::AiResearcher | Role::DevOps))
+            .filter(|e| matches!(e.assignment, Assignment::Task(_) | Assignment::Ops | Assignment::Unassigned) && e.is_available(self.day))
+            .count() as u32
+    }
+
+    pub fn counter(&self, key: &str) -> u32 {
+        self.counters.get(key).copied().unwrap_or(0)
+    }
+
+    /// Part d'énergie par analyse économisée depuis le début du niveau (0..1).
+    pub fn energy_reduction(&self) -> f64 {
+        let start = self.campaign.snapshot.energy_per_k;
+        if start > 0.0 { (1.0 - self.product.energy_per_k / start).max(0.0) } else { 0.0 }
     }
 
     pub fn paying_customers(&self) -> u32 {
@@ -118,6 +141,10 @@ impl GameState {
             Condition::NetBurnAtMost(v) => m.net_burn <= *v,
             Condition::ValuationAtLeast(v) => m.valuation >= *v,
             Condition::OfficeTierAtLeast(t) => self.office.tier >= *t,
+            Condition::MarketOpened(id) => self.market.markets.iter().any(|m| m == id),
+            Condition::CounterAtLeast(k, n) => self.counter(k) >= *n,
+            Condition::EngineersFullTimeAtLeast(n) => self.full_time_engineers() >= *n,
+            Condition::EnergyReducedBy(f) => self.energy_reduction() >= *f - 1e-9,
             Condition::DayInLevelAtLeast(d) => self.day_in_level() >= *d,
             Condition::LeadsAtLeast(v) => m.leads >= *v,
             Condition::Launched => self.product.launched,
@@ -187,6 +214,9 @@ impl GameState {
             Condition::LtvCacAtLeast(v) => Progress::up(m.ltv_cac, *v),
             Condition::ValuationAtLeast(v) => Progress::up(m.valuation, *v),
             Condition::LeadsAtLeast(v) => Progress::up(m.leads, *v),
+            Condition::CounterAtLeast(k, n) => Progress::up(self.counter(k) as f64, *n as f64),
+            Condition::EngineersFullTimeAtLeast(n) => Progress::up(self.full_time_engineers() as f64, *n as f64),
+            Condition::EnergyReducedBy(f) => Progress::up(self.energy_reduction() * 100.0, f * 100.0),
             _ => None,
         }
     }

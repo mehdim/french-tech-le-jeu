@@ -59,7 +59,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
     // Entrée fait avancer l'histoire (réplique suivante, puis « C'est parti ! »).
     let enter = ctx.input(|i| i.key_pressed(egui::Key::Enter));
     modal(ctx, "intro", 680.0, |ui| {
-        ui.label(RichText::new(format!("{} — NIVEAU {}/12", def.subtitle.to_uppercase(), level)).font(pixel(11.0)).color(MUTED));
+        ui.label(RichText::new(format!("{} — NIVEAU {}/{}", def.subtitle.to_uppercase(), level, c.content.0.levels.len())).font(pixel(11.0)).color(MUTED));
         ui.label(RichText::new(&def.title).font(pixel(33.0)).color(GREEN));
         ui.add_space(8.0);
         if idx < n {

@@ -83,6 +83,9 @@ pub struct GameState {
     /// Mentors d'A la French (absent des anciennes sauvegardes : valeur par défaut).
     #[serde(default)]
     pub mentors: crate::mentors::MentorState,
+    /// Compteurs d'histoire (recrues à San Francisco, accords de Davos…).
+    #[serde(default)]
+    pub counters: BTreeMap<String, u32>,
     #[serde(skip)]
     pub metrics: Metrics,
     #[serde(skip)]
@@ -220,6 +223,7 @@ impl GameState {
             week_churn: 0,
             last_work: WorkSummary::default(),
             mentors: Default::default(),
+            counters: BTreeMap::new(),
             metrics: Metrics::default(),
             cues: Vec::new(),
         };
@@ -299,6 +303,7 @@ impl GameState {
             inference_cost_per_k: self.metrics.inference_cost_per_k,
             mrr: self.metrics.mrr,
             employees: self.employees.len() as u32,
+            energy_per_k: self.product.energy_per_k,
         };
     }
 
@@ -372,6 +377,7 @@ impl GameState {
         self.accrue_money(content);
         self.update_people(content, &fx, &work, working);
         self.update_product(content, &work, &fx);
+        self.apply_staffing(content, working);
         self.update_recruitment(content);
         self.decay_modifiers();
         self.update_events(content);
@@ -813,7 +819,7 @@ impl GameState {
         m.payroll += rr.payroll / d;
         m.rent += rr.rent / d;
         m.marketing += rr.marketing / d;
-        m.hosting += rr.hosting / d;
+        m.hosting += (rr.hosting + rr.energy) / d;
         m.inference += rr.inference / d;
         m.tools += rr.tools / d;
         m.furniture += rr.furniture / d;
@@ -1037,6 +1043,39 @@ impl GameState {
         if self.day % DAYS_PER_MONTH == 14 && self.product.drift > 6.0 {
             let accuracy = self.product.effective_accuracy();
             self.log(Tone::Bad, Msg::DriftWarning { accuracy });
+        }
+    }
+
+    /// À partir du niveau 10, le produit exige un effectif minimum. En dessous, la dette
+    /// technique et la dérive s'accumulent (personne pour les traiter) et l'équipe s'épuise.
+    fn apply_staffing(&mut self, content: &Content, working: bool) {
+        let Some(need) = content.level(self.campaign.level).and_then(|l| l.staffing) else { return };
+        if !working || self.campaign.phase != Phase::Playing {
+            return;
+        }
+        let missing_eng = need.engineers.saturating_sub(self.full_time_engineers()) as f64;
+        let headcount = self.employees.len() as u32;
+        let missing_staff = need.headcount.saturating_sub(headcount) as f64 / need.headcount.max(1) as f64;
+        if missing_eng > 0.0 {
+            self.product.tech_debt = (self.product.tech_debt + 0.12 * missing_eng).min(100.0);
+            if self.product.has("mvp_text") {
+                self.product.drift += 0.03 * missing_eng;
+            }
+        }
+        if missing_staff > 0.0 {
+            for e in &mut self.employees {
+                e.fatigue = (e.fatigue + 1.2 * missing_staff).min(100.0);
+            }
+        }
+        if (missing_eng > 0.0 || missing_staff > 0.0) && self.day_in_level() % 14 == 7 {
+            let ft = self.full_time_engineers();
+            self.log(
+                Tone::Bad,
+                Msg::Text(format!(
+                    "Sous-effectif : {headcount}/{} salariés, {ft}/{} ingénieur·es à plein temps. La dette et la fatigue montent.",
+                    need.headcount, need.engineers
+                )),
+            );
         }
     }
 
@@ -1305,7 +1344,8 @@ impl GameState {
         let b = &content.balancing;
         let fx = self.office.effects(content);
         let payroll = self.employees.iter().map(|e| e.monthly_cost(self.contrib_rate(content, e), self.day)).sum();
-        let rent = content.office(self.office.tier).map(|o| o.rent).unwrap_or(0.0) + self.office.rent_extra;
+        let subsidiaries: f64 = self.market.markets.iter().filter_map(|m| content.market(m)).map(|m| m.monthly_cost).sum();
+        let rent = content.office(self.office.tier).map(|o| o.rent).unwrap_or(0.0) + self.office.rent_extra + subsidiaries;
         let infra = self.mod_mul(ModKind::InfraCostMul);
         let customers = self.market.total_customers() as f64;
         let hosting = if self.product.has("mvp_text") {
@@ -1321,7 +1361,13 @@ impl GameState {
                 self.market.seg(s).customers as f64 * content.segment(s).usage * self.product.usage_mult / 1000.0 * per_k
             })
             .sum();
+        let energy = if self.flags.contains("own_datacenters") {
+            self.energy_mwh(content) * crate::economy::ENERGY_PRICE_PER_MWH
+        } else {
+            0.0
+        };
         RunRate {
+            energy,
             payroll,
             rent,
             marketing: self.market.marketing_budget,
@@ -1332,6 +1378,15 @@ impl GameState {
             loans: self.funding.monthly_loan_payments(),
             other_income: self.finance.incomes.iter().map(|i| i.monthly).sum(),
         }
+    }
+
+    /// Énergie consommée par mois (MWh) : analyses × kWh pour 1 000 analyses.
+    pub fn energy_mwh(&self, content: &Content) -> f64 {
+        let analyses_k: f64 = Segment::ALL
+            .iter()
+            .map(|&s| self.market.seg(s).customers as f64 * content.segment(s).usage * self.product.usage_mult / 1000.0)
+            .sum();
+        analyses_k * self.product.energy_per_k / 1000.0
     }
 
     pub fn innovation_score(&self, content: &Content) -> f64 {
@@ -1409,6 +1464,7 @@ impl GameState {
             employees: self.employees.len() as u32,
             inference_cost_per_k: self.inference_cost(content),
             innovation_score: innovation,
+            energy_mwh: self.energy_mwh(content),
             run_rate: rr,
         };
     }
@@ -1528,6 +1584,7 @@ impl GameState {
                 let c = self.candidates.remove(pos);
                 self.finance.cash -= c.hiring_cost;
                 self.finance.month.one_off_costs += c.hiring_cost;
+                let on_hire = content.channel(&c.channel).map(|ch| ch.on_hire.clone()).unwrap_or_default();
                 let mut e = c.employee;
                 e.hired_day = day;
                 if let Some(arch) = content.archetype(&e.archetype) {
@@ -1540,6 +1597,9 @@ impl GameState {
                 self.stats.hired += 1;
                 self.log(Tone::Good, Msg::Hired { name, role });
                 self.cues.push(Cue::Hired(id));
+                if !on_hire.is_empty() {
+                    self.apply_effects(content, &on_hire, "Recrutement");
+                }
                 Ok(())
             }
             Command::RejectCandidate { candidate } => {
@@ -1785,6 +1845,9 @@ impl GameState {
                     return Err(CmdError::Locked);
                 }
                 let def = content.market(&market).ok_or(CmdError::NotFound)?;
+                if def.requires_unlock.as_ref().is_some_and(|u| !self.is_unlocked(u)) {
+                    return Err(CmdError::Locked);
+                }
                 if self.market.markets.contains(&market) {
                     return Err(CmdError::Invalid("Marché déjà ouvert"));
                 }

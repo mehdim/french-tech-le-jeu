@@ -341,14 +341,14 @@ fn level_one_can_be_completed_by_hand() {
 }
 
 /// La garantie d'équilibrage principale : un joueur scripté qui n'utilise que
-/// les commandes du joueur termine les douze niveaux.
+/// les commandes du joueur termine les seize niveaux.
 #[test]
 fn autopilot_completes_the_campaign() {
     let c = content();
     for seed in [1u64, 2, 3] {
         let s = autopilot::play_campaign(&c, seed, 2000);
         assert_eq!(s.campaign.phase, Phase::Victory, "graine {seed} : bloqué au niveau {} jour {}", s.campaign.level, s.day);
-        assert_eq!(s.campaign.results.len(), 12);
+        assert_eq!(s.campaign.results.len(), c.levels.len());
         assert!(s.campaign.ending.is_some());
     }
 }
@@ -362,12 +362,24 @@ fn every_ending_is_reachable_in_principle() {
     s.campaign.phase = Phase::Playing;
     s.flags.retain(|f| !f.starts_with("ending_") && f != "final_choice");
     s.reputation = 70.0;
+    s.flags.insert("series_c_done".into());
+    s.flags.insert("nvidia_interest".into());
+    s.product.shipped.insert("ipo_readiness".into());
     s.events.pending = None;
     s.fire_event(&c, "final_decision", true);
     let def = s.events.pending_def(&c).unwrap().clone();
     let allowed: Vec<bool> = (0..def.choices.len()).map(|i| s.choice_allowed(&c, i)).collect();
-    // Licorne, acquisition et communs sont ouverts ; « rentable » dépend du burn.
-    assert!(allowed[0] && allowed[2] && allowed[3], "{allowed:?}");
+    // Série C, IPO, NVIDIA et communs sont ouverts ; « rentable » dépend du burn.
+    assert_eq!(def.choices.len(), 5);
+    assert!(allowed[0] && allowed[1] && allowed[2] && allowed[4], "{allowed:?}");
+    // Chaque choix mène à une fin définie.
+    for ch in &def.choices {
+        let flag = ch.effects.iter().find_map(|e| match e {
+            game_core::types::Effect::SetFlag(f) => f.strip_prefix("ending_"),
+            _ => None,
+        });
+        assert!(flag.is_some_and(|f| c.ending(f).is_some()), "{}", ch.label);
+    }
 }
 
 #[test]
@@ -422,3 +434,71 @@ fn saves_from_before_the_mentors_still_load() {
     assert!(old.mentors.main.is_none());
 }
 
+
+#[test]
+fn understaffing_from_level_ten_hurts() {
+    let c = content();
+    let mut s = GameState::new(&c, 8);
+    s.start_level(&c, 10);
+    s.campaign.intro_pending = false;
+    s.events.pending = None;
+    s.events.queue.clear();
+    let need = c.level(10).unwrap().staffing.expect("le niveau 10 exige un effectif minimum");
+    assert_eq!((need.engineers, need.headcount), (4, 20));
+    // Seul le fondateur : pas un seul ingénieur à plein temps.
+    assert_eq!(s.full_time_engineers(), 0);
+    // Témoin : même état, mais au niveau 9 (pas d'exigence d'effectif).
+    let mut control = s.clone();
+    control.campaign.level = 9;
+    for st in [&mut s, &mut control] {
+        for _ in 0..10 {
+            st.tick(&c);
+            st.events.pending = None;
+        }
+    }
+    assert!(s.product.tech_debt > control.product.tech_debt, "la dette doit monter en sous-effectif");
+    assert!(s.employees[0].fatigue > control.employees[0].fatigue, "l'équipe s'épuise en sous-effectif");
+}
+
+#[test]
+fn local_hiring_counts_and_markets_need_their_unlock() {
+    let c = content();
+    let mut s = GameState::new(&c, 9);
+    s.campaign.unlocks.insert("international".into());
+    s.finance.cash = 5_000_000.0;
+    // Sans le déblocage « usa », la filiale américaine est fermée.
+    assert!(s.apply(&c, Command::OpenMarket { market: "us".into() }).is_err());
+    s.campaign.unlocks.insert("usa".into());
+    s.campaign.unlocks.insert("recruitment".into());
+    s.apply(&c, Command::OpenMarket { market: "us".into() }).unwrap();
+    assert!(s.check(&game_core::types::Condition::MarketOpened("us".into())));
+    // Le loyer de la filiale s'ajoute aux charges.
+    s.recompute_metrics(&c);
+    assert!(s.metrics.run_rate.rent >= 90_000.0);
+    // Une embauche par le canal de San Francisco incrémente le compteur.
+    s.apply(&c, Command::StartRecruitment { channel: "sf_local".into(), role: Role::Backend }).unwrap();
+    for _ in 0..20 {
+        s.tick(&c);
+        s.events.pending = None;
+        s.campaign.intro_pending = false;
+    }
+    let id = s.candidates.iter().find(|x| x.channel == "sf_local").expect("candidats de San Francisco").id;
+    s.apply(&c, Command::Hire { candidate: id }).unwrap();
+    assert_eq!(s.counter("hires_us"), 1);
+}
+
+#[test]
+fn energy_is_billed_only_with_own_datacenters() {
+    let c = content();
+    let mut s = autopilot::play_campaign(&c, 1, 700);
+    s.recompute_metrics(&c);
+    assert_eq!(s.metrics.run_rate.energy, 0.0);
+    s.flags.insert("own_datacenters".into());
+    s.recompute_metrics(&c);
+    assert!(s.metrics.energy_mwh > 0.0);
+    assert!(s.metrics.run_rate.energy > 0.0);
+    let before = s.metrics.run_rate.energy;
+    s.apply_effects(&c, &[game_core::types::Effect::EnergyMul(0.5)], "test");
+    s.recompute_metrics(&c);
+    assert!((s.metrics.run_rate.energy - before * 0.5).abs() < 1e-6);
+}

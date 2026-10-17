@@ -72,15 +72,16 @@ pub fn validate(content: &Content) -> Vec<String> {
     }
     let mut ids: Vec<u32> = content.levels.iter().map(|l| l.id).collect();
     ids.sort();
-    if ids != (1..=12).collect::<Vec<u32>>() {
-        problems.push(format!("les niveaux doivent être numérotés de 1 à 12, trouvé {ids:?}"));
+    let n = ids.len() as u32;
+    if n < 12 || ids != (1..=n).collect::<Vec<u32>>() {
+        problems.push(format!("les niveaux doivent être numérotés de 1 à N (N ≥ 12) sans trou, trouvé {ids:?}"));
     }
     for l in &content.levels {
         if !event_ids.contains(l.boss_event.as_str()) {
             problems.push(format!("niveau {} : événement majeur `{}` introuvable", l.id, l.boss_event));
         }
-        if !(2..=4).contains(&l.quests.len()) {
-            problems.push(format!("le niveau {} doit avoir de 2 à 4 objectifs", l.id));
+        if !(2..=5).contains(&l.quests.len()) {
+            problems.push(format!("le niveau {} doit avoir de 2 à 5 objectifs", l.id));
         }
         for q in &l.quests {
             conditions.push((format!("niveau {} objectif {}", l.id, q.id), &q.condition));
@@ -109,7 +110,16 @@ pub fn validate(content: &Content) -> Vec<String> {
     for e in &content.endings {
         conditions.extend(e.requires.iter().map(|c| (format!("fin {}", e.id), c)));
     }
+    let market_ids: BTreeSet<&str> = content.markets.iter().map(|m| m.id.as_str()).collect();
+    for m in &content.markets {
+        if let Some(u) = &m.requires_unlock
+            && !unlocks.contains(u.as_str()) {
+                problems.push(format!("le marché `{}` exige le déblocage `{u}`, qu'aucun niveau n'accorde", m.id));
+            }
+    }
     for c in &content.channels {
+        conditions.extend(c.requires.iter().map(|x| (format!("canal {}", c.id), x)));
+        effects.extend(c.on_hire.iter().map(|x| (format!("canal {}", c.id), x)));
         for a in &c.archetypes {
             if content.archetype(a).is_none() {
                 problems.push(format!("le canal `{}` cite un profil inconnu `{a}`", c.id));
@@ -162,6 +172,10 @@ pub fn validate(content: &Content) -> Vec<String> {
                 Condition::Unlocked(u)
                     if !unlocks.contains(u.as_str()) => {
                         problems.push(format!("{ctx} : déblocage inconnu `{u}`"));
+                    }
+                Condition::MarketOpened(m)
+                    if !market_ids.contains(m.as_str()) => {
+                        problems.push(format!("{ctx} : marché inconnu `{m}`"));
                     }
                 _ => {}
             }

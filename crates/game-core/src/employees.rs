@@ -139,9 +139,12 @@ fn roll(rng: &mut ChaCha8Rng, range: (f64, f64)) -> f64 {
     rng.random_range(range.0..=range.1)
 }
 
-pub fn random_name(content: &Content, rng: &mut ChaCha8Rng) -> String {
-    let first = &content.names.first[rng.random_range(0..content.names.first.len())];
-    let last = &content.names.last[rng.random_range(0..content.names.last.len())];
+pub fn random_name(content: &Content, arch: &ArchetypeDef, rng: &mut ChaCha8Rng) -> String {
+    // Les profils recrutés à l'étranger ont leurs propres réserves de noms.
+    let firsts = if arch.first_names.is_empty() { &content.names.first } else { &arch.first_names };
+    let lasts = if arch.last_names.is_empty() { &content.names.last } else { &arch.last_names };
+    let first = &firsts[rng.random_range(0..firsts.len())];
+    let last = &lasts[rng.random_range(0..lasts.len())];
     format!("{first} {last}")
 }
 
@@ -174,7 +177,7 @@ pub fn roll_employee(
         * rng.random_range(0.95..1.06);
     Employee {
         id,
-        name: random_name(content, rng),
+        name: random_name(content, arch, rng),
         role: arch.role,
         archetype: arch.id.clone(),
         trait_: arch.trait_,
