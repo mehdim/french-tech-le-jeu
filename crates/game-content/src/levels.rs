@@ -80,8 +80,8 @@ pub fn validate(content: &Content) -> Vec<String> {
         if !event_ids.contains(l.boss_event.as_str()) {
             problems.push(format!("niveau {} : événement majeur `{}` introuvable", l.id, l.boss_event));
         }
-        if !(2..=5).contains(&l.quests.len()) {
-            problems.push(format!("le niveau {} doit avoir de 2 à 5 objectifs", l.id));
+        if !(2..=6).contains(&l.quests.len()) {
+            problems.push(format!("le niveau {} doit avoir de 2 à 6 objectifs", l.id));
         }
         for q in &l.quests {
             conditions.push((format!("niveau {} objectif {}", l.id, q.id), &q.condition));

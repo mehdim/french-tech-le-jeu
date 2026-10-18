@@ -32,7 +32,7 @@ fn level_focus(level: u32) -> &'static [&'static str] {
         13 => &["soc2"],
         14 => &["zh_language", "watermark_sdk", "zero_trust"],
         15 => &["ipo_readiness"],
-        16 => &["model_pruning", "liquid_cooling", "carbon_scheduler", "dc_consolidation", "dc_heat_reuse", "green_ppa"],
+        16 => &["model_pruning", "liquid_cooling", "carbon_scheduler", "dc_consolidation", "dc_heat_reuse", "green_ppa", "green_premium", "global_partners"],
         _ => &[],
     }
 }
@@ -53,6 +53,7 @@ fn target_team(level: u32) -> Vec<(Role, usize)> {
         8 => vec![(Role::Backend, 3), (Role::AiResearcher, 3), (Role::Sales, 3), (Role::Growth, 1), (Role::DevOps, 1), (Role::Cfo, 1), (Role::ProductManager, 1)],
         9 => vec![(Role::Backend, 4), (Role::AiResearcher, 3), (Role::Sales, 5), (Role::Growth, 2), (Role::DevOps, 2), (Role::Cfo, 1), (Role::ProductManager, 1), (Role::Hr, 1)],
         10 => vec![(Role::Backend, 5), (Role::AiResearcher, 4), (Role::Sales, 7), (Role::Growth, 2), (Role::DevOps, 2), (Role::Cfo, 1), (Role::ProductManager, 1), (Role::Hr, 1)],
+        16.. => vec![(Role::Backend, 7), (Role::AiResearcher, 6), (Role::Sales, 20), (Role::Growth, 6), (Role::DevOps, 3), (Role::Cfo, 1), (Role::ProductManager, 2), (Role::Hr, 2)],
         13.. => vec![(Role::Backend, 7), (Role::AiResearcher, 6), (Role::Sales, 12), (Role::Growth, 3), (Role::DevOps, 3), (Role::Cfo, 1), (Role::ProductManager, 2), (Role::Hr, 2)],
         _ => vec![(Role::Backend, 6), (Role::AiResearcher, 5), (Role::Sales, 10), (Role::Growth, 3), (Role::DevOps, 3), (Role::Cfo, 1), (Role::ProductManager, 2), (Role::Hr, 1)],
     }
@@ -107,6 +108,8 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
             w * *n as f64
         }
         Effect::EnergyMul(f) => (1.0 - f) * 40.0,
+        Effect::StartTakeover(_) => 100.0,
+        Effect::SellTo(_) => -1000.0,
         Effect::SetFlag(f) if f == "nvidia_interest" => 6.0,
         Effect::FounderProductivity(f) => (f - 1.0) * 60.0,
         Effect::Modifier { kind, value, days } => {
@@ -163,6 +166,10 @@ pub fn step(s: &mut GameState, c: &Content) -> bool {
     }
     if s.campaign.intro_pending {
         let _ = s.apply(c, Command::DismissIntro);
+    }
+    // Le joueur scripté gagne ses combats contre les patrons des acquisitions.
+    if s.takeover.as_ref().is_some_and(|t| t.ready) {
+        let _ = s.apply(c, Command::ResolveTakeover { won: true });
     }
     let mut guard = 0;
     while s.events.pending.is_some() && guard < 5 {
@@ -265,6 +272,13 @@ fn manage(s: &mut GameState, c: &Content) {
     if level >= 14 && s.counter("cn_oem") < 4 && !s.tasks.iter().any(|t| t.task_id == "oem_integration") {
         let _ = s.apply(c, Command::StartTask { task: "oem_integration".into(), approach: Approach::Clean });
     }
+    if level == 16 && s.metrics.mrr < 5_000_000.0 && s.product.has("green_premium")
+        && !s.tasks.iter().any(|t| t.task_id == "public_tender") {
+        let _ = s.apply(c, Command::StartTask { task: "public_tender".into(), approach: Approach::Clean });
+    }
+    if level == 15 && s.counter("state_deals") < 10 && !s.tasks.iter().any(|t| t.task_id == "state_visit") {
+        let _ = s.apply(c, Command::StartTask { task: "state_visit".into(), approach: Approach::Clean });
+    }
     if s.counter("targeted_laws") >= 1 && !s.product.has("policy_lab") {
         let _ = s.apply(c, Command::StartTask { task: "policy_lab".into(), approach: Approach::Clean });
     }
@@ -365,7 +379,9 @@ fn manage(s: &mut GameState, c: &Content) {
     }
     if s.product.launched {
         let mrr = s.metrics.mrr;
-        let budget = if s.metrics.runway < 4.0 { 0.0 } else { (mrr * 0.25).clamp(300.0, 250_000.0) };
+        let cap = if level >= 15 { 1_500_000.0 } else { 250_000.0 };
+
+        let budget = if s.metrics.runway < 4.0 { 0.0 } else { (mrr * 0.25).clamp(300.0, cap) };
         let _ = s.apply(c, Command::SetMarketingBudget(budget));
     }
 
@@ -376,7 +392,8 @@ fn manage(s: &mut GameState, c: &Content) {
 fn assign(s: &mut GameState, c: &Content) {
     let level = s.campaign.level;
     let drafting = s.funding.applications.iter().any(|a| a.status == AppStatus::Drafting);
-    let pitching = s.funding.fundraising.as_ref().is_some_and(|f| f.status == RaiseStatus::Pitching);
+    let pitching = s.funding.fundraising.as_ref().is_some_and(|f| f.status == RaiseStatus::Pitching)
+        || s.takeover.as_ref().is_some_and(|t| !t.ready);
     let has_cfo = s.employees.iter().any(|e| e.role == Role::Cfo);
     let sales_staff = s.employees.iter().filter(|e| e.role == Role::Sales).count();
     let task_ids: Vec<(u32, f64, f64)> = s.tasks.iter().map(|t| (t.instance, t.eng_remaining(), t.research_remaining())).collect();

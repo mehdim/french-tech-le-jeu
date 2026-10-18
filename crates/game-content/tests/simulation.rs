@@ -502,3 +502,65 @@ fn energy_is_billed_only_with_own_datacenters() {
     s.recompute_metrics(&c);
     assert!((s.metrics.run_rate.energy - before * 0.5).abs() < 1e-6);
 }
+
+#[test]
+fn takeover_offers_arrive_and_a_lost_fight_ends_the_game() {
+    let c = content();
+    // Les cinq géants ont un événement d'offre et une fin correspondante.
+    for co in ["google", "microsoft", "amazon", "meta", "nvidia"] {
+        assert!(c.event(&format!("takeover_{co}")).is_some(), "offre {co}");
+        assert!(c.ending(&format!("takeover_{co}")).is_some(), "fin {co}");
+    }
+    let mut s = GameState::new(&c, 12);
+    s.start_level(&c, 14);
+    s.campaign.intro_pending = false;
+    s.events.pending = None;
+    s.events.queue.clear();
+    s.finance.cash = 50_000_000.0;
+    let mut offered = None;
+    for _ in 0..40 {
+        s.tick(&c);
+        if let Some(p) = &s.events.pending {
+            if p.event_id.starts_with("takeover_") {
+                offered = Some(p.event_id.clone());
+                break;
+            }
+            s.events.pending = None;
+        }
+    }
+    let id = offered.expect("une offre de rachat arrive au niveau 14");
+    // Résister : la défense démarre.
+    s.apply(&c, Command::ResolveEvent { choice: 0 }).unwrap();
+    let t = s.takeover.clone().expect("défense lancée");
+    assert_eq!(format!("takeover_{}", t.company), id);
+    // Sans pitch, le délai expire et le rachat passe en force.
+    let mut idle = s.clone();
+    for _ in 0..130 {
+        if idle.campaign.phase != Phase::Playing {
+            break;
+        }
+        idle.tick(&c);
+        idle.events.pending = None;
+    }
+    assert_eq!(idle.campaign.ending.as_deref(), Some(id.as_str()), "délai dépassé = rachat");
+    // Le pitch du fondateur fait monter les points ; défense prête → simulation en attente.
+    s.takeover.as_mut().unwrap().points = 960.0;
+    s.apply(&c, Command::Assign { employee: 1, assignment: Assignment::Fundraising }).unwrap();
+    for _ in 0..400 {
+        if s.takeover.as_ref().is_some_and(|t| t.ready) || s.campaign.phase != Phase::Playing {
+            break;
+        }
+        s.tick(&c);
+        s.events.pending = None;
+    }
+    assert!(s.takeover.as_ref().is_some_and(|t| t.ready), "{:?}", s.takeover);
+    assert!(!s.is_running());
+    // Un combat gagné : Veridix reste indépendante.
+    let mut won = s.clone();
+    won.apply(&c, Command::ResolveTakeover { won: true }).unwrap();
+    assert!(won.takeover.is_none() && won.campaign.phase == Phase::Playing);
+    // Un combat perdu : rachat, la partie s'arrête sur la fin de l'entreprise.
+    s.apply(&c, Command::ResolveTakeover { won: false }).unwrap();
+    assert_eq!(s.campaign.phase, Phase::Victory);
+    assert_eq!(s.campaign.ending.as_deref(), Some(id.as_str()));
+}

@@ -190,6 +190,12 @@ pub fn toasts(ctx: &egui::Context, toasts: &mut Toasts, dt: f32) {
     if toasts.0.is_empty() {
         return;
     }
+    // Une Area se met en page dans la taille de l'image précédente : sans largeur
+    // explicite, un long message peut s'écraser en colonne étroite, plus haute que
+    // large. On fixe donc la largeur de chaque bulle d'après son texte (une ligne si
+    // possible, sinon des lignes de 560 px au plus).
+    let font = egui::FontId::proportional(14.5);
+    let max_w = (ctx.content_rect().width() - 80.0).clamp(220.0, 560.0);
     egui::Area::new("toasts".into())
         .anchor(egui::Align2::CENTER_TOP, egui::vec2(0.0, 64.0))
         .order(egui::Order::Tooltip)
@@ -197,13 +203,15 @@ pub fn toasts(ctx: &egui::Context, toasts: &mut Toasts, dt: f32) {
         .show(ctx, |ui| {
             for (msg, good, ttl) in &toasts.0 {
                 let a = (ttl.min(1.0) * 255.0) as u8;
+                let natural = ctx.fonts_mut(|f| f.layout_no_wrap(msg.clone(), font.clone(), OFFWHITE).size().x);
                 egui::Frame::new()
                     .fill(Color32::from_rgba_unmultiplied(20, 26, 22, a.min(235)))
                     .stroke(egui::Stroke::new(1.5, if *good { GREEN } else { RED }))
                     .inner_margin(egui::Margin::symmetric(12, 6))
                     .corner_radius(3)
                     .show(ui, |ui| {
-                        ui.label(RichText::new(msg).color(OFFWHITE));
+                        ui.set_width(natural.clamp(120.0, max_w));
+                        ui.add(egui::Label::new(RichText::new(msg).font(font.clone()).color(OFFWHITE)).wrap());
                     });
                 ui.add_space(4.0);
             }

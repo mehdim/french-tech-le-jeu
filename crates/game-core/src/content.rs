@@ -406,6 +406,9 @@ pub struct LevelDef {
     /// Effectif minimum pour que le produit tienne la charge à ce niveau.
     #[serde(default)]
     pub staffing: Option<Staffing>,
+    /// Jour du niveau où un géant de la tech fait une offre de rachat (événements `takeover_*`).
+    #[serde(default)]
+    pub takeover_day: Option<u32>,
 }
 
 /// Effectif minimum d'un niveau : en dessous, la dette, la dérive et la fatigue s'emballent.

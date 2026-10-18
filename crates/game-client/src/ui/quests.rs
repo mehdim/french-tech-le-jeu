@@ -12,8 +12,8 @@ use game_core::funding::{AppStatus, RaiseStatus};
 pub fn left(root: &mut egui::Ui, c: &mut Ctx, narrow: bool) {
     egui::Panel::left("quests")
         .resizable(true)
-        .default_size(if narrow { 240.0 } else { 290.0 })
-        .min_size(220.0)
+        .default_size(if narrow { 250.0 } else { 310.0 })
+        .min_size(230.0)
         .max_size(420.0)
         .frame(panel_frame())
         .show(root, |ui| {
@@ -74,6 +74,17 @@ fn body(ui: &mut egui::Ui, c: &mut Ctx) {
     }
 }
 
+fn company_name(id: &str) -> &str {
+    match id {
+        "google" => "Google",
+        "microsoft" => "Microsoft",
+        "amazon" => "Amazon",
+        "meta" => "Meta",
+        "nvidia" => "NVIDIA",
+        other => other,
+    }
+}
+
 fn fmt_progress(cur: f64, target: f64) -> String {
     if target >= 1000.0 {
         format!("{} / {}", dialogue::money(cur), dialogue::money(target))
@@ -121,6 +132,17 @@ fn alerts(ui: &mut egui::Ui, c: &mut Ctx) {
         && !g.employees.iter().any(|e| e.assignment == Assignment::Admin || (e.role == game_core::types::Role::Cfo))
     {
         list.push(("Dossier en attente : affectez quelqu'un à « Administratif ».".into(), ORANGE, Some(Tab::Funding)));
+    }
+    if let Some(t) = &g.takeover
+        && !t.ready
+    {
+        let left = t.deadline_day.saturating_sub(g.day);
+        list.push((
+            format!("⚔ Offre de rachat ({}) : défense {:.0}/{:.0} pts, {left} j restants. Affectez le fondateur ou le CFO à « Levée de fonds ».",
+                company_name(&t.company), t.points, t.required),
+            RED,
+            Some(Tab::Team),
+        ));
     }
     if let Some(fr) = &g.funding.fundraising {
         if fr.status == RaiseStatus::Pitching && !g.employees.iter().any(|e| e.assignment == Assignment::Fundraising) {

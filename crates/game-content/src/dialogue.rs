@@ -238,6 +238,8 @@ pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
             let (label, up_is_good) = counter_label(key);
             (format!("{}{n} {label}", if *n >= 0 { "+" } else { "" }), (*n >= 0) == up_is_good)
         }
+        Effect::StartTakeover(_) => ("Défense anti-rachat : 1 000 pts de levée de fonds, puis combat".into(), true),
+        Effect::SellTo(_) => ("Rachat : la partie s'arrête".into(), false),
         Effect::EnergyMul(f) => (format!("Énergie par analyse {}", signed((f - 1.0) * 100.0, " %")), *f <= 1.0),
     })
 }
@@ -303,6 +305,7 @@ pub fn condition_text(c: &Condition) -> String {
         Condition::DayInLevelAtLeast(d) => format!("{d} jours dans le niveau"),
         Condition::LeadsAtLeast(v) => format!("{} leads", decimal(*v, 0)),
         Condition::Launched => "produit lancé".into(),
+        Condition::MrrHeldAtLeast { mrr, days } => format!("MRR ≥ {} pendant {} jours", money(*mrr), days),
         Condition::MarketOpened(m) => format!("ouvrir {}", market_label(m)),
         Condition::CounterAtLeast(k, n) => format!("{n} {}", counter_label(k).0),
         Condition::EngineersFullTimeAtLeast(n) => format!("{n} ingénieur·es à plein temps"),

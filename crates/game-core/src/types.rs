@@ -201,6 +201,9 @@ pub enum Condition {
     NetBurnAtMost(f64),
     ValuationAtLeast(f64),
     OfficeTierAtLeast(u32),
+    /// Le MRR est resté au moins à ce niveau sans interruption pendant `days` jours
+    /// (relevés hebdomadaires).
+    MrrHeldAtLeast { mrr: f64, days: u32 },
     /// Le marché (ou la filiale) est ouvert.
     MarketOpened(String),
     /// Un compteur d'histoire (recrues locales, accords d'État, contrats…) a atteint ce seuil.
@@ -292,6 +295,10 @@ pub enum Effect {
     Counter(String, i32),
     /// Multiplie durablement l'énergie consommée pour 1 000 analyses.
     EnergyMul(f64),
+    /// Refuse une offre de rachat : la défense commence (points de levée de fonds, puis combat).
+    StartTakeover(String),
+    /// Accepte le rachat par cette entreprise : la partie s'arrête.
+    SellTo(String),
 }
 
 /// Les niveaux d'ancienneté influent sur le salaire et la production.

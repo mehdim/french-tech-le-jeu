@@ -86,10 +86,31 @@ pub struct GameState {
     /// Compteurs d'histoire (recrues à San Francisco, accords de Davos…).
     #[serde(default)]
     pub counters: BTreeMap<String, u32>,
+    /// Défense en cours contre une offre de rachat hostile.
+    #[serde(default)]
+    pub takeover: Option<Takeover>,
     #[serde(skip)]
     pub metrics: Metrics,
     #[serde(skip)]
     pub cues: Vec<Cue>,
+}
+
+/// Points de « levée de fonds » nécessaires pour préparer la défense contre un rachat.
+pub const TAKEOVER_POINTS: f64 = 1000.0;
+/// Délai (jours) pour réunir ces points avant que le rachat ne passe en force.
+pub const TAKEOVER_DAYS: u32 = 120;
+
+/// Une offre de rachat refusée : le fondateur (ou le CFO) prépare la défense, puis
+/// affronte le patron des acquisitions de l'entreprise en face à face.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Takeover {
+    /// Identifiant de l'entreprise (google, microsoft, amazon, meta, nvidia).
+    pub company: String,
+    pub points: f64,
+    pub required: f64,
+    pub deadline_day: u32,
+    /// Défense prête : la simulation attend l'issue du combat.
+    pub ready: bool,
 }
 
 /// Commandes du joueur : le seul moyen pour la couche de présentation de modifier la partie.
@@ -121,6 +142,8 @@ pub enum Command {
     AdvanceLevel,
     ChooseMentor { mentor: String },
     ConsultMentor { mentor: String },
+    /// Issue du combat contre le patron des acquisitions (défaite = rachat, fin de partie).
+    ResolveTakeover { won: bool },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -224,6 +247,7 @@ impl GameState {
             last_work: WorkSummary::default(),
             mentors: Default::default(),
             counters: BTreeMap::new(),
+            takeover: None,
             metrics: Metrics::default(),
             cues: Vec::new(),
         };
@@ -270,6 +294,7 @@ impl GameState {
         self.campaign.phase == Phase::Playing
             && self.events.pending.is_none()
             && !self.campaign.intro_pending
+            && !self.takeover.as_ref().is_some_and(|t| t.ready)
     }
 
     // ------------------------------------------------------------------
@@ -652,6 +677,23 @@ impl GameState {
 
     fn advance_fundraising(&mut self, content: &Content, work: &Work) {
         let day = self.day;
+        // Une défense anti-rachat : le temps de pitch compte aussi pour la levée en cours
+        // (les mêmes rendez-vous rassurent les investisseurs).
+        if let Some(t) = self.takeover.as_mut()
+            && !t.ready
+        {
+            t.points = (t.points + work.pitch).min(t.required);
+            if t.points >= t.required {
+                t.ready = true;
+                self.cues.push(Cue::EventPopup);
+                self.log(Tone::Story, Msg::Text("Défense prête : le face-à-face commence.".into()));
+            } else if day >= t.deadline_day {
+                let company = t.company.clone();
+                self.log(Tone::Bad, Msg::Text("Délai dépassé : la défense n'est pas prête, le rachat passe en force.".into()));
+                self.sell_to(&company);
+                return;
+            }
+        }
         let Some(fr) = self.funding.fundraising.as_mut() else { return };
         match fr.status {
             RaiseStatus::Pitching => {
@@ -1155,6 +1197,25 @@ impl GameState {
             let next = self.events.queue.remove(0);
             self.fire_event(content, &next.event_id, next.boss);
             return;
+        }
+        // Offre de rachat d'un géant de la tech (niveaux 14 et 15).
+        if let Some(d) = content.level(self.campaign.level).and_then(|l| l.takeover_day) {
+            let seen = format!("takeover_seen_{}", self.campaign.level);
+            if self.day_in_level() >= d && !self.flags.contains(&seen) && self.takeover.is_none() {
+                let offers: Vec<String> = content
+                    .events
+                    .iter()
+                    .filter_map(|e| e.id.strip_prefix("takeover_").map(|c| (e.id.clone(), c.to_string())))
+                    .filter(|(_, c)| !self.flags.contains(&format!("takeover_by_{c}")))
+                    .map(|(id, _)| id)
+                    .collect();
+                self.flags.insert(seen);
+                if !offers.is_empty() {
+                    let id = offers[self.rng.random_range(0..offers.len())].clone();
+                    self.fire_event(content, &id, true);
+                    return;
+                }
+            }
         }
         // Événement majeur du niveau.
         if !self.campaign.boss_fired
@@ -1894,6 +1955,24 @@ impl GameState {
             }
             Command::ChooseMentor { mentor } => self.choose_mentor(content, &mentor),
             Command::ConsultMentor { mentor } => self.consult_mentor(content, &mentor),
+            Command::ResolveTakeover { won } => {
+                let t = self.takeover.clone().ok_or(CmdError::NotFound)?;
+                if !t.ready {
+                    return Err(CmdError::Invalid("La défense n'est pas encore prête"));
+                }
+                if won {
+                    self.takeover = None;
+                    self.flags.insert(format!("repelled_{}", t.company));
+                    self.reputation = (self.reputation + 8.0).min(100.0);
+                    for e in &mut self.employees {
+                        e.morale = (e.morale + 8.0).min(100.0);
+                    }
+                    self.log(Tone::Good, Msg::Text("Offre de rachat repoussée ! Veridix reste indépendante. Réputation +8, moral +8.".into()));
+                } else {
+                    self.sell_to(&t.company);
+                }
+                Ok(())
+            }
             Command::DismissIntro => {
                 self.campaign.intro_pending = false;
                 Ok(())

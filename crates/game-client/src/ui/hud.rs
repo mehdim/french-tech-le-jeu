@@ -55,7 +55,10 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
         .frame(egui::Frame::new().fill(NEAR_BLACK).inner_margin(egui::Margin::symmetric(10, 6)))
         .show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                ui.spacing_mut().item_spacing.x = 16.0;
+                // Sur les petits écrans, on retire les indicateurs secondaires plutôt que de
+                // les laisser passer sous les boutons de vitesse.
+                let width = ui.available_width();
+                ui.spacing_mut().item_spacing.x = if width < 1200.0 { 10.0 } else { 16.0 };
                 ui.label(RichText::new("VERIDIX").font(pixel(22.0)).color(GREEN))
                     .on_hover_text("Détection de contenus générés par IA. « Fiable » à 53 % au départ.");
                 let g = &c.game.0;
@@ -71,6 +74,7 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
                     "Mois avant d'être à court d'argent au rythme actuel.\nRunway = trésorerie / burn net, burn net = dépenses − revenus.");
                 stat(ui, c, "people", format!("{} / {} places", g.employees.len(), m.seats), if g.employees.len() as u32 > m.seats { ORANGE } else { OFFWHITE }, "Équipe",
                     "Personnes / places assises. Sans bureau, chacun travaille moins bien et le moral baisse.");
+                if width >= 1000.0 {
                 let cust = if g.product.launched { format!("{}", m.paying_customers) } else { format!("{} (bêta)", m.customers) };
                 stat(ui, c, "customers", cust, OFFWHITE, "Clients", "Comptes clients actifs. Avant le lancement, ce sont des bêta-testeurs gratuits.");
                 // Sans clients, le churn n'est qu'une projection pour le produit
@@ -80,8 +84,11 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
                 } else {
                     (format!("{:.1} %/mois", m.churn), if m.churn > 10.0 { RED } else if m.churn > 6.0 { ORANGE } else { GREEN })
                 };
+                if width >= 1180.0 {
                 stat(ui, c, "churn", churn_txt, churn_col, "Churn",
                     "Part des clients qui résilient chaque mois (projection).\nDépend de la qualité, des faux positifs, du prix, de la concurrence, du support et des incidents.");
+                }
+                }
                 stat(ui, c, "day", date_label(g.day), LIGHTGRAY, &format!("Jour {} · niveau {}", g.day, g.campaign.level), "Un jour simulé par tick ; un mois comptable = 28 jours.");
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

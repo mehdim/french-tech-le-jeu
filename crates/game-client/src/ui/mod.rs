@@ -5,6 +5,8 @@
 
 mod dialogs;
 mod feed;
+mod fight;
+mod finale;
 mod finance;
 mod funding;
 mod hud;
@@ -77,11 +79,19 @@ pub struct UiState {
 pub struct Toasts(pub Vec<(String, bool, f32)>);
 
 impl Toasts {
+    /// Les messages longs (issues d'événements) restent affichés plus longtemps.
+    fn ttl(msg: &str, base: f32) -> f32 {
+        (base + msg.chars().count() as f32 / 28.0).clamp(base, 10.0)
+    }
     pub fn push_bad(&mut self, msg: impl Into<String>) {
-        self.0.push((msg.into(), false, 4.0));
+        let m = msg.into();
+        let t = Self::ttl(&m, 4.0);
+        self.0.push((m, false, t));
     }
     pub fn push_good(&mut self, msg: impl Into<String>) {
-        self.0.push((msg.into(), true, 3.5));
+        let m = msg.into();
+        let t = Self::ttl(&m, 3.5);
+        self.0.push((m, true, t));
     }
 }
 

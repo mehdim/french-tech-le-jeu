@@ -26,5 +26,24 @@ fn main() {
     s.campaign.intro_pending = false;
     s.recompute_metrics(&c);
     std::fs::write(format!("{out}/level16.json"), to_save_string(&s, "démo")).unwrap();
+    // Une défense anti-rachat prête, par entreprise, pour tester les combats.
+    for company in ["google", "microsoft", "amazon", "meta", "nvidia"] {
+        let mut e = s.clone();
+        e.takeover = Some(game_core::simulation::Takeover {
+            company: company.to_string(),
+            points: 1000.0,
+            required: 1000.0,
+            deadline_day: e.day + 30,
+            ready: true,
+        });
+        std::fs::write(format!("{out}/fight_{company}.json"), to_save_string(&e, "démo")).unwrap();
+    }
+    // Une sauvegarde par fin, pour tester les animations et les mini-jeux.
+    for ending in ["unicorn", "ipo", "acquisition", "profitable", "commons"] {
+        let mut e = s.clone();
+        e.campaign.phase = game_core::missions::Phase::Victory;
+        e.campaign.ending = Some(ending.to_string());
+        std::fs::write(format!("{out}/ending_{ending}.json"), to_save_string(&e, "démo")).unwrap();
+    }
     println!("niveau {} jour {} énergie {:.0} MWh", s.campaign.level, s.day, s.metrics.energy_mwh);
 }

@@ -44,7 +44,9 @@ pub fn in_game(ctx: &egui::Context, c: &mut Ctx) {
     if c.ui.show_help {
         help(ctx, c);
     }
-    if c.game.0.campaign.intro_pending {
+    if c.game.0.takeover.as_ref().is_some_and(|t| t.ready) {
+        super::fight::show(ctx, c);
+    } else if c.game.0.campaign.intro_pending {
         intro(ctx, c);
     } else if c.game.0.events.pending.is_some() {
         event(ctx, c);
@@ -59,7 +61,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
     // Entrée fait avancer l'histoire (réplique suivante, puis « C'est parti ! »).
     let enter = ctx.input(|i| i.key_pressed(egui::Key::Enter));
     modal(ctx, "intro", 680.0, |ui| {
-        ui.label(RichText::new(format!("{} — NIVEAU {}/{}", def.subtitle.to_uppercase(), level, c.content.0.levels.len())).font(pixel(11.0)).color(MUTED));
+        ui.label(RichText::new(format!("NIVEAU {}/{}", level, c.content.0.levels.len())).font(pixel(11.0)).color(MUTED));
         ui.label(RichText::new(&def.title).font(pixel(33.0)).color(GREEN));
         ui.add_space(8.0);
         if idx < n {
@@ -138,7 +140,7 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
                         if i < keys.len() {
                             ui.label(RichText::new(format!("{}", i + 1)).font(pixel(13.0)).color(if allowed { GREEN } else { MUTED }));
                         }
-                        ui.label(RichText::new(&ch.label).strong().size(15.5).color(if allowed { OFFWHITE } else { MUTED }));
+                        ui.add(egui::Label::new(RichText::new(&ch.label).strong().size(15.5).color(if allowed { OFFWHITE } else { MUTED })).wrap());
                     });
                     if !ch.description.is_empty() {
                         ui.add(egui::Label::new(RichText::new(&ch.description).size(12.5).color(LIGHTGRAY)).wrap());
@@ -248,6 +250,12 @@ pub fn game_over(ctx: &egui::Context, c: &mut Ctx) {
 pub fn victory(ctx: &egui::Context, c: &mut Ctx) {
     let ending_id = c.game.0.campaign.ending.clone().unwrap_or_else(|| "acquisition".into());
     let Some(ending) = c.content.0.ending(&ending_id).cloned() else { return };
+    // D'abord l'animation et le mini-jeu propres à cette fin, puis l'épilogue.
+    // (Les rachats par un géant de la tech n'ont pas de mini-jeu : le combat a déjà eu lieu.)
+    let has_finale = ["unicorn", "ipo", "acquisition", "profitable", "commons"].contains(&ending.id.as_str());
+    if has_finale && !super::finale::show(ctx, c, &ending.id, &ending.title) {
+        return;
+    }
     let g = &c.game.0;
     let stats = format!(
         "{} jours · MRR final {} · valorisation {} · votre part {} · {} recrutements · {} incidents · {} cafés · {} pages de paperasse",
@@ -276,7 +284,10 @@ pub fn victory(ctx: &egui::Context, c: &mut Ctx) {
         }
         muted(ui, stats);
         ui.add_space(10.0);
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
+            if big_button(ui, "Rejouer le mini-jeu", true, 260.0).clicked() {
+                super::finale::replay(ui.ctx());
+            }
             if big_button(ui, "Crédits", true, 160.0).clicked() {
                 c.ui.menu_page = super::MenuPage::Credits;
                 super::menu::to_main_menu(c);

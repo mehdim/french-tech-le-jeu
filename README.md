@@ -110,14 +110,37 @@ déplacement se fait donc avec ZQSD.
   - **14 — La Grande Muraille des Tokens** : apprendre le mandarin, recruter
     des commerciaux chinois, vendre un SDK de watermarking aux fabricants de
     modèles chinois, et ne pas se faire espionner (clé USB en forme de panda) ;
-  - **15 — Davos, Mon Amour** : le fondateur part au Forum, reçoit cinq chefs
+  - **15 — Davos, Mon Amour** : le fondateur part au Forum, reçoit huit chefs
     d'État et doit négocier politiques industrielles et investissements pour
-    éviter les lois taillées sur mesure contre Veridix ; puis préparer la
-    suite : Série C, IPO ou rendez-vous avec NVIDIA ;
+    éviter les lois taillées sur mesure contre Veridix. Il faut **10 accords
+    d'État** (Davos, visites d'État répétables, dîners officiels) ; puis
+    préparer la suite : Série C, IPO ou rendez-vous avec NVIDIA ;
   - **16 — Sobriété ou Surchauffe** : Veridix a ses propres datacenters et
     consomme trop d'électricité. Il faut diviser l'énergie par analyse par
     deux, récupérer la chaleur, signer de l'électricité bas carbone, garder ses
-    marges… avant la décision finale.
+    marges, et **tenir 5 M€ de MRR pendant 6 mois (ou toucher 100 M€ d'ARR
+    un jour)** avant de boucler la campagne.
+- **Des événements satiriques sur trois écosystèmes** (niveaux 13 à 16) :
+  Europe (annexe XLVII du règlement sur l'IA, bannière de consentement à
+  14 cases, taxe numérique version 7, droit à un humain…), États-Unis
+  (droits de douane sur les algorithmes, cinquante lois sur l'IA, loterie des
+  visas, pub du Super Bowl…) et Chine (registre des algorithmes, guerre des
+  prix des tokens, clone sur la messagerie, contrôles à l'export des puces…).
+  Chaque décision politique change les lois, les prix ou les coûts.
+- **Des offres de rachat hostiles** aux niveaux 14 et 15 : Google, Microsoft,
+  Amazon, Meta ou NVIDIA veulent racheter Veridix. Accepter met fin à la
+  partie ; refuser lance une défense de 1 000 points de « Levée de fonds »
+  (fondateur ou CFO) en 120 jours, puis un **face-à-face au tour par tour**
+  contre le ou la responsable des acquisitions de l'entreprise (personnages
+  fictifs en pixel art, dialogues épiques avant et pendant le combat, jauge de
+  visée, appel aux mentors d'A la French, pilule empoisonnée). Défaite : le
+  rachat est signé et la partie s'arrête.
+- **Des projets somptuaires** pour les niveaux 14 à 16, jusqu'à 20 000
+  points d'ingénierie, 10 000 points de recherche et 200 M€ : détecteur
+  multimodal, supercalculateur « Jules-Verne », Veridix-1 (2 000 milliards de
+  paramètres), datacenter en orbite, Veridix OS, datacenter sous-marin au
+  large de Brest, puces neuromorphiques, contrat de fusion nucléaire, et
+  « l'Auditeur », une IA qui certifie toutes les autres.
 - **Un effectif minimum à partir du niveau 10** : 20 salariés dont
   4 ingénieur·es à plein temps (développement ou infrastructure). En dessous,
   la dette technique, la dérive et la fatigue s'emballent. Les chantiers de fin
@@ -125,8 +148,18 @@ déplacement se fait donc avec ZQSD.
   fondation maison, préparation à l'IPO…) coûtent des centaines de milliers
   d'euros et des mois d'ingénierie. Au niveau 11, Veridix s'installe d'office
   au campus Station F si ce n'est pas déjà fait.
-- **5 fins illustrées** : licorne mondiale (Série C), introduction en
-  Bourse, rachat par NVIDIA, entreprise rentable, communs.
+- **5 fins principales illustrées, chacune avec son animation et son
+  mini-jeu de 30 secondes** avant l'épilogue (plus 5 fins de rachat) :
+  - licorne mondiale (Série C) : la licorne vole et attrape les sacs de la
+    Série C en évitant les nuages de « down round » ;
+  - introduction en Bourse : la cloche sonne, puis il faut tenir le cours de
+    VRDX en démentant les rumeurs et en saisissant les bonnes nouvelles ;
+  - rachat par NVIDIA : pluie de GPU à attraper dans la baie Veridix, sans
+    les clauses d'earn-out ;
+  - entreprise rentable : les pièces s'empilent, puis il faut couper les
+    dépenses inutiles (offsite à Ibiza, kombucha bio…) sans couper les clients ;
+  - communs : l'arbre de commits pousse, puis « merge ou close » sur une pluie
+    de pull requests.
 - **Trois mentors d'A la French.** Au début de la campagne, vous choisissez
   un mentor principal, dont le bonus est permanent :
   - **Mehdi** (APIs, écosystème, business) : conversion grands comptes et ETI, réputation ;
@@ -149,7 +182,7 @@ déplacement se fait donc avec ZQSD.
   à la vitesse 1× ; mois comptables de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
   runway, CAC, LTV, ARPA, valorisation et table de capitalisation.
-- **Une R&D en IA qui ne « résout » jamais la détection** : 70 chantiers
+- **Une R&D en IA qui ne « résout » jamais la détection** : 85 chantiers
   produit, recherche, entreprise et pivot IA native, avec dépendances, points
   d'ingénierie et de recherche, coût, risque de dette technique et approche
   « vite fait » ou « propre ». La dérive des données et les nouveaux modèles
@@ -167,7 +200,7 @@ déplacement se fait donc avec ZQSD.
   versements échelonnés ; allègements façon JEI/CIR ; quatre business angels
   récurrents (Jean-Michel Exit 2001, Patrick Blockchain, Bernard EBITDA,
   Sophie Term Sheet) ; des VC du seed à la série C, avec dilution.
-- **98 événements pilotés par les données** (72 aléatoires, 26 scénarisés), avec conditions,
+- **129 événements pilotés par les données** (94 aléatoires, 35 scénarisés), avec conditions,
   pondérations, délais de carence et choix aux effets immédiats et différés
   (l'incident Kubernetes, le dilemme du modèle open-weight chinois,
   l'influenceur LinkedIn, la clé d'API publiée par le stagiaire…).

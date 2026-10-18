@@ -7,6 +7,15 @@ use crate::simulation::GameState;
 use crate::types::{Effect, Modifier, Segment};
 
 impl GameState {
+    /// Rachat effectif par un géant de la tech : la partie s'arrête sur la fin correspondante.
+    pub fn sell_to(&mut self, company: &str) {
+        self.takeover = None;
+        self.campaign.ending = Some(format!("takeover_{company}"));
+        self.campaign.phase = crate::missions::Phase::Victory;
+        self.cues.push(Cue::Victory);
+        self.log(Tone::Story, Msg::Text("Veridix est rachetée. La partie s'arrête ici.".into()));
+    }
+
     pub fn apply_effects(&mut self, content: &Content, effects: &[Effect], source: &str) {
         for e in effects {
             self.apply_effect(content, e, source);
@@ -161,6 +170,21 @@ impl GameState {
                 *v = (*v as i64 + *n as i64).max(0) as u32;
             }
             Effect::EnergyMul(f) => self.product.energy_per_k *= f.max(0.01),
+            Effect::StartTakeover(company) => {
+                self.flags.insert(format!("takeover_by_{company}"));
+                self.takeover = Some(crate::simulation::Takeover {
+                    company: company.clone(),
+                    points: 0.0,
+                    required: crate::simulation::TAKEOVER_POINTS,
+                    deadline_day: self.day + crate::simulation::TAKEOVER_DAYS,
+                    ready: false,
+                });
+                self.log(Tone::Story, Msg::Text("Défense anti-rachat lancée : affectez le fondateur ou le CFO à « Levée de fonds ».".into()));
+            }
+            Effect::SellTo(company) => {
+                self.flags.insert(format!("takeover_by_{company}"));
+                self.sell_to(company);
+            }
             Effect::ChooseMentor(id) => {
                 let _ = self.choose_mentor(content, id);
             }

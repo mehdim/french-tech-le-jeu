@@ -58,6 +58,21 @@ impl GameState {
         if start > 0.0 { (1.0 - self.product.energy_per_k / start).max(0.0) } else { 0.0 }
     }
 
+    /// Nombre de jours d'affilée (relevés hebdomadaires compris) où le MRR est resté ≥ `min`.
+    pub fn mrr_held_days(&self, min: f64) -> u32 {
+        if self.metrics.mrr < min {
+            return 0;
+        }
+        let mut since = self.day;
+        for &(day, _, mrr) in self.finance.history.iter().rev() {
+            if mrr < min {
+                break;
+            }
+            since = day;
+        }
+        self.day - since
+    }
+
     pub fn paying_customers(&self) -> u32 {
         if self.product.launched { self.market.total_customers() } else { 0 }
     }
@@ -141,6 +156,7 @@ impl GameState {
             Condition::NetBurnAtMost(v) => m.net_burn <= *v,
             Condition::ValuationAtLeast(v) => m.valuation >= *v,
             Condition::OfficeTierAtLeast(t) => self.office.tier >= *t,
+            Condition::MrrHeldAtLeast { mrr, days } => self.mrr_held_days(*mrr) >= *days,
             Condition::MarketOpened(id) => self.market.markets.iter().any(|m| m == id),
             Condition::CounterAtLeast(k, n) => self.counter(k) >= *n,
             Condition::EngineersFullTimeAtLeast(n) => self.full_time_engineers() >= *n,
@@ -215,6 +231,7 @@ impl GameState {
             Condition::ValuationAtLeast(v) => Progress::up(m.valuation, *v),
             Condition::LeadsAtLeast(v) => Progress::up(m.leads, *v),
             Condition::CounterAtLeast(k, n) => Progress::up(self.counter(k) as f64, *n as f64),
+            Condition::MrrHeldAtLeast { mrr, days } => Progress::up(self.mrr_held_days(*mrr) as f64, *days as f64),
             Condition::EngineersFullTimeAtLeast(n) => Progress::up(self.full_time_engineers() as f64, *n as f64),
             Condition::EnergyReducedBy(f) => Progress::up(self.energy_reduction() * 100.0, f * 100.0),
             _ => None,
