@@ -9,6 +9,7 @@ pub mod autopilot;
 pub mod balancing;
 pub mod characters;
 pub mod dialogue;
+pub mod hero;
 pub mod levels;
 
 use game_core::content::{

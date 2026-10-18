@@ -348,7 +348,7 @@ fn autopilot_completes_the_campaign() {
     for seed in [1u64, 2, 3] {
         let s = autopilot::play_campaign(&c, seed, 2000);
         assert_eq!(s.campaign.phase, Phase::Victory, "graine {seed} : bloqué au niveau {} jour {}", s.campaign.level, s.day);
-        assert_eq!(s.campaign.results.len(), c.levels.len());
+        assert_eq!(s.campaign.results.len(), c.campaign_length(&s.flags));
         assert!(s.campaign.ending.is_some());
     }
 }
@@ -563,4 +563,40 @@ fn takeover_offers_arrive_and_a_lost_fight_ends_the_game() {
     s.apply(&c, Command::ResolveTakeover { won: false }).unwrap();
     assert_eq!(s.campaign.phase, Phase::Victory);
     assert_eq!(s.campaign.ending.as_deref(), Some(id.as_str()));
+}
+
+#[test]
+fn ipo_and_nvidia_endings_open_a_bonus_level() {
+    let c = content();
+    for (ending, level, id) in [("ending_ipo", 17, "ipo"), ("ending_acquisition", 18, "acquisition")] {
+        let s = autopilot::play_campaign_choosing(&c, 1, 2500, ending);
+        assert_eq!(s.campaign.phase, Phase::Victory, "{ending}");
+        assert_eq!(s.campaign.level, level, "{ending} : le niveau bonus est joué");
+        assert_eq!(s.campaign.ending.as_deref(), Some(id));
+        assert!(s.campaign.results.iter().any(|r| r.level == 16) && s.campaign.results.iter().any(|r| r.level == level));
+        assert!(!s.campaign.results.iter().any(|r| r.level == 17 + 18 - level), "un seul niveau bonus");
+    }
+    // Les autres fins s'arrêtent au niveau 16.
+    let s = autopilot::play_campaign(&c, 1, 2500);
+    assert_eq!(s.campaign.phase, Phase::Victory);
+    assert_eq!(s.campaign.level, 16);
+}
+
+#[test]
+fn the_hero_gets_a_name_and_a_look() {
+    let c = content();
+    let mut s = GameState::new(&c, 4);
+    s.set_founder("  Camille Dupont  ", true);
+    assert_eq!(s.founder.name, "Camille Dupont");
+    assert!(s.founder.female);
+    let f = s.employees.iter().find(|e| e.role == Role::Founder).unwrap();
+    assert_eq!(f.name, "Camille Dupont");
+    assert_eq!(f.look, 1);
+    s.set_founder("", false);
+    assert_eq!(s.founder.name, "Camille");
+    // Les anciennes sauvegardes, sans profil, se chargent avec un profil par défaut.
+    let mut v = serde_json::to_value(&s).unwrap();
+    v.as_object_mut().unwrap().remove("founder");
+    let back: GameState = serde_json::from_value(v).unwrap();
+    assert_eq!(back.founder.name, "Camille");
 }

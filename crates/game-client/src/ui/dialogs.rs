@@ -6,7 +6,7 @@ use super::widgets::*;
 use super::Ctx;
 use crate::states::AppState;
 use bevy_egui::egui::{self, RichText};
-use game_content::characters::portrait_for;
+use game_content::hero;
 use game_content::dialogue;
 use game_core::Command;
 use game_core::content::Line;
@@ -30,12 +30,17 @@ fn modal(ctx: &egui::Context, id: &str, width: f32, add: impl FnOnce(&mut egui::
         });
 }
 
+/// Texte accordé au héros ou à l'héroïne de la partie ({nom}, fondateur/fondatrice…).
+pub fn tx(c: &Ctx, s: &str) -> String {
+    hero::personalize(s, &c.game.0.founder)
+}
+
 fn speaker_line(ui: &mut egui::Ui, c: &Ctx, line: &Line) {
     ui.horizontal_top(|ui| {
-        portrait(ui, c.tex, c.atlas, portrait_for(&line.speaker), 72.0);
+        portrait(ui, c.tex, c.atlas, hero::portrait(&line.speaker, &c.game.0.founder), 72.0);
         ui.vertical(|ui| {
-            ui.label(RichText::new(&line.speaker).font(pixel(11.0)).color(GREEN));
-            ui.add(egui::Label::new(RichText::new(&line.text).size(15.5).color(OFFWHITE)).wrap());
+            ui.label(RichText::new(hero::speaker(&line.speaker, &c.game.0.founder)).font(pixel(11.0)).color(GREEN));
+            ui.add(egui::Label::new(RichText::new(tx(c, &line.text)).size(15.5).color(OFFWHITE)).wrap());
         });
     });
 }
@@ -61,7 +66,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
     // Entrée fait avancer l'histoire (réplique suivante, puis « C'est parti ! »).
     let enter = ctx.input(|i| i.key_pressed(egui::Key::Enter));
     modal(ctx, "intro", 680.0, |ui| {
-        ui.label(RichText::new(format!("NIVEAU {}/{}", level, c.content.0.levels.len())).font(pixel(11.0)).color(MUTED));
+        ui.label(RichText::new(format!("NIVEAU {}/{}", c.content.0.campaign_position(level, &c.game.0.flags), c.content.0.campaign_length(&c.game.0.flags))).font(pixel(11.0)).color(MUTED));
         ui.label(RichText::new(&def.title).font(pixel(33.0)).color(GREEN));
         ui.add_space(8.0);
         if idx < n {
@@ -79,7 +84,7 @@ fn intro(ctx: &egui::Context, c: &mut Ctx) {
                 }
             });
         } else {
-            ui.label(RichText::new(&def.objective).size(15.5).color(OFFWHITE));
+            ui.add(egui::Label::new(RichText::new(tx(c, &def.objective)).size(15.5).color(OFFWHITE)).wrap());
             ui.add_space(6.0);
             subheading(ui, "Objectifs");
             for q in &def.quests {
@@ -114,17 +119,17 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
         ui.label(RichText::new(if boss { "ÉVÉNEMENT MAJEUR" } else { "ÉVÉNEMENT" }).font(pixel(11.0)).color(if boss { ORANGE } else { MUTED }));
         ui.horizontal_top(|ui| {
             if !def.speaker.is_empty() {
-                portrait(ui, c.tex, c.atlas, portrait_for(&def.speaker), 72.0);
+                portrait(ui, c.tex, c.atlas, hero::portrait(&def.speaker, &c.game.0.founder), 72.0);
             }
             ui.vertical(|ui| {
-                ui.label(RichText::new(&def.title).font(pixel(22.0)).color(GREEN));
+                ui.add(egui::Label::new(RichText::new(tx(c, &def.title)).font(pixel(22.0)).color(GREEN)).wrap());
                 if !def.speaker.is_empty() {
-                    ui.label(RichText::new(&def.speaker).size(12.5).color(MUTED));
+                    ui.label(RichText::new(hero::speaker(&def.speaker, &c.game.0.founder)).size(12.5).color(MUTED));
                 }
             });
         });
         ui.add_space(6.0);
-        ui.add(egui::Label::new(RichText::new(&def.description).size(15.0)).wrap());
+        ui.add(egui::Label::new(RichText::new(tx(c, &def.description)).size(15.0)).wrap());
         if !def.immediate.is_empty() {
             ui.add_space(4.0);
             effects_list(ui, &def.immediate);
@@ -140,7 +145,7 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
                         if i < keys.len() {
                             ui.label(RichText::new(format!("{}", i + 1)).font(pixel(13.0)).color(if allowed { GREEN } else { MUTED }));
                         }
-                        ui.add(egui::Label::new(RichText::new(&ch.label).strong().size(15.5).color(if allowed { OFFWHITE } else { MUTED })).wrap());
+                        ui.add(egui::Label::new(RichText::new(tx(c, &ch.label)).strong().size(15.5).color(if allowed { OFFWHITE } else { MUTED })).wrap());
                     });
                     if !ch.description.is_empty() {
                         ui.add(egui::Label::new(RichText::new(&ch.description).size(12.5).color(LIGHTGRAY)).wrap());
@@ -167,7 +172,7 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
             if allowed && (r.clicked() || key_choice == Some(i)) {
                 c.run(Command::ResolveEvent { choice: i });
                 if !ch.outcome.is_empty() {
-                    c.toasts.push_good(ch.outcome.clone());
+                    c.toasts.push_good(tx(c, &ch.outcome));
                 }
             }
             ui.add_space(4.0);
@@ -178,7 +183,7 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
 pub fn mission_complete(ctx: &egui::Context, c: &mut Ctx) {
     let level = c.game.0.campaign.level;
     let Some(def) = c.content.0.level(level).cloned() else { return };
-    let next = c.content.0.level(level + 1).cloned();
+    let next = c.content.0.next_level(level, &c.game.0.flags).and_then(|n| c.content.0.level(n)).cloned();
     modal(ctx, "mission_complete", 660.0, |ui| {
         ui.label(RichText::new("MISSION ACCOMPLIE").font(pixel(11.0)).color(GREEN));
         ui.label(RichText::new(&def.title).font(pixel(33.0)).color(GREEN));
@@ -200,7 +205,7 @@ pub fn mission_complete(ctx: &egui::Context, c: &mut Ctx) {
         if let Some(n) = next {
             ui.add_space(8.0);
             ui.label(RichText::new(format!("Prochain niveau : {}", n.title)).font(pixel(22.0)).color(OFFWHITE));
-            muted(ui, n.objective.clone());
+            muted(ui, tx(c, &n.objective));
         }
         ui.add_space(10.0);
         if big_button(ui, "Niveau suivant ▸", true, 260.0).clicked()
@@ -276,7 +281,7 @@ pub fn victory(ctx: &egui::Context, c: &mut Ctx) {
             ui.add(egui::Image::from_texture(egui::load::SizedTexture::new(*id, egui::vec2(w, w * 90.0 / 160.0))).texture_options(egui::TextureOptions::NEAREST));
         }
         ui.add_space(6.0);
-        ui.add(egui::Label::new(RichText::new(&ending.headline).italics().size(15.0).color(OFFWHITE)).wrap());
+        ui.add(egui::Label::new(RichText::new(tx(c, &ending.headline)).italics().size(15.0).color(OFFWHITE)).wrap());
         ui.add_space(6.0);
         for line in &ending.epilogue {
             speaker_line(ui, c, line);

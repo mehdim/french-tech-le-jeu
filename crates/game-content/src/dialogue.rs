@@ -166,6 +166,9 @@ pub fn counter_label(key: &str) -> (&'static str, bool) {
         "targeted_laws" => ("loi(s) ciblée(s) contre Veridix", false),
         "spy_leaks" => ("fuite(s) industrielle(s)", false),
         "ex_competitors" => ("ancien(s) salarié(s) devenu(s) concurrent(s)", false),
+        "stock" => ("point(s) de cours de bourse (VRDX)", true),
+        "scandals_handled" => ("scandale(s) médiatique(s) traversé(s)", true),
+        "gpu_k" => ("millier(s) de GPU vendus grâce à Veridix", true),
         _ => ("événement(s)", true),
     }
 }

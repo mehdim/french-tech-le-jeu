@@ -620,4 +620,108 @@
         effects: [Reputation(3.0), Resilience(0.05)], repeatable: true, meaningful: true,
         benefit: "Réputation +3, incidents -5 %.",
     ),
+    // =================================================================
+    // NIVEAU BONUS 17 — société cotée
+    // =================================================================
+    (
+        id: "investor_roadshow", name: "Roadshow investisseurs (Londres, Francfort, Boston)", category: Enterprise,
+        description: "Douze rendez-vous par jour, le même pitch, le même costume, trois fuseaux horaires. Le dernier fonds de Boston demande si Veridix « détecte aussi les fake news sur Veridix ».",
+        eng: 50.0, research: 0.0, cost: 250000.0, requires_unlock: Some("listed"),
+        effects: [Counter("stock", 5)], debt: 0.0, repeatable: true,
+        benefit: "Cours de bourse +5.",
+    ),
+    (
+        id: "quarterly_results", name: "Résultats trimestriels impeccables", category: Enterprise,
+        description: "Clôture comptable en 9 jours, guidance prudente, slides sobres. Trois semaines pendant lesquelles personne ne dort au service financier.",
+        eng: 140.0, research: 0.0, cost: 120000.0, requires_unlock: Some("listed"),
+        effects: [Counter("stock", 7), Reputation(1.0), FatigueAll(2.0)], debt: 0.0, repeatable: true,
+        benefit: "Cours de bourse +7, réputation +1. Un peu de fatigue.",
+    ),
+    (
+        id: "share_buyback", name: "Programme de rachat d'actions", category: Enterprise,
+        description: "Racheter ses propres actions pour soutenir le cours. Les financiers appellent ça « allouer le capital ». Les ingénieurs appellent ça « acheter des slides ».",
+        eng: 10.0, research: 0.0, cost: 4000000.0, requires_unlock: Some("listed"),
+        effects: [Counter("stock", 10)], debt: 0.0, repeatable: true,
+        benefit: "Cours de bourse +10.",
+    ),
+    (
+        id: "crisis_cell", name: "Cellule de crise permanente", category: Enterprise,
+        description: "Une salle sans fenêtre, six écrans de veille médiatique, un avocat d'astreinte et un stock de réponses pré-rédigées pour 48 scénarios, dont « le fondateur est une IA ».",
+        eng: 300.0, research: 0.0, cost: 600000.0, requires_unlock: Some("listed"),
+        effects: [Reputation(4.0), Counter("stock", 4)], debt: 0.0, meaningful: true,
+        benefit: "Réputation +4, cours +4.",
+    ),
+    (
+        id: "explainable_detector", name: "Détecteur explicable : chaque verdict justifié", category: AiResearch,
+        description: "Chaque analyse s'accompagne d'une explication lisible par un humain, et même par un député. Le projet le plus difficile de l'histoire de Veridix : faire comprendre un réseau de neurones à une commission d'enquête.",
+        eng: 4000.0, research: 3000.0, cost: 2000000.0, requires_unlock: Some("listed"),
+        effects: [Accuracy(2.0), Reputation(6.0), Retention(Enterprise, 0.10), Counter("stock", 8)], debt: 5.0, risk: 0.1, meaningful: true,
+        benefit: "Réputation +6, rétention grands comptes +10 %, cours +8.",
+    ),
+    (
+        id: "csrd_report", name: "Rapport de durabilité CSRD (600 pages)", category: Enterprise,
+        description: "Mille deux cents indicateurs, dont la consommation d'eau de la machine à café. Le rapport est plus lourd que le serveur qu'il décrit.",
+        eng: 200.0, research: 0.0, cost: 400000.0, requires_unlock: Some("listed"),
+        effects: [Reputation(3.0), Counter("stock", 3)], debt: 0.0,
+        benefit: "Réputation +3, cours +3. Les fonds ESG reviennent.",
+    ),
+    // =================================================================
+    // NIVEAU BONUS 18 — la stratégie NVIDIA
+    // =================================================================
+    (
+        id: "gpu_bundle", name: "Bundle « Veridix Inside » (une licence = 8 GPU)", category: Enterprise,
+        description: "Chaque licence Veridix est désormais vendue avec un serveur de 8 GPU « recommandé ». Le mot « recommandé » est écrit en très petit. Le serveur, lui, est très grand.",
+        eng: 120.0, research: 0.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [Counter("gpu_k", 12), Reputation(-1.0), MoraleAll(-2.0)], debt: 0.0, repeatable: true,
+        benefit: "+12 000 GPU vendus. Réputation -1, moral -2.",
+    ),
+    (
+        id: "kill_sobriety", name: "Saborder le programme Sobriété", category: Engineering,
+        description: "Débrancher le refroidissement liquide, désactiver l'élagage des modèles, supprimer le calcul aux heures creuses. Kyle appelle ça « libérer la performance ». La piscine municipale de Valence, elle, appelle ça « l'hiver ».",
+        eng: 400.0, research: 0.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [EnergyMul(2.5), InferenceCostMul(1.5), Counter("gpu_k", 30), Reputation(-6.0), MoraleAll(-6.0)], debt: 4.0,
+        benefit: "+30 000 GPU. Énergie ×2,5, coût d'inférence ×1,5, réputation -6, moral -6.",
+    ),
+    (
+        id: "close_the_weights", name: "Fermer les modèles et retirer le benchmark ouvert", category: AiResearch,
+        description: "Le dépôt public passe en privé, le benchmark ouvert disparaît, et les 10 000 étoiles GitHub deviennent un souvenir. La licence devient un PDF de 80 pages.",
+        eng: 300.0, research: 200.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [Counter("gpu_k", 10), Reputation(-8.0), MoraleRole(AiResearcher, -10.0)], debt: 0.0,
+        benefit: "+10 000 GPU. Réputation -8, chercheurs très déçus.",
+    ),
+    (
+        id: "detector_xxl", name: "Détecteur XXL : 40 fois plus de paramètres", category: AiResearch,
+        description: "Un modèle de 400 milliards de paramètres pour gagner 0,3 point de précision sur les rédactions de 4e. Il faut un rack entier pour analyser une dictée.",
+        eng: 3000.0, research: 4000.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [Accuracy(1.0), InferenceCostMul(2.0), EnergyMul(1.8), Counter("gpu_k", 40), Reputation(-2.0)], debt: 6.0, risk: 0.1,
+        benefit: "+40 000 GPU. Précision +1, coût d'inférence ×2, énergie ×1,8.",
+    ),
+    (
+        id: "video_8k", name: "Analyser chaque image de chaque vidéo, en 8K", category: Engineering,
+        description: "Vérifier l'authenticité d'une vidéo image par image, en 8K, 120 images par seconde. Pour une réunion Teams de 45 minutes, cela fait 324 000 analyses. Kyle a les larmes aux yeux.",
+        eng: 2500.0, research: 1500.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [UsageMul(2.0), InferenceCostMul(1.3), Counter("gpu_k", 35)], debt: 5.0,
+        benefit: "+35 000 GPU. Usage ×2, coût d'inférence ×1,3.",
+    ),
+    (
+        id: "cuda_rewrite", name: "Tout réécrire en CUDA propriétaire", category: Engineering,
+        description: "Le code portable, qui tournait sur n'importe quelle puce européenne, est réécrit pour ne tourner que sur une seule marque. Un ingénieur appelle ça « une migration ». Un autre appelle ça « une prise d'otages ».",
+        eng: 5000.0, research: 1000.0, cost: 0.0, requires_unlock: Some("nvidia"),
+        effects: [Counter("gpu_k", 25), TechDebt(10.0), Reputation(-3.0)], debt: 4.0,
+        benefit: "+25 000 GPU. Dette technique +10, réputation -3.",
+    ),
+    (
+        id: "responsible_compute", name: "Rebaptiser la surconsommation « calcul accéléré responsable »", category: Enterprise,
+        description: "Une agence de communication trouve le mot juste pour dire « on consomme six fois plus ». Il y a une feuille verte dans le logo.",
+        eng: 60.0, research: 0.0, cost: 1000000.0, requires_unlock: Some("nvidia"),
+        effects: [Counter("gpu_k", 6), Reputation(-2.0)], debt: 0.0,
+        benefit: "+6 000 GPU. Réputation -2.",
+    ),
+    (
+        id: "nvidia_bonus", name: "Primes de rétention NVIDIA", category: Enterprise,
+        description: "Des actions NVIDIA pour toute l'équipe d'origine, acquises sur quatre ans. Ce qu'on appelle des menottes dorées, avec un logo vert.",
+        eng: 20.0, research: 0.0, cost: 1500000.0, requires_unlock: Some("nvidia"),
+        effects: [MoraleAll(8.0)], debt: 0.0, repeatable: true,
+        benefit: "Moral +8 pour toute l'équipe.",
+    ),
 ]

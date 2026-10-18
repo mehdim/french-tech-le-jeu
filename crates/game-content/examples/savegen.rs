@@ -18,6 +18,42 @@ fn main() {
         s.recompute_metrics(&c);
         std::fs::write(format!("{out}/tier{tier}.json"), to_save_string(&s, "démo")).unwrap();
     }
+    // Le tutoriel au début du niveau 1, avec une héroïne.
+    let mut t = game_core::GameState::new(&c, 7);
+    t.set_founder("Camille", true);
+    t.tutorial = Some(0);
+    let _ = t.apply(&c, game_core::Command::DismissIntro);
+    let _ = t.apply(&c, game_core::Command::ResolveEvent { choice: 0 });
+    t.recompute_metrics(&c);
+    std::fs::write(format!("{out}/tutorial.json"), to_save_string(&t, "démo")).unwrap();
+    t.tutorial = Some(2);
+    std::fs::write(format!("{out}/tutorial2.json"), to_save_string(&t, "démo")).unwrap();
+    let mut t2 = game_core::GameState::new(&c, 7);
+    t2.set_founder("Camille", true);
+    t2.start_level(&c, 2);
+    t2.campaign.intro_pending = false;
+    t2.events.pending = None;
+    t2.events.queue.clear();
+    t2.office.move_to(&c, 1);
+    t2.tutorial = Some(10);
+    t2.recompute_metrics(&c);
+    std::fs::write(format!("{out}/tutorial_l2.json"), to_save_string(&t2, "démo")).unwrap();
+    // Les niveaux bonus : 17 après l'IPO, 18 après le rachat par NVIDIA.
+    for (pref, name) in [("ending_ipo", "level17"), ("ending_acquisition", "level18")] {
+        autopilot::prefer_ending(Some(pref));
+        let mut b = game_core::GameState::new(&c, 1);
+        b.set_founder("Camille", true);
+        while b.campaign.level < 17 && autopilot::step(&mut b, &c) {}
+        for _ in 0..40 {
+            autopilot::step(&mut b, &c);
+        }
+        b.recompute_metrics(&c);
+        std::fs::write(format!("{out}/{name}.json"), to_save_string(&b, "démo")).unwrap();
+        let mut i = b.clone();
+        i.start_level(&c, i.campaign.level);
+        std::fs::write(format!("{out}/{name}_intro.json"), to_save_string(&i, "démo")).unwrap();
+    }
+    autopilot::prefer_ending(None);
     let mut s = game_core::GameState::new(&c, 1);
     while s.campaign.level < 16 && autopilot::step(&mut s, &c) {}
     for _ in 0..12 {

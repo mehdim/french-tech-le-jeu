@@ -100,7 +100,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
                         ui.spacing_mut().item_spacing.y = 2.0;
                         ui.horizontal(|ui| {
                             ui.label(RichText::new(&e.name).strong());
-                            ui.label(RichText::new(role_name(e.role)).size(12.0).color(MUTED));
+                            ui.label(RichText::new(game_content::hero::personalize(role_name(e.role), &c.game.0.founder)).size(12.0).color(MUTED));
                             if !e.is_available(c.game.0.day) {
                                 ui.label(RichText::new("en arrêt").size(12.0).color(RED));
                             }
@@ -115,6 +115,7 @@ pub fn show(ui: &mut egui::Ui, c: &mut Ctx) {
             })
             .response;
         ui.ctx().data_mut(|d| d.insert_temp(card_id, resp.rect));
+        super::tutorial::mark(ui, &format!("employee_{id}"), resp.rect);
         if card_click.is_some_and(|r| r.clicked()) {
             c.ui.inspect_employee = Some(id);
             c.selection.employee = Some(id);
@@ -221,8 +222,8 @@ fn recruitment(ui: &mut egui::Ui, c: &mut Ctx) {
     if channels.is_empty() {
         muted(ui, "Aucun canal ne propose ce profil.");
     }
-    for ch in channels {
-        card().show(ui, |ui| {
+    for (k, ch) in channels.into_iter().enumerate() {
+        let r = card().show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.label(RichText::new(&ch.name).strong());
@@ -249,6 +250,9 @@ fn recruitment(ui: &mut egui::Ui, c: &mut Ctx) {
                 requirements(ui, c, &ch.requires);
             }
         });
+        if k == 0 {
+            super::tutorial::mark(ui, "recruit", r.response.rect);
+        }
     }
     let searches: Vec<_> = c.game.0.searches.clone();
     if !searches.is_empty() {
@@ -284,7 +288,9 @@ fn recruitment(ui: &mut egui::Ui, c: &mut Ctx) {
             });
             ui.horizontal(|ui| {
                 let label = if cd.hiring_cost > 0.0 { format!("Embaucher ({})", money(cd.hiring_cost)) } else { "Embaucher".into() };
-                if ui.button(RichText::new(label).color(GREEN)).on_hover_text(trait_effect(e.trait_)).clicked() {
+                let hb = ui.button(RichText::new(label).color(GREEN));
+                super::tutorial::mark(ui, "hire", hb.rect);
+                if hb.on_hover_text(trait_effect(e.trait_)).clicked() {
                     c.run(Command::Hire { candidate: cd.id });
                 }
                 if ui.button("Décliner").clicked() {

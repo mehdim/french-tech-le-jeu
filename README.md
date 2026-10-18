@@ -16,8 +16,10 @@ fabricants de modèles chinois, des chefs d'État à convaincre, des datacenters
 trop gourmands, et un choix final : **Série C, introduction en Bourse, rachat
 par NVIDIA, entreprise rentable ou communs open source**.
 
-Avec trois mentors venus tout droit du podcast **A la French** : Mehdi,
-Steeve et Jean-Baptiste. Écrit en Rust avec Bevy, compilé en WebAssembly,
+Vous choisissez votre héros (fondateur ou fondatrice) et son nom, et un
+tutoriel en bulles vous guide pendant les deux premiers niveaux. Avec trois
+mentors venus tout droit du podcast **A la French** : Mehdi, Steeve et
+Jean-Baptiste. Écrit en Rust avec Bevy, compilé en WebAssembly,
 joué dans le navigateur.
 
 ![Écran titre](docs/screenshots/menu.png)
@@ -100,7 +102,14 @@ déplacement se fait donc avec ZQSD.
 
 ## Contenu du jeu
 
-- **Une campagne de 16 niveaux**, chacun avec une introduction, 2 à 5
+- **Votre héros ou votre héroïne** : à la création de la partie, choisissez
+  fondateur ou fondatrice (sprite, portrait et combat assortis) et un nom ;
+  les dialogues s'accordent (« la fondatrice », « {nom} sonne la cloche »…).
+- **Un tutoriel guidé** sur les niveaux 1 et 2 (facultatif, désactivable à
+  tout moment) : 15 bulles qui désignent l'élément à utiliser (onglet,
+  chantier, dossier France Travail, menu d'affectation, recrutement…) et
+  avancent dès que l'action est faite.
+- **Une campagne de 16 niveaux, plus un niveau bonus selon la fin choisie**, chacun avec une introduction, 2 à 5
   objectifs mesurables, un événement majeur unique, un déblocage et une
   conclusion humoristique. De « France Travail Simulator » à « Sobriété ou
   Surchauffe ». Les quatre derniers chapitres :
@@ -120,6 +129,19 @@ déplacement se fait donc avec ZQSD.
     deux, récupérer la chaleur, signer de l'électricité bas carbone, garder ses
     marges, et **tenir 5 M€ de MRR pendant 6 mois (ou toucher 100 M€ d'ARR
     un jour)** avant de boucler la campagne.
+  - **17 — La Bourse ou la Vie** (si vous choisissez l'IPO) : VRDX est cotée
+    et les médias se déchaînent. Six scandales scénarisés (#Veridix1789, la
+    fausse empreinte carbone, les copies du bac, la thèse de la fondatrice ou
+    du fondateur, le « yacht » qui était un pédalo, la rumeur selon laquelle
+    vous seriez une IA), un **cours de bourse** à garder au-dessus du prix
+    d'introduction (roadshows, résultats trimestriels, rachats d'actions),
+    une réputation à tenir, et le rapport d'un vendeur à découvert ;
+  - **18 — Le Badge Vert** (si vous choisissez le rachat par NVIDIA) : votre
+    nouveau manager, Kyle Throughput (personnage fictif), exige de faire
+    vendre 250 000 GPU grâce à Veridix. Bundles « Veridix Inside », détecteur
+    XXL, analyse vidéo en 8K, réécriture CUDA, fin de l'offre gratuite pour
+    les écoles… et deux trahisons obligatoires : saborder la sobriété et
+    fermer les modèles. Jean-Baptiste appelle. Le cône est triste.
 - **Des événements satiriques sur trois écosystèmes** (niveaux 13 à 16) :
   Europe (annexe XLVII du règlement sur l'IA, bannière de consentement à
   14 cases, taxe numérique version 7, droit à un humain…), États-Unis
@@ -158,9 +180,12 @@ déplacement se fait donc avec ZQSD.
     les clauses d'earn-out ;
   - entreprise rentable : les pièces s'empilent, puis il faut couper les
     dépenses inutiles (offsite à Ibiza, kombucha bio…) sans couper les clients ;
-  - communs : l'arbre de commits pousse, puis « merge ou close » sur une pluie
-    de pull requests.
-- **Trois mentors d'A la French.** Au début de la campagne, vous choisissez
+  - communs : l'arbre de commits pousse, le Président de la République vous
+    remet l'ordre national du Mérite à l'Élysée… et le lendemain, retour à
+    France Travail, ticket en main ; puis « merge ou close » sur une pluie de
+    pull requests.
+- **Trois mentors d'A la French**, dont les portraits reprennent
+  l'illustration de l'émission. Au début de la campagne, vous choisissez
   un mentor principal, dont le bonus est permanent :
   - **Mehdi** (APIs, écosystème, business) : conversion grands comptes et ETI, réputation ;
   - **Steeve** (infra, inférence, performance) : coût d'inférence et résilience ;
@@ -182,7 +207,7 @@ déplacement se fait donc avec ZQSD.
   à la vitesse 1× ; mois comptables de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
   runway, CAC, LTV, ARPA, valorisation et table de capitalisation.
-- **Une R&D en IA qui ne « résout » jamais la détection** : 85 chantiers
+- **Une R&D en IA qui ne « résout » jamais la détection** : 99 chantiers
   produit, recherche, entreprise et pivot IA native, avec dépendances, points
   d'ingénierie et de recherche, coût, risque de dette technique et approche
   « vite fait » ou « propre ». La dérive des données et les nouveaux modèles
@@ -200,7 +225,7 @@ déplacement se fait donc avec ZQSD.
   versements échelonnés ; allègements façon JEI/CIR ; quatre business angels
   récurrents (Jean-Michel Exit 2001, Patrick Blockchain, Bernard EBITDA,
   Sophie Term Sheet) ; des VC du seed à la série C, avec dilution.
-- **129 événements pilotés par les données** (94 aléatoires, 35 scénarisés), avec conditions,
+- **149 événements pilotés par les données** (100 aléatoires, 49 scénarisés), avec conditions,
   pondérations, délais de carence et choix aux effets immédiats et différés
   (l'incident Kubernetes, le dilemme du modèle open-weight chinois,
   l'influenceur LinkedIn, la clé d'API publiée par le stagiaire…).
@@ -223,7 +248,7 @@ déplacement se fait donc avec ZQSD.
   basse consommation à 30 FPS.
 
 Quelques répliques restent volontairement en anglais : le pitch d'un VC
-américain, les recrues de San Francisco et le communiqué de presse de NVIDIA.
+américain, les recrues de San Francisco et les répliques de NVIDIA.
 
 ## Compiler depuis les sources
 
@@ -249,7 +274,8 @@ Les tests de la simulation sont dans les crates en Rust pur (`game-core`,
 `game-content`, `platform`) et n'ont pas besoin de GPU. `cargo test` sans
 `--workspace` ne lance que ces crates et ne demande aucune bibliothèque
 système. La suite comprend un autopilote scripté qui joue **toute la campagne
-de 16 niveaux jusqu'à la victoire** sur plusieurs graines, ainsi que des tests
+de 16 niveaux jusqu'à la victoire** sur plusieurs graines (et les niveaux
+bonus 17 et 18 en forçant l'IPO ou le rachat par NVIDIA), ainsi que des tests
 de déterminisme, d'aller-retour des sauvegardes, de rejet des sauvegardes
 corrompues, de faillite par recrutement imprudent, de churn qui punit la
 croissance sans rétention, de dette technique, de règles de placement du
@@ -257,6 +283,7 @@ mobilier, de calcul de dilution et de paperasse des subventions.
 
 ```bash
 cargo run -p game-content --example balance -- 42 quiet   # rapport d'équilibrage de la campagne
+cargo run -p game-content --example balance -- 42 quiet ipo   # … en choisissant l'IPO (niveau 17)
 ```
 
 ### Version navigateur
@@ -405,7 +432,9 @@ Tous les éléments visuels et sonores sont originaux et générés par les scri
 de `tools/`. Aucun graphisme, musique ou son tiers n'est inclus : le thème
 d'*À la French* (fourni par l'équipe de la chaîne) et les airs
 traditionnels (domaine public) sont réarrangés et synthétisés par
-`tools/audio/gen_audio.py`. La police du
+`tools/audio/gen_audio.py`. Les portraits des trois mentors sont recadrés
+et pixélisés à partir de l'illustration de l'émission fournie par l'équipe
+d'*À la French* (`tools/art/refs/alafrench_hosts.png`). La police du
 texte de l'interface est un sous-ensemble de DejaVu Sans (licence Bitstream
 Vera / DejaVu) ; la police pixel *VeridixPixel* est originale.
 

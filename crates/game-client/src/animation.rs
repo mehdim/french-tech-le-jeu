@@ -270,11 +270,15 @@ fn sync_employees(
     mut fx: ResMut<crate::fx::FxQueue>,
 ) {
     let Some(atlas) = atlas else { return };
-    let ids: HashMap<u32, ()> = game.0.employees.iter().map(|e| (e.id, ())).collect();
+    // Identifiant → ligne du sprite : une apparence qui change (nouvelle partie,
+    // héroïne choisie) fait recréer le sprite.
+    let ids: HashMap<u32, u32> = game.0.employees.iter().map(|e| (e.id, row_for(&atlas, e.role, e.look))).collect();
     let mut present: HashMap<u32, ()> = HashMap::new();
     for (ent, s) in &q {
-        if !ids.contains_key(&s.id) {
-            fx.smoke(s.pos);
+        if ids.get(&s.id) != Some(&s.row) {
+            if !ids.contains_key(&s.id) {
+                fx.smoke(s.pos);
+            }
             commands.entity(ent).despawn();
             for (se, sh) in &shadows {
                 if sh.0 == s.id {

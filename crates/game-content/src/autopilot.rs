@@ -32,6 +32,8 @@ fn level_focus(level: u32) -> &'static [&'static str] {
         13 => &["soc2"],
         14 => &["zh_language", "watermark_sdk", "zero_trust"],
         15 => &["ipo_readiness"],
+        17 => &["crisis_cell", "csrd_report", "explainable_detector", "green_premium", "global_partners"],
+        18 => &["kill_sobriety", "close_the_weights", "responsible_compute", "video_8k", "detector_xxl", "cuda_rewrite"],
         16 => &["model_pruning", "liquid_cooling", "carbon_scheduler", "dc_consolidation", "dc_heat_reuse", "green_ppa", "green_premium", "global_partners"],
         _ => &[],
     }
@@ -103,6 +105,8 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
                 "state_deals" => 250.0,
                 "targeted_laws" | "spy_leaks" => -250.0,
                 "cn_oem" => 15.0,
+                "stock" => 3.0,
+                "gpu_k" => 0.5,
                 _ => 1.0,
             };
             w * *n as f64
@@ -127,10 +131,21 @@ fn effect_score(s: &GameState, e: &Effect) -> f64 {
     }
 }
 
+thread_local! {
+    /// Fin que le joueur scripté choisit en priorité (tests des niveaux bonus).
+    static ENDING_PREF: std::cell::Cell<Option<&'static str>> = const { std::cell::Cell::new(None) };
+}
+
+/// Fixe la fin que le joueur scripté choisira en priorité (`None` = ordre par défaut).
+pub fn prefer_ending(ending: Option<&'static str>) {
+    ENDING_PREF.with(|p| p.set(ending));
+}
+
 fn pick_choice(s: &GameState, c: &Content) -> usize {
     let Some(def) = s.events.pending_def(c) else { return 0 };
     if def.id == "final_decision" {
-        for pref in ["ending_commons", "ending_profitable", "ending_ipo", "ending_unicorn", "ending_acquisition"] {
+        let first = ENDING_PREF.with(|p| p.get());
+        for pref in first.into_iter().chain(["ending_commons", "ending_profitable", "ending_ipo", "ending_unicorn", "ending_acquisition"]) {
             if let Some(i) = def.choices.iter().position(|ch| {
                 ch.effects.iter().any(|e| matches!(e, Effect::SetFlag(f) if f == pref))
             })
@@ -275,6 +290,31 @@ fn manage(s: &mut GameState, c: &Content) {
     if level == 16 && s.metrics.mrr < 5_000_000.0 && s.product.has("green_premium")
         && !s.tasks.iter().any(|t| t.task_id == "public_tender") {
         let _ = s.apply(c, Command::StartTask { task: "public_tender".into(), approach: Approach::Clean });
+    }
+    let repeat = |s: &mut GameState, id: &str| {
+        if !s.tasks.iter().any(|t| t.task_id == id) {
+            let _ = s.apply(c, Command::StartTask { task: id.into(), approach: Approach::Clean });
+        }
+    };
+    if level == 17 {
+        if s.counter("stock") < 125 {
+            repeat(s, "investor_roadshow");
+            repeat(s, "quarterly_results");
+        }
+        if s.counter("stock") < 105 && s.finance.cash > 15_000_000.0 {
+            repeat(s, "share_buyback");
+        }
+        if s.metrics.mrr < 6_000_000.0 && s.product.has("green_premium") {
+            repeat(s, "public_tender");
+        }
+    }
+    if level == 18 {
+        if s.counter("gpu_k") < 250 {
+            repeat(s, "gpu_bundle");
+        }
+        if s.metrics.morale < 50.0 {
+            repeat(s, "nvidia_bonus");
+        }
     }
     if level == 15 && s.counter("state_deals") < 10 && !s.tasks.iter().any(|t| t.task_id == "state_visit") {
         let _ = s.apply(c, Command::StartTask { task: "state_visit".into(), approach: Approach::Clean });
@@ -457,5 +497,14 @@ fn first_task(tasks: &[(u32, f64, f64)]) -> Option<Assignment> {
 pub fn play_campaign(c: &Content, seed: u64, max_days: u32) -> GameState {
     let mut s = GameState::new(c, seed);
     while s.day < max_days && step(&mut s, c) {}
+    s
+}
+
+/// Comme `play_campaign`, mais en choisissant si possible cette fin (`"ending_ipo"`, …)
+/// lors de la décision finale : sert à tester les niveaux bonus.
+pub fn play_campaign_choosing(c: &Content, seed: u64, max_days: u32, ending: &'static str) -> GameState {
+    ENDING_PREF.with(|p| p.set(Some(ending)));
+    let s = play_campaign(c, seed, max_days);
+    ENDING_PREF.with(|p| p.set(None));
     s
 }

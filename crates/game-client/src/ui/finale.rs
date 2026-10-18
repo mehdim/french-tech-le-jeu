@@ -263,7 +263,8 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx, ending: &str, title: &str) -> bool
                             pixel(11.0),
                             Color32::from_white_alpha((150.0 * k) as u8),
                         );
-                        if f.t >= INTRO_SECS || click.is_some() || keys.2 {
+                        let secs = if ending == "commons" { INTRO_SECS + 5.0 } else { INTRO_SECS };
+                        if f.t >= secs || click.is_some() || keys.2 {
                             f.stage = Stage::Play;
                             f.reset_game(ending);
                         }
@@ -743,6 +744,8 @@ fn intro(p: &egui::Painter, rect: Rect, ending: &str, t: f32) {
                 DEEP_GREEN,
             );
         }
+        _ if (4.0..8.0).contains(&t) => elysee(p, rect, t - 4.0),
+        _ if t >= 8.0 => france_travail(p, rect, t - 8.0),
         _ => {
             p.rect_filled(rect, 0.0, Color32::from_rgb(12, 18, 16));
             // Un arbre de commits qui pousse branche par branche.
@@ -799,6 +802,134 @@ fn intro(p: &egui::Painter, rect: Rect, ending: &str, t: f32) {
             );
         }
     }
+}
+
+/// Un personnage simple vu de face (tête, corps), pour les scènes de fin.
+fn person(p: &egui::Painter, rect: Rect, c: Pos2, h: f32, skin: Color32, suit: Color32, hair: Color32, long_hair: bool) {
+    let px = |v: f32| v * rect.height();
+    let base = at(rect, c);
+    let body = Rect::from_center_size(base - vec2(0.0, px(h * 0.32)), vec2(px(h * 0.36), px(h * 0.5)));
+    p.rect_filled(body, px(h * 0.06), suit);
+    let head = base - vec2(0.0, px(h * 0.72));
+    if long_hair {
+        p.rect_filled(Rect::from_center_size(head + vec2(0.0, px(h * 0.06)), vec2(px(h * 0.26), px(h * 0.3))), px(h * 0.05), hair);
+    }
+    p.circle_filled(head, px(h * 0.11), skin);
+    p.rect_filled(Rect::from_center_size(head - vec2(0.0, px(h * 0.08)), vec2(px(h * 0.22), px(h * 0.06))), px(h * 0.02), hair);
+    p.circle_filled(head + vec2(-px(h * 0.04), 0.0), px(h * 0.012), Color32::from_rgb(30, 24, 20));
+    p.circle_filled(head + vec2(px(h * 0.04), 0.0), px(h * 0.012), Color32::from_rgb(30, 24, 20));
+}
+
+/// La remise de médaille à l'Élysée : façade, drapeaux, tapis rouge, garde républicaine.
+fn elysee(p: &egui::Painter, rect: Rect, t: f32) {
+    let px = |v: f32| v * rect.height();
+    sky(p, rect, Color32::from_rgb(120, 170, 220), Color32::from_rgb(210, 225, 240));
+    // Façade en pierre claire, colonnes et fenêtres.
+    let facade = Rect::from_min_max(at(rect, pos2(0.08, 0.22)), at(rect, pos2(0.92, 0.78)));
+    p.rect_filled(facade, 0.0, Color32::from_rgb(232, 224, 204));
+    p.rect_filled(Rect::from_min_max(at(rect, pos2(0.06, 0.18)), at(rect, pos2(0.94, 0.24))), 0.0, Color32::from_rgb(200, 192, 172));
+    for i in 0..9 {
+        let x = 0.12 + i as f32 * 0.095;
+        p.rect_filled(Rect::from_min_max(at(rect, pos2(x, 0.3)), at(rect, pos2(x + 0.045, 0.44))), 0.0, Color32::from_rgb(90, 110, 130));
+        p.rect_filled(Rect::from_min_max(at(rect, pos2(x - 0.01, 0.26)), at(rect, pos2(x + 0.055, 0.28))), 0.0, Color32::from_rgb(200, 192, 172));
+    }
+    // Le drapeau sur le toit, qui ondule.
+    let pole = at(rect, pos2(0.86, 0.04));
+    p.line_segment([pole, at(rect, pos2(0.86, 0.18))], Stroke::new(2.0, Color32::from_rgb(80, 80, 80)));
+    for (k, col) in [Color32::from_rgb(40, 70, 160), OFFWHITE, Color32::from_rgb(210, 50, 50)].into_iter().enumerate() {
+        let wave = (t * 5.0 + k as f32).sin() * px(0.006);
+        let r = Rect::from_min_size(pole + vec2(px(0.04) * k as f32, wave), vec2(px(0.04), px(0.07)));
+        p.rect_filled(r, 0.0, col);
+    }
+    // Tapis rouge et sol.
+    p.rect_filled(Rect::from_min_max(at(rect, pos2(0.0, 0.78)), rect.max), 0.0, Color32::from_rgb(150, 140, 120));
+    p.add(egui::Shape::convex_polygon(
+        vec![at(rect, pos2(0.42, 0.78)), at(rect, pos2(0.58, 0.78)), at(rect, pos2(0.66, 1.0)), at(rect, pos2(0.34, 1.0))],
+        Color32::from_rgb(170, 30, 40),
+        Stroke::NONE,
+    ));
+    // Deux gardes républicains, casque à crinière.
+    for x in [0.2, 0.8] {
+        person(p, rect, pos2(x, 0.86), 0.32, Color32::from_rgb(236, 200, 170), Color32::from_rgb(30, 40, 80), Color32::from_rgb(200, 170, 60), false);
+        p.line_segment([at(rect, pos2(x, 0.6)), at(rect, pos2(x - 0.015, 0.64))], Stroke::new(px(0.012), Color32::from_rgb(170, 30, 40)));
+    }
+    // Le Président (écharpe tricolore) remet la médaille au héros.
+    let pres = pos2(0.42, 0.9);
+    person(p, rect, pres, 0.42, Color32::from_rgb(232, 196, 166), Color32::from_rgb(34, 36, 48), Color32::from_rgb(120, 110, 100), false);
+    for (k, col) in [Color32::from_rgb(40, 70, 160), OFFWHITE, Color32::from_rgb(210, 50, 50)].into_iter().enumerate() {
+        let a = at(rect, pos2(0.40 + k as f32 * 0.008, 0.63));
+        p.line_segment([a, a + vec2(px(0.07), px(0.13))], Stroke::new(px(0.008), col));
+    }
+    let hero = pos2(0.58, 0.9);
+    person(p, rect, hero, 0.4, Color32::from_rgb(240, 200, 170), Color32::from_rgb(38, 125, 75), Color32::from_rgb(90, 60, 40), false);
+    // La médaille voyage de la main du Président jusqu'au sweat du héros.
+    let k = ((t - 0.6) / 1.4).clamp(0.0, 1.0);
+    let from = at(rect, pos2(0.47, 0.72));
+    let to = at(rect, pos2(0.585, 0.68));
+    let m = from + (to - from) * k - vec2(0.0, (k * std::f32::consts::PI).sin() * px(0.06));
+    p.line_segment([m - vec2(px(0.008), px(0.03)), m], Stroke::new(px(0.01), Color32::from_rgb(40, 90, 180)));
+    p.circle_filled(m, px(0.016), GOLD);
+    if k >= 1.0 {
+        // Flashs des photographes.
+        for i in 0..5 {
+            let ph = (t * 3.0 + i as f32 * 1.7).fract();
+            if ph < 0.15 {
+                p.circle_filled(at(rect, pos2(0.1 + i as f32 * 0.2, 0.74)), px(0.04), Color32::from_white_alpha(200));
+            }
+        }
+    }
+    p.text(at(rect, pos2(0.5, 0.12)), Align2::CENTER_CENTER, "PALAIS DE L'ÉLYSÉE", pixel(px(0.05)), Color32::from_rgb(40, 50, 90));
+    let fade = ((t - 1.6) / 0.6).clamp(0.0, 1.0);
+    p.text(
+        at(rect, pos2(0.5, 0.52)),
+        Align2::CENTER_CENTER,
+        "Ordre national du Mérite · pour services rendus aux communs",
+        pixel(px(0.035)),
+        alpha(Color32::from_rgb(30, 30, 40), fade),
+    );
+}
+
+/// Le lendemain matin : retour à l'agence France Travail, la médaille sur le sweat.
+fn france_travail(p: &egui::Painter, rect: Rect, t: f32) {
+    let px = |v: f32| v * rect.height();
+    p.rect_filled(rect, 0.0, Color32::from_rgb(214, 220, 226));
+    p.rect_filled(Rect::from_min_max(at(rect, pos2(0.0, 0.8)), rect.max), 0.0, Color32::from_rgb(170, 176, 186));
+    // Enseigne et écran d'appel des tickets.
+    let sign = Rect::from_min_max(at(rect, pos2(0.06, 0.06)), at(rect, pos2(0.5, 0.18)));
+    p.rect_filled(sign, 4.0, Color32::from_rgb(30, 60, 140));
+    p.text(sign.center(), Align2::CENTER_CENTER, "FRANCE TRAVAIL", pixel(px(0.05)), OFFWHITE);
+    let screen = Rect::from_min_max(at(rect, pos2(0.66, 0.06)), at(rect, pos2(0.94, 0.2)));
+    p.rect_filled(screen, 2.0, Color32::from_rgb(20, 24, 22));
+    let ticket = 38 + (t * 1.5) as i32;
+    p.text(screen.center(), Align2::CENTER_CENTER, format!("TICKET {ticket:03}"), pixel(px(0.045)), Color32::from_rgb(250, 120, 60));
+    // Les chaises en plastique et la file d'attente.
+    for i in 0..4 {
+        let x = 0.08 + i as f32 * 0.09;
+        p.rect_filled(Rect::from_min_max(at(rect, pos2(x, 0.72)), at(rect, pos2(x + 0.06, 0.75))), 2.0, Color32::from_rgb(230, 120, 40));
+        if i != 2 {
+            person(p, rect, pos2(x + 0.03, 0.74), 0.26, Color32::from_rgb(220, 180, 150), RAINBOW[i % RAINBOW.len()], Color32::from_rgb(60, 50, 40), i % 2 == 1);
+        }
+    }
+    // Le bureau de la conseillère.
+    let desk = Rect::from_min_max(at(rect, pos2(0.6, 0.6)), at(rect, pos2(0.95, 0.8)));
+    person(p, rect, pos2(0.82, 0.66), 0.3, Color32::from_rgb(200, 160, 130), Color32::from_rgb(120, 90, 140), Color32::from_rgb(70, 50, 40), true);
+    p.rect_filled(desk, 2.0, Color32::from_rgb(140, 110, 80));
+    p.rect_filled(Rect::from_min_max(at(rect, pos2(0.63, 0.5)), at(rect, pos2(0.73, 0.6))), 2.0, Color32::from_rgb(40, 44, 50));
+    // Le héros entre, médaille au cou, et s'assoit en face.
+    let x = (0.1 + t * 0.25).min(0.52);
+    person(p, rect, pos2(x, 0.86), 0.34, Color32::from_rgb(240, 200, 170), Color32::from_rgb(38, 125, 75), Color32::from_rgb(90, 60, 40), false);
+    let medal = at(rect, pos2(x + 0.005, 0.66));
+    p.circle_filled(medal, px(0.014), GOLD);
+    if x >= 0.52 {
+        let b = Rect::from_min_size(at(rect, pos2(0.42, 0.28)), vec2(px(0.8), px(0.16)));
+        p.rect_filled(b, 8.0, OFFWHITE);
+        p.rect_stroke(b, 8.0, Stroke::new(2.0, Color32::from_rgb(30, 60, 140)), egui::StrokeKind::Inside);
+        let line1 = "« Une médaille ? Je ne peux pas la mettre";
+        let line2 = "dans « expérience professionnelle ». »";
+        p.text(b.center() - vec2(0.0, px(0.03)), Align2::CENTER_CENTER, line1, egui::FontId::proportional(px(0.035)), Color32::from_rgb(30, 30, 40));
+        p.text(b.center() + vec2(0.0, px(0.03)), Align2::CENTER_CENTER, line2, egui::FontId::proportional(px(0.035)), Color32::from_rgb(30, 30, 40));
+    }
+    p.text(at(rect, pos2(0.28, 0.24)), Align2::CENTER_CENTER, "Le lendemain, 9h00", pixel(px(0.04)), Color32::from_rgb(60, 70, 90));
 }
 
 fn branch(p: &egui::Painter, rect: Rect, from: Pos2, a: f32, len: f32, depth: f32, level: i32) {

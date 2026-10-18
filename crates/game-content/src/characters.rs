@@ -70,6 +70,8 @@ pub fn portrait_for(speaker: &str) -> &'static str {
         "steeve"
     } else if s.contains("jean-baptiste") {
         "jb"
+    } else if s.contains("kyle") {
+        "kyle"
     } else if s.contains("a la french") || s.contains("à la french") {
         "alf"
     } else if s.contains("vous") {
@@ -92,7 +94,7 @@ pub fn portrait_for(speaker: &str) -> &'static str {
         "researcher"
     } else if s.contains("cfo") || s.contains("financ") {
         "cfo"
-    } else if s.contains("ministre") || s.contains("commissaire") || s.contains("administration") || s.contains("urssaf") {
+    } else if s.contains("président de la république") || s.contains("ministre") || s.contains("commissaire") || s.contains("administration") || s.contains("urssaf") {
         "official"
     } else if s.contains("fonds") || s.contains("associé") || s.contains("board") || s.contains("vc") || s.contains("sand hill") {
         "vc"

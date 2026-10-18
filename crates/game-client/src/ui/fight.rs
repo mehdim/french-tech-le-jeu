@@ -321,6 +321,8 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
             ..Default::default()
         };
     }
+    let founder = c.game.0.founder.clone();
+    let hero_look = if founder.female { Look { hair_style: 1, hair: Color32::from_rgb(150, 70, 40), ..FOUNDER } } else { FOUNDER };
     let now = ctx.input(|i| i.time);
     let dt = if f.last_time > 0.0 { (now - f.last_time).clamp(0.0, 0.1) as f32 } else { 0.0 };
     f.last_time = now;
@@ -470,7 +472,7 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
                 let shake = |s: f32| if s > 0.0 { (s * 60.0).sin() * 6.0 } else { 0.0 };
                 let hero_o = pos2(rect.min.x + rect.width() * 0.16 + shake(f.shake_hero), rect.min.y + rect.height() * 0.62 - cell * 20.0 + bob(0.0));
                 let boss_o = pos2(rect.max.x - rect.width() * 0.16 - cell * 16.0 + shake(f.shake_boss), rect.min.y + rect.height() * 0.62 - cell * 20.0 + bob(1.5));
-                draw_character(&p, hero_o, cell, &FOUNDER, f.shake_hero > 0.0, false);
+                draw_character(&p, hero_o, cell, &hero_look, f.shake_hero > 0.0, false);
                 draw_character(&p, boss_o, cell, &b.look, f.shake_boss > 0.0, true);
                 // Barres de vie.
                 hp_bar(&p, Rect::from_min_size(rect.min + vec2(14.0, 12.0), vec2(rect.width() * 0.38, 16.0)), f.hp / f.hp_max, "Vous · Indépendance", GREEN);
@@ -496,7 +498,7 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
                 let dlg = Rect::from_min_max(pos2(rect.min.x + 10.0, rect.min.y + rect.height() * 0.66), pos2(rect.max.x - 10.0, rect.max.y - 10.0));
                 p.rect_filled(dlg, 4.0, Color32::from_rgba_unmultiplied(16, 20, 18, 235));
                 p.rect_stroke(dlg, 4.0, Stroke::new(2.0, DEEP_GREEN), egui::StrokeKind::Inside);
-                p.text(dlg.min + vec2(12.0, 8.0), Align2::LEFT_TOP, &f.speaker, pixel(13.0), GREEN);
+                p.text(dlg.min + vec2(12.0, 8.0), Align2::LEFT_TOP, game_content::hero::speaker(&f.speaker, &founder), pixel(13.0), GREEN);
                 let galley = p.layout(f.text.clone(), egui::FontId::proportional(16.0), OFFWHITE, dlg.width() - 24.0);
                 p.galley(dlg.min + vec2(12.0, 30.0), galley, OFFWHITE);
                 if matches!(f.phase, Phase::Intro) {

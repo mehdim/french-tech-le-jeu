@@ -1,4 +1,6 @@
 """Portraits de dialogue en 40x40 pour les personnages récurrents."""
+import os
+
 from pixlib import *
 
 P = 40
@@ -171,6 +173,25 @@ def mentor(skin, hair, style, shirt, prop, extras=None):
     return img
 
 
+HOSTS_REF = os.path.join(os.path.dirname(os.path.abspath(__file__)), "refs", "alafrench_hosts.png")
+# centre (x, y) et côté du recadrage de chaque animateur dans l'image de référence
+HOSTS_CROP = {"steeve": (44, 126, 70), "jb": (148, 116, 70), "mehdi": (256, 122, 70)}
+
+
+def host(name):
+    """Portrait d'un animateur d'À la French, repris de l'illustration de l'émission."""
+    from PIL import ImageEnhance
+    cx, cy, s = HOSTS_CROP[name]
+    src = Image.open(HOSTS_REF).convert("RGB")
+    c = src.crop((cx - s // 2, cy - s // 2, cx + s // 2, cy + s // 2)).resize((P, P), Image.LANCZOS)
+    c = ImageEnhance.Contrast(c).enhance(1.12)
+    img = c.quantize(32, method=Image.MEDIANCUT).convert("RGBA")
+    for i in range(P):
+        px(img, i, 0, GREEN_DIM); px(img, i, P - 1, GREEN_DIM)
+        px(img, 0, i, GREEN_DIM); px(img, P - 1, i, GREEN_DIM)
+    return img
+
+
 def alf_logo():
     """Portrait générique de l'émission : le titre et trois micros."""
     img = new(P, P)
@@ -192,6 +213,7 @@ def portraits():
     S, H = SKINS, HAIRS
     return {
         "founder": bust(DEEP_GREEN, S[1], H[0], "short", GRAPHITE_2, {"logo": GREEN, "mouth": "smile"}),
+        "founder_f": bust(DEEP_GREEN, S[1], H[4], "long", GRAPHITE_2, {"logo": GREEN, "mouth": "smile"}),
         "advisor": bust((92, 110, 160, 255), S[0], H[2], "bob", (120, 90, 140, 255), {"glasses": INK, "papers": True}),
         "bpi": bust((240, 210, 90, 255), S[2], H[0], "long", NAVY, {"glasses": RED, "scarf": YELLOW, "mouth": "smile"}),
         "jm": bust((90, 140, 200, 255), S[0], H[5], "slick", (230, 230, 240, 255), {"sunglasses_up": True, "mustache": H[5], "mouth": "grin", "collar": NAVY}),
@@ -204,10 +226,11 @@ def portraits():
         "official": bust((50, 70, 130, 255), S[0], H[1], "slick", NAVY, {"sash": True, "collar": OFFWHITE, "mouth": "smile"}),
         "vc": bust((60, 120, 90, 255), S[1], H[1], "short", (110, 150, 220, 255), {"vest": (40, 50, 70, 255), "mouth": "grin"}),
         "generic": bust((90, 96, 90, 255), S[2], H[6], "short", ORANGE, {}),
-        "mehdi": mentor(S[2], H[0], "short", GRAPHITE_2, "api"),
-        "steeve": mentor(S[1], H[1], "slick", INK, "gpu"),
-        "jb": mentor(S[1], H[6], "short", NAVY, "cone"),
+        "mehdi": host("mehdi"),
+        "steeve": host("steeve"),
+        "jb": host("jb"),
         "alf": alf_logo(),
+        "kyle": bust((96, 150, 20, 255), S[0], H[2], "short", (36, 40, 36, 255), {"sunglasses_up": True, "mouth": "grin", "logo": (118, 185, 0, 255)}),
     }
 
 

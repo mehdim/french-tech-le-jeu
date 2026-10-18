@@ -65,7 +65,8 @@ fn programs(ui: &mut egui::Ui, c: &mut Ctx) {
         shown += 1;
         let approved = c.game.0.funding.approved.contains(&p.id);
         let active = c.game.0.funding.active_applications().any(|a| a.program == p.id);
-        card().show(ui, |ui| {
+        let pid = p.id.clone();
+        let resp = card().show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
@@ -99,6 +100,7 @@ fn programs(ui: &mut egui::Ui, c: &mut Ctx) {
                 requirements(ui, c, &p.requires);
             }
         });
+        super::tutorial::mark(ui, &format!("program_{pid}"), resp.response.rect);
     }
     if shown == 0 {
         muted(ui, "Aucun dispositif accessible pour l'instant.");

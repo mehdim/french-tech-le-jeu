@@ -1,5 +1,5 @@
 //! Rapport d'équilibrage : joue la campagne avec l'autopilote et affiche un
-//! suivi mensuel. Usage : cargo run -p game-content --example balance -- [graine] [quiet]
+//! suivi mensuel. Usage : cargo run -p game-content --example balance -- [graine] [quiet] [ipo|nvidia]
 use game_content::{autopilot, dialogue};
 use game_core::missions::Phase;
 use game_core::types::Segment;
@@ -9,6 +9,11 @@ fn main() {
     let seed: u64 = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(1);
     let quiet = args.iter().any(|a| a == "quiet");
     let c = game_content::load();
+    if args.iter().any(|a| a == "ipo") {
+        autopilot::prefer_ending(Some("ending_ipo"));
+    } else if args.iter().any(|a| a == "nvidia") {
+        autopilot::prefer_ending(Some("ending_acquisition"));
+    }
     let mut s = game_core::GameState::new(&c, seed);
     let mut last_level = 0;
     let mut log_seen = 0;

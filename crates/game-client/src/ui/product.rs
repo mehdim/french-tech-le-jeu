@@ -177,7 +177,8 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
                     continue; // caché jusqu'à ce que son niveau le débloque
                 }
                 let frame = if shipped && !def.repeatable { card().fill(GRAPHITE) } else { card() };
-                frame.show(ui, |ui| {
+                let tid = def.id.clone();
+                let resp = frame.show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.horizontal(|ui| {
                         let col = if shipped && !def.repeatable { MUTED } else { OFFWHITE };
@@ -232,6 +233,7 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
                         }
                     }
                 });
+                super::tutorial::mark(ui, &format!("task_{tid}"), resp.response.rect);
             }
         });
     }

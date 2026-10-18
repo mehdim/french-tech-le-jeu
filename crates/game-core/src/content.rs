@@ -409,6 +409,9 @@ pub struct LevelDef {
     /// Jour du niveau où un géant de la tech fait une offre de rachat (événements `takeover_*`).
     #[serde(default)]
     pub takeover_day: Option<u32>,
+    /// Niveau « bonus » qui n'est joué que si ce drapeau est posé (suite d'une fin choisie).
+    #[serde(default)]
+    pub requires_flag: Option<String>,
 }
 
 /// Effectif minimum d'un niveau : en dessous, la dette, la dérive et la fatigue s'emballent.
@@ -561,6 +564,23 @@ impl Content {
     }
     pub fn level(&self, id: u32) -> Option<&LevelDef> {
         self.levels.iter().find(|l| l.id == id)
+    }
+    /// Niveau suivant de la campagne : le plus petit numéro après `current` dont le
+    /// drapeau requis (s'il y en a un) est posé. `None` = la campagne est finie.
+    pub fn next_level(&self, current: u32, flags: &std::collections::BTreeSet<String>) -> Option<u32> {
+        self.levels
+            .iter()
+            .filter(|l| l.id > current && l.requires_flag.as_ref().is_none_or(|f| flags.contains(f)))
+            .map(|l| l.id)
+            .min()
+    }
+    /// Rang du niveau dans la campagne jouée (le niveau bonus 18 est le 17e niveau joué).
+    pub fn campaign_position(&self, level: u32, flags: &std::collections::BTreeSet<String>) -> usize {
+        self.levels.iter().filter(|l| l.id <= level && l.requires_flag.as_ref().is_none_or(|f| flags.contains(f))).count()
+    }
+    /// Nombre de niveaux de la campagne pour ces drapeaux (tronc commun + niveau bonus éventuel).
+    pub fn campaign_length(&self, flags: &std::collections::BTreeSet<String>) -> usize {
+        self.levels.iter().filter(|l| l.requires_flag.as_ref().is_none_or(|f| flags.contains(f))).count()
     }
     pub fn market(&self, id: &str) -> Option<&MarketDef> {
         self.markets.iter().find(|m| m.id == id)

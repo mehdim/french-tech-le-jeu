@@ -70,8 +70,9 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
                 stat(ui, c, "mrr", money(m.mrr), GREEN, "MRR",
                     "Revenu mensuel récurrent = Σ clients payants × prix mensuel.\nARR (run-rate) = MRR × 12.");
                 let runway = if m.runway.is_infinite() { "∞ rentable".to_string() } else { dialogue::months(m.runway) };
-                stat(ui, c, "runway", runway, if m.runway < 3.0 { RED } else if m.runway < 6.0 { ORANGE } else { OFFWHITE }, "Runway",
+                let rr = stat(ui, c, "runway", runway, if m.runway < 3.0 { RED } else if m.runway < 6.0 { ORANGE } else { OFFWHITE }, "Runway",
                     "Mois avant d'être à court d'argent au rythme actuel.\nRunway = trésorerie / burn net, burn net = dépenses − revenus.");
+                super::tutorial::mark(ui, "runway", rr.rect);
                 stat(ui, c, "people", format!("{} / {} places", g.employees.len(), m.seats), if g.employees.len() as u32 > m.seats { ORANGE } else { OFFWHITE }, "Équipe",
                     "Personnes / places assises. Sans bureau, chacun travaille moins bien et le moral baisse.");
                 if width >= 1000.0 {
@@ -100,15 +101,23 @@ pub fn top_bar(root: &mut egui::Ui, c: &mut Ctx) {
                         c.ui.show_help = !c.ui.show_help;
                     }
                     ui.add_space(6.0);
+                    let mut speed_rect = egui::Rect::NOTHING;
                     for (s, label, tip) in [(4u8, "4×", "Très rapide (3)"), (2, "2×", "Rapide (2)"), (1, "1×", "Normal (1)"), (0, "⏸", "Pause (Espace)")] {
                         let sel = c.clock.speed == s;
                         let b = egui::Button::selectable(sel, RichText::new(label).size(15.0)).min_size(egui::vec2(34.0, 30.0));
-                        if ui.add(b).on_hover_text(tip).clicked() {
+                        let r = ui.add(b);
+                        speed_rect = speed_rect.union(r.rect);
+                        if r.on_hover_text(tip).clicked() {
                             c.clock.set_speed(s);
                             *c.click += 1;
                         }
                     }
-                    if !c.ui.right_open && ui.button("Panneaux ▸").clicked() {
+                    super::tutorial::mark(ui, "speed", speed_rect);
+                    if !c.ui.right_open && {
+                        let r = ui.button("Panneaux ▸");
+                        super::tutorial::mark(ui, "panels", r.rect);
+                        r.clicked()
+                    } {
                         c.ui.right_open = true;
                         c.ui.tab = Tab::Team;
                     }

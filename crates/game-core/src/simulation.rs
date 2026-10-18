@@ -89,6 +89,12 @@ pub struct GameState {
     /// Défense en cours contre une offre de rachat hostile.
     #[serde(default)]
     pub takeover: Option<Takeover>,
+    /// Le héros ou l'héroïne de la partie.
+    #[serde(default)]
+    pub founder: FounderProfile,
+    /// Étape du tutoriel des niveaux 1 et 2 (`None` = désactivé ou terminé).
+    #[serde(default)]
+    pub tutorial: Option<u32>,
     #[serde(skip)]
     pub metrics: Metrics,
     #[serde(skip)]
@@ -99,6 +105,19 @@ pub struct GameState {
 pub const TAKEOVER_POINTS: f64 = 1000.0;
 /// Délai (jours) pour réunir ces points avant que le rachat ne passe en force.
 pub const TAKEOVER_DAYS: u32 = 120;
+
+/// Nom et genre choisis à la création de la partie.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FounderProfile {
+    pub name: String,
+    pub female: bool,
+}
+
+impl Default for FounderProfile {
+    fn default() -> Self {
+        Self { name: "Camille".to_string(), female: false }
+    }
+}
 
 /// Une offre de rachat refusée : le fondateur (ou le CFO) prépare la défense, puis
 /// affronte le patron des acquisitions de l'entreprise en face à face.
@@ -248,11 +267,25 @@ impl GameState {
             mentors: Default::default(),
             counters: BTreeMap::new(),
             takeover: None,
+            founder: FounderProfile::default(),
+            tutorial: None,
             metrics: Metrics::default(),
             cues: Vec::new(),
         };
         s.start_level(content, 1);
         s
+    }
+
+    /// Personnalise le héros (nom affiché, apparence) au début d'une nouvelle partie.
+    pub fn set_founder(&mut self, name: &str, female: bool) {
+        let name = name.trim();
+        let name: String = if name.is_empty() { "Camille".to_string() } else { name.chars().take(24).collect() };
+        if let Some(f) = self.employees.iter_mut().find(|e| e.role == Role::Founder) {
+            f.name = name.clone();
+            // apparences 1 et 5 : cheveux longs ; 0 : cheveux courts
+            f.look = if female { 1 } else { 0 };
+        }
+        self.founder = FounderProfile { name, female };
     }
 
     /// Call after deserializing a save: rebuilds derived data.
@@ -362,8 +395,7 @@ impl GameState {
                 cash_end: self.finance.cash,
                 mrr_end: self.metrics.mrr,
             });
-            let last = content.levels.iter().map(|l| l.id).max().unwrap_or(12);
-            if self.campaign.level >= last {
+            if content.next_level(self.campaign.level, &self.flags).is_none() {
                 self.campaign.ending = self
                     .flags
                     .iter()
@@ -1981,7 +2013,9 @@ impl GameState {
                 if self.campaign.phase != Phase::LevelComplete {
                     return Err(CmdError::Invalid("Niveau pas encore terminé"));
                 }
-                let next = self.campaign.level + 1;
+                let Some(next) = content.next_level(self.campaign.level, &self.flags) else {
+                    return Err(CmdError::Invalid("Plus de niveau après celui-ci"));
+                };
                 self.start_level(content, next);
                 Ok(())
             }

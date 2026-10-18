@@ -17,6 +17,8 @@ pub fn left(root: &mut egui::Ui, c: &mut Ctx, narrow: bool) {
         .max_size(420.0)
         .frame(panel_frame())
         .show(root, |ui| {
+            let top = ui.max_rect();
+            super::tutorial::mark(ui, "quests", egui::Rect::from_min_size(top.min, egui::vec2(top.width(), top.height().min(260.0))));
             egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| body(ui, c));
         });
 }
@@ -25,8 +27,9 @@ fn body(ui: &mut egui::Ui, c: &mut Ctx) {
     let level = c.game.0.campaign.level;
     let Some(def) = c.content.0.level(level) else { return };
     ui.horizontal(|ui| {
-        let total = c.content.0.levels.len();
-        ui.label(RichText::new(format!("NIVEAU {level}/{total}")).font(pixel(11.0)).color(MUTED));
+        let total = c.content.0.campaign_length(&c.game.0.flags);
+        let pos = c.content.0.campaign_position(level, &c.game.0.flags);
+        ui.label(RichText::new(format!("NIVEAU {pos}/{total}")).font(pixel(11.0)).color(MUTED));
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if ui.small_button("◂").on_hover_text("Masquer").clicked() {
                 c.ui.left_open = false;
@@ -34,7 +37,7 @@ fn body(ui: &mut egui::Ui, c: &mut Ctx) {
         });
     });
     ui.label(RichText::new(&def.title).font(pixel(22.0)).color(GREEN));
-    ui.label(RichText::new(&def.objective).size(13.0).color(LIGHTGRAY));
+    ui.label(RichText::new(super::dialogs::tx(c, &def.objective)).size(13.0).color(LIGHTGRAY));
     ui.add_space(6.0);
     let def = def.clone();
     for (i, q) in def.quests.iter().enumerate() {

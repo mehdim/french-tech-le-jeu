@@ -6,6 +6,7 @@
 mod dialogs;
 mod feed;
 mod fight;
+pub mod tutorial;
 mod finale;
 mod finance;
 mod funding;
@@ -51,6 +52,8 @@ pub enum MenuPage {
     Settings,
     Credits,
     ConfirmReset,
+    /// Création du héros ou de l'héroïne avant une nouvelle partie.
+    NewHero,
 }
 
 #[derive(Resource, Default)]
@@ -72,6 +75,10 @@ pub struct UiState {
     /// egui applique les nouvelles polices à l'image suivante : on ne dessine qu'après.
     pub fonts_ready: bool,
     pub show_help: bool,
+    /// Écran de création du héros.
+    pub hero_name: String,
+    pub hero_female: bool,
+    pub hero_tutorial: bool,
 }
 
 /// Notifications éphémères dans le coin.
@@ -267,7 +274,10 @@ fn ui_root(
             }
             let r = root.available_rect_before_wrap();
             match current {
-                AppState::Playing => dialogs::in_game(&ctx, &mut c),
+                AppState::Playing => {
+                    dialogs::in_game(&ctx, &mut c);
+                    tutorial::show(&ctx, &mut c);
+                }
                 AppState::Paused => menu::pause_menu(&ctx, &mut c),
                 AppState::MissionComplete => dialogs::mission_complete(&ctx, &mut c),
                 AppState::GameOver => dialogs::game_over(&ctx, &mut c),
@@ -327,6 +337,7 @@ fn right_panel(ui: &mut egui::Ui, c: &mut Ctx) {
         for (tab, label, key, enabled) in tabs {
             let selected = c.ui.tab == tab;
             let b = ui.add_enabled(enabled, egui::Button::selectable(selected, egui::RichText::new(label).size(14.0)));
+            tutorial::mark(ui, &format!("tab_{tab:?}"), b.rect);
             if b.on_hover_text(format!("Raccourci : {key}")).clicked() {
                 c.ui.tab = tab;
                 *c.click += 1;

@@ -24,9 +24,75 @@ pub fn to_main_menu(c: &mut Ctx) {
     }
 }
 
+const NAMES_F: [&str; 8] = ["Camille", "Léa", "Inès", "Manon", "Chloé", "Yasmine", "Clémence", "Aïcha"];
+const NAMES_M: [&str; 8] = ["Hugo", "Karim", "Théo", "Lucas", "Mehdi", "Antoine", "Bastien", "Youssef"];
+
+fn open_new_hero(c: &mut Ctx) {
+    let k = (platform::clock::now_millis() % 8) as usize;
+    c.ui.hero_female = platform::clock::now_millis().is_multiple_of(2);
+    c.ui.hero_name = if c.ui.hero_female { NAMES_F[k] } else { NAMES_M[k] }.to_string();
+    // Le tutoriel est proposé d'office à la première partie.
+    c.ui.hero_tutorial = !c.slots.0.iter().any(|(_, m)| m.is_ok());
+    c.ui.menu_page = MenuPage::NewHero;
+}
+
+fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
+    ui.label(RichText::new("Votre héros").font(pixel(22.0)).color(GREEN));
+    ui.add(egui::Label::new(RichText::new("Belleville, un salon, un ordinateur portable. Qui va créer Veridix ?").size(13.0).color(LIGHTGRAY)).wrap());
+    ui.add_space(6.0);
+    ui.horizontal(|ui| {
+        for (female, key, label) in [(false, "founder", "Fondateur"), (true, "founder_f", "Fondatrice")] {
+            let selected = c.ui.hero_female == female;
+            let frame = if selected { card().stroke(egui::Stroke::new(2.0, GREEN)) } else { card() };
+            let r = frame
+                .show(ui, |ui| {
+                    ui.set_width(170.0);
+                    ui.vertical_centered(|ui| {
+                        portrait(ui, c.tex, c.atlas, key, 88.0);
+                        ui.label(RichText::new(label).font(pixel(13.0)).color(if selected { GREEN } else { LIGHTGRAY }));
+                    });
+                })
+                .response
+                .interact(egui::Sense::click())
+                .on_hover_cursor(egui::CursorIcon::PointingHand);
+            if r.clicked() && !selected {
+                *c.click += 1;
+                c.ui.hero_female = female;
+                // On propose un prénom assorti si le joueur n'a rien tapé de personnel.
+                if NAMES_F.contains(&c.ui.hero_name.as_str()) || NAMES_M.contains(&c.ui.hero_name.as_str()) {
+                    let k = (platform::clock::now_millis() % 8) as usize;
+                    c.ui.hero_name = if female { NAMES_F[k] } else { NAMES_M[k] }.to_string();
+                }
+            }
+        }
+    });
+    ui.add_space(6.0);
+    ui.label(RichText::new("Nom").strong());
+    ui.horizontal(|ui| {
+        ui.add(egui::TextEdit::singleline(&mut c.ui.hero_name).char_limit(24).desired_width(280.0).font(egui::FontId::proportional(17.0)));
+        if ui.button("Au hasard").on_hover_text("Un autre prénom").clicked() {
+            let k = (platform::clock::now_millis() / 7 % 8) as usize;
+            c.ui.hero_name = if c.ui.hero_female { NAMES_F[k] } else { NAMES_M[k] }.to_string();
+        }
+    });
+    ui.add_space(6.0);
+    ui.checkbox(&mut c.ui.hero_tutorial, RichText::new("Tutoriel guidé (niveaux 1 et 2)").color(OFFWHITE));
+    ui.add(egui::Label::new(RichText::new("Des bulles vous montrent où cliquer : produit, équipe, France Travail, premiers clients.").size(13.0).color(LIGHTGRAY)).wrap());
+    ui.add_space(10.0);
+    let ok = !c.ui.hero_name.trim().is_empty();
+    if big_button(ui, "Créer Veridix ▸", ok, 300.0).clicked() && ok {
+        *c.click += 1;
+        start_new(c);
+    }
+    back(ui, c);
+}
+
 fn start_new(c: &mut Ctx) {
     let seed = platform::clock::now_millis();
     c.game.0 = game_core::GameState::new(&c.content.0, seed);
+    let (name, female) = (c.ui.hero_name.clone(), c.ui.hero_female);
+    c.game.0.set_founder(&name, female);
+    c.game.0.tutorial = if c.ui.hero_tutorial { Some(0) } else { None };
     c.demo.0 = false;
     c.ui.intro_line = 0;
     c.ui.inspect_employee = None;
@@ -62,7 +128,7 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
         .order(egui::Order::Foreground)
         .show(ctx, |ui| {
             ui.set_width(410.0);
-            if let Some(id) = c.tex.title {
+            if let Some(id) = c.tex.title.filter(|_| c.ui.menu_page != MenuPage::NewHero) {
                 ui.add(egui::Image::from_texture(egui::load::SizedTexture::new(id, egui::vec2(406.0, 228.0))).texture_options(egui::TextureOptions::NEAREST));
             }
             ui.add_space(6.0);
@@ -79,6 +145,7 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
                 MenuPage::Settings => settings_page(ui, c),
                 MenuPage::Credits => credits_page(ui, c),
                 MenuPage::ConfirmReset => confirm_reset(ui, c),
+                MenuPage::NewHero => new_hero_page(ui, c),
             }
         });
     egui::Area::new("menu_footer".into())
@@ -92,7 +159,7 @@ fn main_buttons(ui: &mut egui::Ui, c: &mut Ctx) {
     let w = 300.0;
     if big_button(ui, "Nouvelle partie", true, w).clicked() {
         *c.click += 1;
-        start_new(c);
+        open_new_hero(c);
     }
     let latest = c.slots.0.iter().filter(|(_, m)| m.is_ok()).max_by_key(|(_, m)| m.as_ref().map(|m| m.day).unwrap_or(0)).map(|(s, _)| s.clone());
     if big_button(ui, "Continuer", latest.is_some(), w).clicked()

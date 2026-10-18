@@ -76,7 +76,20 @@ pub fn validate(content: &Content) -> Vec<String> {
     if n < 12 || ids != (1..=n).collect::<Vec<u32>>() {
         problems.push(format!("les niveaux doivent être numérotés de 1 à N (N ≥ 12) sans trou, trouvé {ids:?}"));
     }
+    let main_last = content.levels.iter().filter(|l| l.requires_flag.is_none()).map(|l| l.id).max().unwrap_or(0);
     for l in &content.levels {
+        if let Some(f) = &l.requires_flag {
+            if l.id <= main_last {
+                problems.push(format!("le niveau bonus {} doit venir après le dernier niveau commun ({main_last})", l.id));
+            }
+            let set_somewhere = content.events.iter().flat_map(|e| e.choices.iter()).flat_map(|ch| ch.effects.iter())
+                .any(|x| matches!(x, Effect::SetFlag(g) if g == f));
+            if !set_somewhere {
+                problems.push(format!("le niveau bonus {} attend le drapeau `{f}`, qu'aucun choix ne pose", l.id));
+            }
+        } else if l.id > main_last {
+            problems.push(format!("niveau {} mal placé", l.id));
+        }
         if !event_ids.contains(l.boss_event.as_str()) {
             problems.push(format!("niveau {} : événement majeur `{}` introuvable", l.id, l.boss_event));
         }

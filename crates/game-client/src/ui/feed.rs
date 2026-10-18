@@ -37,7 +37,7 @@ pub fn bottom(root: &mut egui::Ui, c: &mut Ctx) {
                     }
                     ui.horizontal_wrapped(|ui| {
                         ui.label(RichText::new(date_label(e.day)).size(11.5).color(MUTED));
-                        ui.label(RichText::new(dialogue::format(&e.msg)).size(13.0).color(tone_color(e.tone)));
+                        ui.label(RichText::new(game_content::hero::personalize(&dialogue::format(&e.msg), &c.game.0.founder)).size(13.0).color(tone_color(e.tone)));
                     });
                 }
             });
