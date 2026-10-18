@@ -156,6 +156,10 @@ def main() -> int:
         # Nouvelle campagne.
         page.evaluate("Object.keys(localStorage).filter(k => k.includes('autosave')).forEach(k => localStorage.removeItem(k))")
         page.mouse.click(*NEW_GAME)
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(args.shots / "2-hero.png"))
+        # Écran de création du héros : un nom est proposé, Entrée lance la partie.
+        page.keyboard.press("Enter", delay=120)
         page.wait_for_timeout(2500)
         page.screenshot(path=str(args.shots / "2-intro.png"))
         # Entrée fait avancer le dialogue réplique par réplique, puis lance le niveau.

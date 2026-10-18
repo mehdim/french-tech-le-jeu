@@ -80,7 +80,8 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
     ui.add(egui::Label::new(RichText::new("Des bulles vous montrent où cliquer : produit, équipe, France Travail, premiers clients.").size(13.0).color(LIGHTGRAY)).wrap());
     ui.add_space(10.0);
     let ok = !c.ui.hero_name.trim().is_empty();
-    if big_button(ui, "Créer Veridix ▸", ok, 300.0).clicked() && ok {
+    let enter = ui.input(|i| i.key_pressed(egui::Key::Enter));
+    if (big_button(ui, "Créer Veridix ▸", ok, 300.0).on_hover_text("Entrée").clicked() || enter) && ok {
         *c.click += 1;
         start_new(c);
     }
