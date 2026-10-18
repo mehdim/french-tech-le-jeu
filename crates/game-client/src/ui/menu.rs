@@ -77,15 +77,62 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
     });
     ui.add_space(6.0);
     ui.checkbox(&mut c.ui.hero_tutorial, RichText::new("Tutoriel guidé (niveaux 1 et 2)").color(OFFWHITE));
-    ui.add(egui::Label::new(RichText::new("Des bulles vous montrent où cliquer : produit, équipe, France Travail, premiers clients.").size(13.0).color(LIGHTGRAY)).wrap());
+    ui.add(egui::Label::new(RichText::new("Votre mentor vous montre où cliquer : produit, équipe, France Travail, premiers clients.").size(13.0).color(LIGHTGRAY)).wrap());
     ui.add_space(10.0);
     let ok = !c.ui.hero_name.trim().is_empty();
     let enter = ui.input(|i| i.key_pressed(egui::Key::Enter));
-    if (big_button(ui, "Créer Veridix ▸", ok, 300.0).on_hover_text("Entrée").clicked() || enter) && ok {
+    if (big_button(ui, "Choisir un mentor ▸", ok, 300.0).on_hover_text("Entrée").clicked() || enter) && ok {
+        *c.click += 1;
+        if c.ui.hero_mentor.is_empty() {
+            c.ui.hero_mentor = "mehdi".into();
+        }
+        c.ui.menu_page = MenuPage::NewMentor;
+    }
+    back(ui, c);
+}
+
+/// Deuxième écran de la création : le mentor principal d'À la French.
+fn new_mentor_page(ui: &mut egui::Ui, c: &mut Ctx) {
+    ui.label(RichText::new("Votre mentor").font(pixel(22.0)).color(GREEN));
+    ui.add(egui::Label::new(RichText::new(
+        "Mehdi, Steeve et Jean-Baptiste vous conseilleront tous les trois. Votre mentor principal vous guide dans le tutoriel, son bonus est permanent et ses conseils reviennent deux fois plus vite.",
+    ).size(13.0).color(LIGHTGRAY)).wrap());
+    ui.add_space(6.0);
+    let mentors: Vec<_> = c.content.0.mentors.clone();
+    for m in &mentors {
+        let selected = c.ui.hero_mentor == m.id;
+        let frame = if selected { card().stroke(egui::Stroke::new(2.0, GREEN)) } else { card() };
+        let r = frame
+            .show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.horizontal(|ui| {
+                    portrait(ui, c.tex, c.atlas, &m.id, 64.0);
+                    ui.vertical(|ui| {
+                        ui.spacing_mut().item_spacing.y = 2.0;
+                        ui.label(RichText::new(&m.name).font(pixel(15.0)).color(if selected { GREEN } else { OFFWHITE }));
+                        ui.add(egui::Label::new(RichText::new(&m.title).size(12.0).color(LIGHTGRAY)).wrap());
+                        ui.add(egui::Label::new(RichText::new(format!("Bonus : {}", m.passive_label)).size(12.0).color(GREEN)).wrap());
+                    });
+                });
+            })
+            .response
+            .interact(egui::Sense::click())
+            .on_hover_cursor(egui::CursorIcon::PointingHand);
+        if r.clicked() && !selected {
+            *c.click += 1;
+            c.ui.hero_mentor = m.id.clone();
+        }
+    }
+    ui.add_space(8.0);
+    let enter = ui.input(|i| i.key_pressed(egui::Key::Enter));
+    if big_button(ui, "Créer Veridix ▸", true, 300.0).on_hover_text("Entrée").clicked() || enter {
         *c.click += 1;
         start_new(c);
     }
-    back(ui, c);
+    ui.add_space(8.0);
+    if ui.button("◂ Retour").clicked() {
+        c.ui.menu_page = MenuPage::NewHero;
+    }
 }
 
 fn start_new(c: &mut Ctx) {
@@ -93,6 +140,10 @@ fn start_new(c: &mut Ctx) {
     c.game.0 = game_core::GameState::new(&c.content.0, seed);
     let (name, female) = (c.ui.hero_name.clone(), c.ui.hero_female);
     c.game.0.set_founder(&name, female);
+    let mentor = if c.ui.hero_mentor.is_empty() { "mehdi".to_string() } else { c.ui.hero_mentor.clone() };
+    if let Err(e) = c.game.0.choose_starting_mentor(&c.content.0, &mentor) {
+        c.toasts.push_bad(e.label());
+    }
     c.game.0.tutorial = if c.ui.hero_tutorial { Some(0) } else { None };
     c.demo.0 = false;
     c.ui.intro_line = 0;
@@ -129,7 +180,7 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
         .order(egui::Order::Foreground)
         .show(ctx, |ui| {
             ui.set_width(410.0);
-            if let Some(id) = c.tex.title.filter(|_| c.ui.menu_page != MenuPage::NewHero) {
+            if let Some(id) = c.tex.title.filter(|_| !matches!(c.ui.menu_page, MenuPage::NewHero | MenuPage::NewMentor)) {
                 ui.add(egui::Image::from_texture(egui::load::SizedTexture::new(id, egui::vec2(406.0, 228.0))).texture_options(egui::TextureOptions::NEAREST));
             }
             ui.add_space(6.0);
@@ -147,6 +198,7 @@ pub fn main_menu(ctx: &egui::Context, c: &mut Ctx) {
                 MenuPage::Credits => credits_page(ui, c),
                 MenuPage::ConfirmReset => confirm_reset(ui, c),
                 MenuPage::NewHero => new_hero_page(ui, c),
+                MenuPage::NewMentor => new_mentor_page(ui, c),
             }
         });
     egui::Area::new("menu_footer".into())

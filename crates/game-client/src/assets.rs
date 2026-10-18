@@ -86,7 +86,7 @@ impl Plugin for AssetsPlugin {
 }
 
 fn load_atlas(mut commands: Commands, server: Res<AssetServer>) {
-    let endings = ["ending_unicorn", "ending_ipo", "ending_profitable", "ending_acquisition", "ending_commons"]
+    let endings = ["ending_unicorn", "ending_ipo", "ending_profitable", "ending_acquisition", "ending_commons", "scene_elysee", "scene_france_travail"]
         .iter()
         .map(|k| (k.to_string(), server.load(format!("backgrounds/{k}.png"))))
         .collect();

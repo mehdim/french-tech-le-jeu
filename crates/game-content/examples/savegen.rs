@@ -22,8 +22,8 @@ fn main() {
     let mut t = game_core::GameState::new(&c, 7);
     t.set_founder("Camille", true);
     t.tutorial = Some(0);
+    t.choose_starting_mentor(&c, "steeve").unwrap();
     let _ = t.apply(&c, game_core::Command::DismissIntro);
-    let _ = t.apply(&c, game_core::Command::ResolveEvent { choice: 0 });
     t.recompute_metrics(&c);
     std::fs::write(format!("{out}/tutorial.json"), to_save_string(&t, "démo")).unwrap();
     t.tutorial = Some(2);
@@ -36,6 +36,7 @@ fn main() {
     t2.events.queue.clear();
     t2.office.move_to(&c, 1);
     t2.tutorial = Some(10);
+    t2.choose_starting_mentor(&c, "jb").unwrap();
     t2.recompute_metrics(&c);
     std::fs::write(format!("{out}/tutorial_l2.json"), to_save_string(&t2, "démo")).unwrap();
     // Les niveaux bonus : 17 après l'IPO, 18 après le rachat par NVIDIA.

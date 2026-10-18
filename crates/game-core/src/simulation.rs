@@ -288,6 +288,17 @@ impl GameState {
         self.founder = FounderProfile { name, female };
     }
 
+    /// Choisit le mentor principal à la création de la partie : l'événement
+    /// « Trois mentors pour le prix d'un » n'a alors plus lieu d'être.
+    pub fn choose_starting_mentor(&mut self, content: &Content, mentor: &str) -> Result<(), CmdError> {
+        self.apply(content, Command::ChooseMentor { mentor: mentor.to_string() })?;
+        if self.events.pending.as_ref().is_some_and(|p| p.event_id == "mentors_intro") {
+            self.events.pending = None;
+        }
+        self.events.queue.retain(|p| p.event_id != "mentors_intro");
+        Ok(())
+    }
+
     /// Call after deserializing a save: rebuilds derived data.
     pub fn after_load(&mut self, content: &Content) {
         self.recompute_metrics(content);
@@ -1296,6 +1307,10 @@ impl GameState {
 
     pub fn fire_event(&mut self, content: &Content, id: &str, boss: bool) {
         let Some(def) = content.event(id) else { return };
+        // Le mentor a déjà été choisi à la création de la partie.
+        if id == "mentors_intro" && self.mentors.main.is_some() {
+            return;
+        }
         if self.events.pending.is_some() {
             self.events.queue.push(PendingEvent { event_id: id.to_string(), fired_day: self.day, boss });
             return;

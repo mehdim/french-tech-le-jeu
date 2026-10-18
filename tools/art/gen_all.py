@@ -182,6 +182,9 @@ def main():
 
     # --- fonds --------------------------------------------------------------
     S.title_background().save(os.path.join(A, "backgrounds", "title.png"))
+    import gen_rooms as R
+    R.elysee().save(os.path.join(A, "backgrounds", "scene_elysee.png"))
+    R.france_travail().save(os.path.join(A, "backgrounds", "scene_france_travail.png"))
     for name, fn in (("ending_unicorn", S.ending_unicorn), ("ending_ipo", S.ending_ipo), ("ending_profitable", S.ending_profitable),
                      ("ending_acquisition", S.ending_acquisition), ("ending_commons", S.ending_commons)):
         fn().save(os.path.join(A, "backgrounds", f"{name}.png"))

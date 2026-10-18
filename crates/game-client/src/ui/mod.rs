@@ -54,6 +54,8 @@ pub enum MenuPage {
     ConfirmReset,
     /// Création du héros ou de l'héroïne avant une nouvelle partie.
     NewHero,
+    /// Choix du mentor principal, juste après le héros.
+    NewMentor,
 }
 
 #[derive(Resource, Default)]
@@ -79,6 +81,7 @@ pub struct UiState {
     pub hero_name: String,
     pub hero_female: bool,
     pub hero_tutorial: bool,
+    pub hero_mentor: String,
 }
 
 /// Notifications éphémères dans le coin.

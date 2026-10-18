@@ -81,70 +81,70 @@ const STEPS: &[Step] = &[
     Step {
         show_when: always,
         title: "Bienvenue, {nom} !",
-        text: "Je vous accompagne pendant les deux premiers niveaux (vous pouvez couper le tutoriel à tout moment). À gauche, vos objectifs : survolez-les pour un indice.",
+        text: "C'est moi qui t'accompagne pendant les deux premiers niveaux (tu peux couper le tutoriel à tout moment). À gauche, tes objectifs : survole-les pour un indice.",
         anchors: |_| vec!["quests".into()],
         done: Done::Ok,
     },
     Step {
         show_when: always,
         title: "Le temps qui passe",
-        text: "Le jeu avance jour après jour. ⏸ met en pause (Espace), 1× 2× 4× accélèrent. Mettez en pause dès que vous voulez réfléchir : rien ne presse… à part la trésorerie.",
+        text: "Le jeu avance jour après jour. ⏸ met en pause (Espace), 1× 2× 4× accélèrent. Mets en pause dès que tu veux réfléchir : rien ne presse… à part la trésorerie.",
         anchors: |_| vec!["speed".into()],
         done: Done::Ok,
     },
     Step {
         show_when: always,
         title: "Construire le MVP",
-        text: "Ouvrez l'onglet « Produit & R&D » (touche P), puis cliquez sur « Lancer » à côté de « Détection de texte (MVP) », dans la feuille de route (faites défiler le panneau).",
+        text: "Ouvre l'onglet « Produit & R&D » (touche P), puis clique sur « Lancer » à côté de « Détection de texte (MVP) », dans la feuille de route (fais défiler le panneau).",
         anchors: |c| tab_or(c, Tab::Product, "task_mvp_text"),
         done: Done::When(|c| has_task(c, "mvp_text")),
     },
     Step {
         show_when: always,
         title: "Au travail !",
-        text: "Un chantier n'avance que si quelqu'un y travaille. Dans l'onglet « Équipe » (touche E), choisissez le chantier MVP dans votre menu d'affectation.",
+        text: "Un chantier n'avance que si quelqu'un y travaille. Dans l'onglet « Équipe » (touche E), choisis le chantier MVP dans ton menu d'affectation.",
         anchors: employee_anchor,
         done: Done::When(|c| matches!(founder_assignment(c), Some(Assignment::Task(_))) || c.game.0.product.has("mvp_text")),
     },
     Step {
         show_when: always,
         title: "France Travail",
-        text: "Ouvrez l'onglet « Financement » (touche F) et cliquez sur « Constituer le dossier » pour le Dossier créateur d'entreprise. Il apporte l'accompagnement et l'ARE.",
+        text: "Ouvre l'onglet « Financement » (touche F) et clique sur « Constituer le dossier » pour le Dossier créateur d'entreprise. Accompagnement et ARE : ne crache pas dessus.",
         anchors: |c| tab_or(c, Tab::Funding, "program_france_travail"),
         done: Done::When(|c| c.game.0.funding.applications.iter().any(|a| a.program == "france_travail") || c.game.0.funding.approved.iter().any(|p| p == "france_travail")),
     },
     Step {
         show_when: always,
         title: "La paperasse",
-        text: "Un dossier avance avec des points « Administratif ». Chaque personne ne fait qu'une chose par jour : alternez entre le MVP et l'administratif dans votre menu d'affectation. Votre attention est la ressource la plus rare de Veridix !",
+        text: "Un dossier avance avec des points « Administratif ». Chacun ne fait qu'une chose par jour : alterne entre le MVP et l'administratif dans ton menu d'affectation. Ton attention est la ressource la plus rare de Veridix !",
         anchors: employee_anchor,
         done: Done::Ok,
     },
     Step {
         show_when: always,
-        title: "Accélérez",
-        text: "Tout est lancé. Passez en 2× ou 4× et regardez les barres de progression avancer, à gauche et dans les panneaux.",
+        title: "Accélère",
+        text: "Tout est lancé. Passe en 2× ou 4× et regarde les barres de progression avancer, à gauche et dans les panneaux.",
         anchors: |_| vec!["speed".into()],
         done: Done::When(|c| c.clock.speed >= 2),
     },
     Step {
         show_when: |c| c.game.0.product.has("mvp_text"),
         title: "MVP livré !",
-        text: "Bravo ! Il vous faut maintenant 3 bêta-testeurs : affectez-vous à « Ventes » ou « Marketing » dans l'onglet Équipe. Et n'oubliez pas le dossier France Travail.",
+        text: "Bravo ! Il te faut maintenant 3 bêta-testeurs : affecte-toi à « Ventes » ou « Marketing » dans l'onglet Équipe. Et n'oublie pas le dossier France Travail.",
         anchors: employee_anchor,
         done: Done::When(|c| matches!(founder_assignment(c), Some(Assignment::Sales | Assignment::Marketing)) || c.game.0.metrics.customers >= 3),
     },
     Step {
         show_when: always,
-        title: "Vos mentors",
-        text: "Mehdi, Steeve et Jean-Baptiste, d'À la French, vous conseillent : onglet « Mentors » (touche M). Chaque conseil se recharge au fil des jours.",
+        title: "Tes mentors",
+        text: "On est trois à te conseiller, avec les deux autres d'À la French : onglet « Mentors » (touche M). Chaque conseil se recharge au fil des jours, le mien deux fois plus vite.",
         anchors: |_| vec!["tab_Mentors".into(), "panels".into()],
         done: Done::When(|c| c.ui.tab == Tab::Mentors && c.ui.right_open),
     },
     Step {
         show_when: always,
         title: "La trésorerie",
-        text: "En haut : trésorerie, MRR (revenu mensuel) et runway (mois avant la faillite). Gardez plus de 5 000 € en banque : c'est un objectif du niveau. Une aide accordée n'est pas une aide versée !",
+        text: "En haut : trésorerie, MRR (revenu mensuel) et runway (mois avant la faillite). Garde plus de 5 000 € en banque : c'est un objectif du niveau. Une aide accordée n'est pas une aide versée !",
         anchors: |_| vec!["runway".into()],
         done: Done::Ok,
     },
@@ -152,21 +152,21 @@ const STEPS: &[Step] = &[
     Step {
         show_when: |c| level2(c) && !c.game.0.campaign.intro_pending,
         title: "Niveau 2 : recruter",
-        text: "Un vrai bureau ! Dans l'onglet « Équipe », section Recrutement (en bas du panneau) : choisissez un profil (Backend, par exemple) puis un canal, et cliquez sur « Lancer ». LinkedIn est rapide, France Travail gratuit mais lent.",
+        text: "Un vrai bureau ! Dans l'onglet « Équipe », section Recrutement (en bas du panneau) : choisis un profil (Backend, par exemple) puis un canal, et clique sur « Lancer ». LinkedIn est rapide, France Travail gratuit mais lent.",
         anchors: |c| tab_or(c, Tab::Team, "recruit"),
         done: Done::When(|c| !c.game.0.searches.is_empty() || !c.game.0.candidates.is_empty() || c.game.0.employees.len() >= 2),
     },
     Step {
         show_when: level2,
         title: "Embaucher",
-        text: "Les candidats arrivent au bout de quelques jours, en bas de l'onglet Équipe. Comparez le salaire et les compétences, puis cliquez sur « Embaucher ».",
+        text: "Les candidats arrivent au bout de quelques jours, en bas de l'onglet Équipe. Compare salaire et compétences, puis clique sur « Embaucher ».",
         anchors: |c| tab_or(c, Tab::Team, "hire"),
         done: Done::When(|c| c.game.0.employees.len() >= 2),
     },
     Step {
         show_when: level2,
         title: "Le lancement",
-        text: "Pour faire payer vos clients : dans « Produit & R&D », livrez le Dashboard, puis le « Lancement public ». Pensez à y affecter votre nouvelle recrue.",
+        text: "Pour faire payer tes clients : dans « Produit & R&D », livre le Dashboard, puis le « Lancement public ». Affecte ta nouvelle recrue dessus.",
         anchors: |c| tab_or(c, Tab::Product, if c.game.0.product.has("mvp_dashboard") { "task_launch" } else { "task_mvp_dashboard" }),
         done: Done::When(|c| has_task(c, "launch")),
     },
@@ -179,8 +179,8 @@ const STEPS: &[Step] = &[
     },
     Step {
         show_when: level2,
-        title: "À vous de jouer",
-        text: "Vous savez l'essentiel. La suite : subventions, levées de fonds, Station F, la Chine, Davos… Bonne chance, {nom}. Et pensez à mettre un cône de chantier dans le bureau.",
+        title: "À toi de jouer",
+        text: "Tu sais l'essentiel. La suite : subventions, levées de fonds, Station F, la Chine, Davos… Bonne chance, {nom}. Et pense à mettre un cône de chantier dans le bureau.",
         anchors: |_| vec![],
         done: Done::Ok,
     },
@@ -216,13 +216,26 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
     let target = (step.anchors)(c).iter().find_map(|k| anchor(ctx, k));
     let founder = c.game.0.founder.clone();
     let title = game_content::hero::personalize(step.title, &founder);
-    let text = game_content::hero::personalize(step.text, &founder);
+    let mut text = game_content::hero::personalize(step.text, &founder);
+    // Le mentor principal, choisi à la création de la partie, parle dans les bulles.
+    let mentor_id = c.game.0.mentors.main.clone().unwrap_or_else(|| "alf".into());
+    let mentor_name = c.content.0.mentor(&mentor_id).map(|m| m.name.clone()).unwrap_or_else(|| "À la French".into());
+    if idx + 1 == STEPS.len() {
+        text.push(' ');
+        text.push_str(match mentor_id.as_str() {
+            "mehdi" => "Et rappelle-toi : si ça n'a pas d'API, ça n'existe pas.",
+            "steeve" => "Et montre-moi ta facture GPU de temps en temps. La vraie.",
+            "jb" => "Et publie ton code. Le cône de chantier, c'est cadeau.",
+            _ => "",
+        });
+    }
 
     let screen = ctx.content_rect();
-    let w = 330.0_f32.min(screen.width() - 32.0);
-    // Taille de la bulle : mesurée sur le texte.
-    let body = ctx.fonts_mut(|f| f.layout(text.clone(), FontId::proportional(14.5), OFFWHITE, w - 24.0));
-    let h = body.size().y + 86.0;
+    let w = 400.0_f32.min(screen.width() - 32.0);
+    const FACE: f32 = 64.0;
+    // Taille de la bulle : mesurée sur le texte (à droite du portrait).
+    let body = ctx.fonts_mut(|f| f.layout(text.clone(), FontId::proportional(14.5), OFFWHITE, w - 24.0 - FACE - 10.0));
+    let h = (body.size().y + 86.0).max(FACE + 60.0);
     let size = vec2(w, h);
     let pos = place(screen, target, size);
     let bubble = Rect::from_min_size(pos, size);
@@ -256,11 +269,19 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
                 .inner_margin(egui::Margin::same(12))
                 .show(ui, |ui| {
                     ui.set_width(w - 24.0);
-                    ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(format!("TUTORIEL {}/{}", idx + 1, STEPS.len())).font(pixel(10.0)).color(MUTED));
+                    ui.horizontal_top(|ui| {
+                        ui.vertical(|ui| {
+                            ui.set_width(FACE);
+                            super::widgets::portrait(ui, c.tex, c.atlas, &mentor_id, FACE);
+                            ui.label(egui::RichText::new(&mentor_name).font(pixel(10.0)).color(GREEN));
+                        });
+                        ui.vertical(|ui| {
+                            ui.set_width(w - 24.0 - FACE - 10.0);
+                            ui.label(egui::RichText::new(format!("TUTORIEL {}/{}", idx + 1, STEPS.len())).font(pixel(10.0)).color(MUTED));
+                            ui.label(egui::RichText::new(title).font(pixel(15.0)).color(GREEN));
+                            ui.add(egui::Label::new(egui::RichText::new(text).size(14.5).color(OFFWHITE)).wrap());
+                        });
                     });
-                    ui.label(egui::RichText::new(title).font(pixel(15.0)).color(GREEN));
-                    ui.add(egui::Label::new(egui::RichText::new(text).size(14.5).color(OFFWHITE)).wrap());
                     ui.add_space(4.0);
                     ui.horizontal(|ui| {
                         if matches!(step.done, Done::Ok) {
@@ -268,7 +289,7 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
                                 ok = true;
                             }
                         } else {
-                            ui.label(egui::RichText::new("⟳ à vous de jouer…").size(12.5).italics().color(LIGHTGRAY));
+                            ui.label(egui::RichText::new("⟳ à toi de jouer…").size(12.5).italics().color(LIGHTGRAY));
                         }
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             if ui.small_button(egui::RichText::new("Passer le tutoriel").size(11.5).color(MUTED)).clicked() {

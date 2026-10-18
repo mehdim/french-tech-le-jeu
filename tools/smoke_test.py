@@ -158,7 +158,10 @@ def main() -> int:
         page.mouse.click(*NEW_GAME)
         page.wait_for_timeout(1500)
         page.screenshot(path=str(args.shots / "2-hero.png"))
-        # Écran de création du héros : un nom est proposé, Entrée lance la partie.
+        # Écran de création du héros (un nom est proposé), puis choix du mentor : Entrée, Entrée.
+        page.keyboard.press("Enter", delay=120)
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(args.shots / "2-mentor.png"))
         page.keyboard.press("Enter", delay=120)
         page.wait_for_timeout(2500)
         page.screenshot(path=str(args.shots / "2-intro.png"))

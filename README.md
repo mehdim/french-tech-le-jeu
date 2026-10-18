@@ -16,8 +16,8 @@ fabricants de modèles chinois, des chefs d'État à convaincre, des datacenters
 trop gourmands, et un choix final : **Série C, introduction en Bourse, rachat
 par NVIDIA, entreprise rentable ou communs open source**.
 
-Vous choisissez votre héros (fondateur ou fondatrice) et son nom, et un
-tutoriel en bulles vous guide pendant les deux premiers niveaux. Avec trois
+Vous choisissez votre héros (fondateur ou fondatrice), son nom et votre
+mentor principal, qui vous guide en bulles pendant les deux premiers niveaux. Avec trois
 mentors venus tout droit du podcast **A la French** : Mehdi, Steeve et
 Jean-Baptiste. Écrit en Rust avec Bevy, compilé en WebAssembly,
 joué dans le navigateur.
@@ -105,8 +105,11 @@ déplacement se fait donc avec ZQSD.
 - **Votre héros ou votre héroïne** : à la création de la partie, choisissez
   fondateur ou fondatrice (sprite, portrait et combat assortis) et un nom ;
   les dialogues s'accordent (« la fondatrice », « {nom} sonne la cloche »…).
+- **Le choix du mentor** juste après celui du héros (Mehdi, Steeve ou
+  Jean-Baptiste, avec leur bonus permanent).
 - **Un tutoriel guidé** sur les niveaux 1 et 2 (facultatif, désactivable à
-  tout moment) : 15 bulles qui désignent l'élément à utiliser (onglet,
+  tout moment), présenté par votre mentor principal (photo et tutoiement
+  compris) : 15 bulles qui désignent l'élément à utiliser (onglet,
   chantier, dossier France Travail, menu d'affectation, recrutement…) et
   avancent dès que l'action est faite.
 - **Une campagne de 16 niveaux, plus un niveau bonus selon la fin choisie**, chacun avec une introduction, 2 à 5
@@ -180,9 +183,12 @@ déplacement se fait donc avec ZQSD.
     les clauses d'earn-out ;
   - entreprise rentable : les pièces s'empilent, puis il faut couper les
     dépenses inutiles (offsite à Ibiza, kombucha bio…) sans couper les clients ;
-  - communs : l'arbre de commits pousse, le Président de la République vous
-    remet l'ordre national du Mérite à l'Élysée… et le lendemain, retour à
-    France Travail, ticket en main ; puis « merge ou close » sur une pluie de
+  - communs : l'arbre de commits pousse, puis deux salles isométriques en
+    pixel art : la salle des fêtes de l'Élysée (tapis rouge, lustre, garde
+    républicaine, photographes), où le Président remet l'ordre national du
+    Mérite à votre héros… et le lendemain, l'agence France Travail (chaises
+    orange, borne à tickets, affiche « Atelier créer startup »), médaille au
+    sweat ; puis « merge ou close » sur une pluie de
     pull requests.
 - **Trois mentors d'A la French**, dont les portraits reprennent
   l'illustration de l'émission. Au début de la campagne, vous choisissez

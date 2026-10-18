@@ -1,5 +1,5 @@
-// Les mentors d'A la French. Le mentor principal est choisi au début de la
-// campagne (événement « mentors_intro ») : son bonus permanent s'applique une
+// Les mentors d'A la French. Le mentor principal est choisi à la création de la
+// partie, juste après le héros (ou, à défaut, par l'événement « mentors_intro ») : son bonus permanent s'applique une
 // fois, et on peut le consulter deux fois plus souvent que les autres
 // (toutes les 7 semaines au lieu de 14).
 // Une consultation donne le PREMIER conseil dont les conditions sont remplies ;

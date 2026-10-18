@@ -600,3 +600,17 @@ fn the_hero_gets_a_name_and_a_look() {
     let back: GameState = serde_json::from_value(v).unwrap();
     assert_eq!(back.founder.name, "Camille");
 }
+
+#[test]
+fn a_mentor_chosen_at_creation_replaces_the_mentor_event() {
+    let c = content();
+    let mut s = GameState::new(&c, 3);
+    s.choose_starting_mentor(&c, "jb").unwrap();
+    assert_eq!(s.mentors.main.as_deref(), Some("jb"));
+    s.apply(&c, Command::DismissIntro).unwrap();
+    for _ in 0..5 {
+        s.tick(&c);
+    }
+    assert!(s.events.history.iter().all(|e| e.event_id != "mentors_intro"));
+    assert!(s.events.pending.as_ref().is_none_or(|p| p.event_id != "mentors_intro"));
+}
