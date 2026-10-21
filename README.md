@@ -103,9 +103,9 @@ déplacement se fait donc avec ZQSD.
 ## Contenu du jeu
 
 - **Votre héros ou votre héroïne** : à la création de la partie, choisissez
-  fondateur ou fondatrice, son origine parmi sept types (blanc, arabe, indien,
-  métis, africain, asiatique, amérindien d'Amérique du Sud, chacun avec son
-  teint et sa coiffure ; sprite, portrait et combat assortis) et un nom ;
+  fondateur ou fondatrice (visages jaunes façon emoji), puis son avatar parmi
+  sept (teints et coiffures variés ;
+  sprite, portrait et combat assortis) et un nom ;
   les dialogues s'accordent (« la fondatrice », « {nom} sonne la cloche »…).
 - **Le choix du mentor** juste après celui du héros (Mehdi, Steeve ou
   Jean-Baptiste, avec leur bonus permanent).

@@ -42,8 +42,8 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
     ui.add(egui::Label::new(RichText::new("Belleville, un salon, un ordinateur portable. Qui va créer Veridix ?").size(13.0).color(LIGHTGRAY)).wrap());
     ui.add_space(6.0);
     ui.horizontal(|ui| {
-        let e = c.ui.hero_ethnicity;
-        for (female, key, label) in [(false, format!("hero_m{e}"), "Fondateur"), (true, format!("hero_f{e}"), "Fondatrice")] {
+        // Visages jaunes et neutres, façon emoji : l'apparence se choisit juste en dessous.
+        for (female, key, label) in [(false, "hero_m_yellow".to_string(), "Fondateur"), (true, "hero_f_yellow".to_string(), "Fondatrice")] {
             let selected = c.ui.hero_female == female;
             let frame = if selected { card().stroke(egui::Stroke::new(2.0, GREEN)) } else { card() };
             let r = frame
@@ -69,14 +69,10 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
         }
     });
     ui.add_space(4.0);
-    let (male_label, female_label) = game_core::simulation::ETHNICITIES[c.ui.hero_ethnicity as usize % 7];
-    ui.horizontal(|ui| {
-        ui.label(RichText::new("Origine").strong());
-        ui.label(RichText::new(if c.ui.hero_female { female_label } else { male_label }).color(GREEN));
-    });
+    ui.label(RichText::new("Choix de l'avatar").strong());
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = 4.0;
-        for (i, (m, f)) in game_core::simulation::ETHNICITIES.iter().enumerate() {
+        for i in 0..game_core::simulation::ETHNICITIES.len() {
             let selected = c.ui.hero_ethnicity as usize == i;
             let key = if c.ui.hero_female { format!("hero_f{i}") } else { format!("hero_m{i}") };
             let frame = egui::Frame::new()
@@ -86,8 +82,7 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
                 .show(ui, |ui| portrait(ui, c.tex, c.atlas, &key, 46.0))
                 .response
                 .interact(egui::Sense::click())
-                .on_hover_cursor(egui::CursorIcon::PointingHand)
-                .on_hover_text(if c.ui.hero_female { *f } else { *m });
+                .on_hover_cursor(egui::CursorIcon::PointingHand);
             if r.clicked() && !selected {
                 *c.click += 1;
                 c.ui.hero_ethnicity = i as u8;

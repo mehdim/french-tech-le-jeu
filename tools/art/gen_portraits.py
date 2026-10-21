@@ -232,6 +232,13 @@ def heroes():
         rect(f, 18, 23, 4, 1, (196, 70, 84, 255)); px(f, 17, 22, (196, 70, 84, 255)); px(f, 22, 22, (196, 70, 84, 255))
         px(f, 12, 21, YELLOW); px(f, 12, 22, YELLOW); px(f, 28, 21, YELLOW); px(f, 28, 22, YELLOW)
         out[f"hero_f{i}"] = f
+    # visages jaunes neutres (façon emoji) pour le choix fondateur / fondatrice
+    yellow, brown = (255, 214, 64, 255), (92, 60, 34, 255)
+    out["hero_m_yellow"] = bust(DEEP_GREEN, yellow, brown, "short", GRAPHITE_2, {"logo": GREEN, "mouth": "smile"})
+    f = bust(DEEP_GREEN, yellow, brown, "long", GRAPHITE_2, {"logo": GREEN, "mouth": "smile"})
+    rect(f, 18, 23, 4, 1, (196, 70, 84, 255)); px(f, 17, 22, (196, 70, 84, 255)); px(f, 22, 22, (196, 70, 84, 255))
+    px(f, 12, 21, YELLOW); px(f, 12, 22, YELLOW); px(f, 28, 21, YELLOW); px(f, 28, 22, YELLOW)
+    out["hero_f_yellow"] = f
     return out
 
 
