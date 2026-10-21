@@ -268,6 +268,10 @@ pub enum RoundKind {
     SeriesA,
     SeriesB,
     SeriesC,
+    /// Tour de fin de partie (niveau 16+), réservé aux entreprises qui ont fait une Série C.
+    SeriesD,
+    /// Levée en cryptomonnaie : pas de dilution, mais une trésorerie qui fait le yo-yo.
+    Crypto,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -306,6 +310,12 @@ pub struct RoundDef {
     /// Fourchette de dilution typique visée par les investisseurs, en %.
     pub dilution: (f64, f64),
     pub description: String,
+    /// Conditions supplémentaires pour lancer ce tour (ex. avoir bouclé une Série C).
+    #[serde(default)]
+    pub requires: Vec<Condition>,
+    /// Texte affiché quand une condition manque.
+    #[serde(default)]
+    pub requires_text: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

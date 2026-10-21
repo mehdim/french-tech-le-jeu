@@ -131,6 +131,26 @@ fn equity(ui: &mut egui::Ui, c: &mut Ctx) {
             }
         });
     }
+    // Trésorerie en cryptomonnaie (levée en jetons).
+    if c.game.0.crypto > 0.0 {
+        card().stroke(egui::Stroke::new(1.5, ORANGE)).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(format!("Trésorerie crypto : {}", money(c.game.0.crypto))).strong().color(ORANGE));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button(RichText::new("Convertir en euros (3 %)").color(GREEN)).clicked() {
+                        c.run(Command::SellCrypto);
+                    }
+                });
+            });
+            muted(ui, "Comptée dans la trésorerie, mais elle varie chaque semaine (souvent de ±10 %) et reste exposée aux plateformes, aux piratages et aux régulateurs.");
+        });
+    }
+    if c.game.0.flags.contains("nvidia_owned") {
+        ui.add_space(4.0);
+        ui.label(RichText::new("🔒 Veridix appartient à NVIDIA : plus de levée de fonds possible. Le budget, c'est Kyle.").color(ORANGE));
+        return;
+    }
     // Levée de fonds.
     let fr = c.game.0.funding.fundraising.clone();
     match fr {
@@ -152,12 +172,21 @@ fn equity(ui: &mut egui::Ui, c: &mut Ctx) {
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(&r.name).strong());
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if ui.button(RichText::new("Lancer la levée").color(GREEN)).clicked() {
+                            let ok = r.requires.iter().all(|cond| c.game.0.check(cond));
+                            if ui.add_enabled(ok, egui::Button::new(RichText::new("Lancer la levée").color(if ok { GREEN } else { MUTED }))).clicked() {
                                 c.run(Command::StartFundraising { round: r.kind });
                             }
                         });
                     });
-                    muted(ui, format!("{} Pitch : {:.0} pts. Dilution visée {:.0}–{:.0} %.", r.description, r.pitch_points, r.dilution.0, r.dilution.1));
+                    let dil = if r.kind == RoundKind::Crypto {
+                        "Aucune dilution (jetons, pas d'actions).".to_string()
+                    } else {
+                        format!("Dilution visée {:.0}–{:.0} %.", r.dilution.0, r.dilution.1)
+                    };
+                    muted(ui, format!("{} Pitch : {:.0} pts. {dil}", r.description, r.pitch_points));
+                    if !r.requires.iter().all(|cond| c.game.0.check(cond)) && !r.requires_text.is_empty() {
+                        ui.label(RichText::new(format!("🔒 {}", r.requires_text)).size(12.0).color(ORANGE));
+                    }
                 });
             }
         }

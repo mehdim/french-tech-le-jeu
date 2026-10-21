@@ -48,9 +48,7 @@ pub fn portrait(ui: &mut egui::Ui, tex: &UiTextures, atlas: Option<&Atlas>, key:
 pub fn avatar(ui: &mut egui::Ui, tex: &UiTextures, atlas: Option<&Atlas>, role: game_core::types::Role, look: u8, size: f32) {
     let Some(atlas) = atlas else { return };
     let m = &atlas.manifest.characters;
-    let name = format!("{role:?}");
-    let idx = m.roles.iter().position(|r| *r == name).unwrap_or(0) as f32;
-    let row = idx * m.looks as f32 + (look as u32 % m.looks) as f32;
+    let row = crate::assets::character_row(m, role, look) as f32;
     let atlas_size = Vec2::new(m.frame[0] * 16.0, m.frame[1] * m.looks as f32 * m.roles.len() as f32);
     if let Some(img) = sub_image(tex.characters, atlas_size, [0.0, row * m.frame[1], m.frame[0], m.frame[1]], size) {
         ui.add(img);
@@ -228,7 +226,8 @@ pub fn placement_hint(ctx: &egui::Context, c: &Ctx, item: &str, rect: egui::Rect
             egui::Frame::new().fill(Color32::from_black_alpha(200)).inner_margin(egui::Margin::symmetric(12, 6)).corner_radius(3).show(ui, |ui| {
                 ui.set_width(360.0);
                 let reason = if c.placement.valid || c.placement.hover.is_none() { String::new() } else { format!(" — {}", c.placement.reason) };
-                ui.label(RichText::new(format!("Placer : {name}{reason}")).color(if c.placement.valid { GREEN } else { ORANGE }));
+                let verb = if c.placement.moving_uid.is_some() { "Déplacer" } else { "Placer" };
+                ui.label(RichText::new(format!("{verb} : {name}{reason}")).color(if c.placement.valid { GREEN } else { ORANGE }));
                 ui.label(RichText::new("Clic gauche : poser · R : pivoter · Maj : en poser plusieurs · Échap / clic droit : annuler").size(11.5).color(LIGHTGRAY));
             });
         });

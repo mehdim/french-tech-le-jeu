@@ -37,7 +37,7 @@ pub fn tx(c: &Ctx, s: &str) -> String {
 
 fn speaker_line(ui: &mut egui::Ui, c: &Ctx, line: &Line) {
     ui.horizontal_top(|ui| {
-        portrait(ui, c.tex, c.atlas, hero::portrait(&line.speaker, &c.game.0.founder), 72.0);
+        portrait(ui, c.tex, c.atlas, &hero::portrait(&line.speaker, &c.game.0.founder), 72.0);
         ui.vertical(|ui| {
             ui.label(RichText::new(hero::speaker(&line.speaker, &c.game.0.founder)).font(pixel(11.0)).color(GREEN));
             ui.add(egui::Label::new(RichText::new(tx(c, &line.text)).size(15.5).color(OFFWHITE)).wrap());
@@ -119,7 +119,7 @@ fn event(ctx: &egui::Context, c: &mut Ctx) {
         ui.label(RichText::new(if boss { "ÉVÉNEMENT MAJEUR" } else { "ÉVÉNEMENT" }).font(pixel(11.0)).color(if boss { ORANGE } else { MUTED }));
         ui.horizontal_top(|ui| {
             if !def.speaker.is_empty() {
-                portrait(ui, c.tex, c.atlas, hero::portrait(&def.speaker, &c.game.0.founder), 72.0);
+                portrait(ui, c.tex, c.atlas, &hero::portrait(&def.speaker, &c.game.0.founder), 72.0);
             }
             ui.vertical(|ui| {
                 ui.add(egui::Label::new(RichText::new(tx(c, &def.title)).font(pixel(22.0)).color(GREEN)).wrap());

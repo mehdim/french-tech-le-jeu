@@ -20,7 +20,7 @@ fn main() {
     }
     // Le tutoriel au début du niveau 1, avec une héroïne.
     let mut t = game_core::GameState::new(&c, 7);
-    t.set_founder("Camille", true);
+    t.set_founder("Camille", true, 4);
     t.tutorial = Some(0);
     t.choose_starting_mentor(&c, "steeve").unwrap();
     let _ = t.apply(&c, game_core::Command::DismissIntro);
@@ -29,7 +29,7 @@ fn main() {
     t.tutorial = Some(2);
     std::fs::write(format!("{out}/tutorial2.json"), to_save_string(&t, "démo")).unwrap();
     let mut t2 = game_core::GameState::new(&c, 7);
-    t2.set_founder("Camille", true);
+    t2.set_founder("Camille", true, 4);
     t2.start_level(&c, 2);
     t2.campaign.intro_pending = false;
     t2.events.pending = None;
@@ -43,7 +43,7 @@ fn main() {
     for (pref, name) in [("ending_ipo", "level17"), ("ending_acquisition", "level18")] {
         autopilot::prefer_ending(Some(pref));
         let mut b = game_core::GameState::new(&c, 1);
-        b.set_founder("Camille", true);
+        b.set_founder("Camille", true, 4);
         while b.campaign.level < 17 && autopilot::step(&mut b, &c) {}
         for _ in 0..40 {
             autopilot::step(&mut b, &c);
@@ -63,6 +63,22 @@ fn main() {
     s.campaign.intro_pending = false;
     s.recompute_metrics(&c);
     std::fs::write(format!("{out}/level16.json"), to_save_string(&s, "démo")).unwrap();
+    // La bulle « nouveaux chantiers » du niveau 16, et une trésorerie en crypto.
+    let mut n = s.clone();
+    n.tasks_seen_level = 15;
+    n.tutorial = None;
+    n.events.pending = None;
+    n.events.queue.clear();
+    std::fs::write(format!("{out}/newtasks.json"), to_save_string(&n, "démo")).unwrap();
+    let mut k = s.clone();
+    k.tasks_seen_level = 99;
+    k.events.pending = None;
+    k.events.queue.clear();
+    k.crypto = 48_000_000.0;
+    k.finance.cash += k.crypto;
+    k.flags.insert("crypto_treasury".into());
+    k.flags.insert("series_c_done".into());
+    std::fs::write(format!("{out}/crypto.json"), to_save_string(&k, "démo")).unwrap();
     // Une défense anti-rachat prête, par entreprise, pour tester les combats.
     for company in ["google", "microsoft", "amazon", "meta", "nvidia"] {
         let mut e = s.clone();

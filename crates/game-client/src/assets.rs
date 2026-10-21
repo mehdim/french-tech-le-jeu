@@ -103,6 +103,18 @@ fn load_atlas(mut commands: Commands, server: Res<AssetServer>) {
     });
 }
 
+/// Ligne du sprite d'un personnage dans l'atlas. Le héros choisi à la création
+/// (apparences 16+ et 24+) a ses propres lignes, « HeroM » et « HeroF ».
+pub fn character_row(m: &CharacterMeta, role: game_core::types::Role, look: u8) -> u32 {
+    let (name, look) = match (role, look) {
+        (game_core::types::Role::Founder, l) if l >= game_core::simulation::HERO_LOOK_FEMALE => ("HeroF".to_string(), l - game_core::simulation::HERO_LOOK_FEMALE),
+        (game_core::types::Role::Founder, l) if l >= game_core::simulation::HERO_LOOK_MALE => ("HeroM".to_string(), l - game_core::simulation::HERO_LOOK_MALE),
+        (r, l) => (format!("{r:?}"), l),
+    };
+    let idx = m.roles.iter().position(|r| *r == name).unwrap_or(0) as u32;
+    idx * m.looks + (look as u32 % m.looks)
+}
+
 /// Projection isométrique d'un point de la grille vers le monde (y vers le haut).
 pub fn iso(gx: f32, gy: f32) -> Vec2 {
     Vec2::new((gx - gy) * 16.0, -(gx + gy) * 8.0)

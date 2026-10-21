@@ -53,6 +53,7 @@ fn placement_input(
     mut game: ResMut<Game>,
     content: Res<GameContent>,
     mut toasts: ResMut<Toasts>,
+    time: Res<Time>,
 ) {
     let Some(item) = placement.item.clone() else { return };
     if keys.just_pressed(KeyCode::KeyR) {
@@ -71,7 +72,11 @@ fn placement_input(
     let check = game.0.office.can_place(&content.0, &item, g.x, g.y, placement.rotated, placement.moving_uid);
     placement.valid = check.is_ok();
     placement.reason = check.err().map(|e| e.label().to_string()).unwrap_or_default();
-    if mouse.just_released(MouseButton::Left) && cam_state.drag_distance < 6.0 {
+    if mouse.just_pressed(MouseButton::Left) && time.elapsed_secs() - placement.picked_at > 0.25 {
+        placement.armed = true;
+    }
+    if placement.armed && mouse.just_released(MouseButton::Left) && cam_state.drag_distance < 6.0 {
+        placement.armed = false;
         let cmd = if let Some(uid) = placement.moving_uid {
             Command::MoveFurniture { uid, x: g.x, y: g.y, rotated: placement.rotated }
         } else if let Some(index) = placement.stored_index {
@@ -94,7 +99,9 @@ fn placement_input(
 
 #[allow(clippy::too_many_arguments)]
 fn pick_input(
-    placement: Res<Placement>,
+    time: Res<Time>,
+    mut placement: ResMut<Placement>,
+    game: Res<Game>,
     cw: Res<CursorWorld>,
     mouse: Res<ButtonInput<MouseButton>>,
     cam_state: Res<CameraState>,
@@ -139,6 +146,21 @@ fn pick_input(
         selection.furniture = Some(uid);
         selection.employee = None;
         ui.inspect_furniture = Some(uid);
+        // Une fois l'aménagement débloqué, cliquer sur un meuble le prend en main :
+        // le clic suivant le repose ailleurs (R pour pivoter, Échap pour annuler).
+        if game.0.is_unlocked("office_custom")
+            && let Some(it) = game.0.office.items.iter().find(|i| i.uid == uid) {
+                *placement = Placement {
+                    item: Some(it.item.clone()),
+                    moving_uid: Some(uid),
+                    rotated: it.rotated,
+                    picked_at: time.elapsed_secs(),
+                    ..Default::default()
+                };
+                ui.tab = Tab::Office;
+                ui.right_open = true;
+                return;
+            }
         // Cliquer sur le tableau blanc ouvre la R&D, une table de réunion ouvre les ventes, etc.
         ui.tab = match item.as_str() {
             "whiteboard" | "gpu_server" | "bookshelf_item" => Tab::Product,

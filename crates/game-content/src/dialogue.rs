@@ -244,6 +244,8 @@ pub fn effect_text(e: &Effect) -> Option<(String, bool)> {
         Effect::StartTakeover(_) => ("Défense anti-rachat : 1 000 pts de levée de fonds, puis combat".into(), true),
         Effect::SellTo(_) => ("Rachat : la partie s'arrête".into(), false),
         Effect::EnergyMul(f) => (format!("Énergie par analyse {}", signed((f - 1.0) * 100.0, " %")), *f <= 1.0),
+        Effect::CryptoMul(f) => (format!("Trésorerie crypto {}", signed((f - 1.0) * 100.0, " %")), *f >= 1.0),
+        Effect::CryptoSell(fee) => (format!("Crypto convertie en euros (frais {:.0} %)", fee * 100.0), true),
     })
 }
 

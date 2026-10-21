@@ -53,6 +53,31 @@ const FOUNDER: Look = Look {
     beard: false,
 };
 
+/// Teint, cheveux et coiffure du héros selon le type choisi (mêmes couleurs que tools/art).
+fn hero_look(f: &game_core::simulation::FounderProfile) -> Look {
+    // (teint, cheveux, coiffure homme, coiffure femme, barbe)
+    const TYPES: [((u8, u8, u8), (u8, u8, u8), u8, u8, bool); 7] = [
+        ((244, 208, 178), (112, 74, 42), 0, 1, false),
+        ((212, 164, 120), (34, 26, 22), 0, 1, true),
+        ((170, 114, 76), (22, 20, 24), 0, 2, false),
+        ((192, 140, 100), (58, 38, 26), 5, 5, false),
+        ((104, 68, 46), (20, 18, 18), 5, 5, false),
+        ((238, 204, 162), (24, 22, 26), 0, 1, false),
+        ((178, 120, 82), (16, 16, 20), 1, 1, false),
+    ];
+    let Some(e) = f.ethnicity else {
+        return if f.female { Look { hair_style: 1, hair: Color32::from_rgb(150, 70, 40), ..FOUNDER } } else { FOUNDER };
+    };
+    let (skin, hair, sm, sf, beard) = TYPES[e as usize % TYPES.len()];
+    Look {
+        skin: Color32::from_rgb(skin.0, skin.1, skin.2),
+        hair: Color32::from_rgb(hair.0, hair.1, hair.2),
+        hair_style: if f.female { sf } else { sm },
+        beard: beard && !f.female,
+        ..FOUNDER
+    }
+}
+
 fn boss(company: &str) -> Boss {
     match company {
         "google" => Boss {
@@ -322,7 +347,7 @@ pub fn show(ctx: &egui::Context, c: &mut Ctx) {
         };
     }
     let founder = c.game.0.founder.clone();
-    let hero_look = if founder.female { Look { hair_style: 1, hair: Color32::from_rgb(150, 70, 40), ..FOUNDER } } else { FOUNDER };
+    let hero_look = hero_look(&founder);
     let now = ctx.input(|i| i.time);
     let dt = if f.last_time > 0.0 { (now - f.last_time).clamp(0.0, 0.1) as f32 } else { 0.0 };
     f.last_time = now;

@@ -59,8 +59,8 @@ fn lerp(a: (f32, f32), b: (f32, f32), k: f32) -> (f32, f32) {
 fn hero(p: &egui::Painter, v: &View, c: &Ctx, feet: (f32, f32), frame: u32, flip: bool) {
     let (Some(tex), Some(atlas)) = (c.tex.characters, c.atlas) else { return };
     let m = &atlas.manifest.characters;
-    let look = c.game.0.employees.iter().find(|e| e.role == Role::Founder).map(|e| e.look as u32).unwrap_or(0);
-    let row = look % m.looks; // le fondateur est le premier rôle de l'atlas
+    let look = c.game.0.employees.iter().find(|e| e.role == Role::Founder).map(|e| e.look).unwrap_or(0);
+    let row = crate::assets::character_row(m, Role::Founder, look);
     let (fw, fh) = (m.frame[0], m.frame[1]);
     let size = vec2(fw * 16.0, fh * m.looks as f32 * m.roles.len() as f32);
     let u0 = frame as f32 * fw / size.x;

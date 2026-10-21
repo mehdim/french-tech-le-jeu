@@ -95,6 +95,12 @@ pub struct GameState {
     /// Étape du tutoriel des niveaux 1 et 2 (`None` = désactivé ou terminé).
     #[serde(default)]
     pub tutorial: Option<u32>,
+    /// Dernier niveau dont les nouveaux chantiers ont été présentés en bulle.
+    #[serde(default)]
+    pub tasks_seen_level: u32,
+    /// Part de la trésorerie détenue en cryptomonnaie (comptée dans `finance.cash`).
+    #[serde(default)]
+    pub crypto: f64,
     #[serde(skip)]
     pub metrics: Metrics,
     #[serde(skip)]
@@ -111,11 +117,30 @@ pub const TAKEOVER_DAYS: u32 = 120;
 pub struct FounderProfile {
     pub name: String,
     pub female: bool,
+    /// Type choisi à la création (0..7 : voir `ETHNICITIES`) ; absent des anciennes sauvegardes.
+    #[serde(default)]
+    pub ethnicity: Option<u8>,
 }
+
+/// Les types de héros proposés à la création, au masculin et au féminin.
+pub const ETHNICITIES: [(&str, &str); 7] = [
+    ("Blanc", "Blanche"),
+    ("Arabe", "Arabe"),
+    ("Indien", "Indienne"),
+    ("Métis", "Métisse"),
+    ("Africain", "Africaine"),
+    ("Asiatique", "Asiatique"),
+    ("Amérindien", "Amérindienne"),
+];
+
+/// Apparence du sprite du héros : 16 + type (homme), 24 + type (femme).
+/// Les apparences 0 à 7 restent celles des anciennes sauvegardes.
+pub const HERO_LOOK_MALE: u8 = 16;
+pub const HERO_LOOK_FEMALE: u8 = 24;
 
 impl Default for FounderProfile {
     fn default() -> Self {
-        Self { name: "Camille".to_string(), female: false }
+        Self { name: "Camille".to_string(), female: false, ethnicity: None }
     }
 }
 
@@ -149,6 +174,8 @@ pub enum Command {
     StartFundraising { round: RoundKind },
     AcceptOffer { index: usize },
     DeclineOffers,
+    /// Convertit la trésorerie crypto en euros (3 % de frais).
+    SellCrypto,
     TakeFriendsFamily,
     PlaceFurniture { item: String, x: i32, y: i32, rotated: bool },
     PlaceStored { index: usize, x: i32, y: i32, rotated: bool },
@@ -269,6 +296,8 @@ impl GameState {
             takeover: None,
             founder: FounderProfile::default(),
             tutorial: None,
+            tasks_seen_level: 0,
+            crypto: 0.0,
             metrics: Metrics::default(),
             cues: Vec::new(),
         };
@@ -277,15 +306,15 @@ impl GameState {
     }
 
     /// Personnalise le héros (nom affiché, apparence) au début d'une nouvelle partie.
-    pub fn set_founder(&mut self, name: &str, female: bool) {
+    pub fn set_founder(&mut self, name: &str, female: bool, ethnicity: u8) {
+        let ethnicity = ethnicity.min(ETHNICITIES.len() as u8 - 1);
         let name = name.trim();
         let name: String = if name.is_empty() { "Camille".to_string() } else { name.chars().take(24).collect() };
         if let Some(f) = self.employees.iter_mut().find(|e| e.role == Role::Founder) {
             f.name = name.clone();
-            // apparences 1 et 5 : cheveux longs ; 0 : cheveux courts
-            f.look = if female { 1 } else { 0 };
+            f.look = if female { HERO_LOOK_FEMALE } else { HERO_LOOK_MALE } + ethnicity;
         }
-        self.founder = FounderProfile { name, female };
+        self.founder = FounderProfile { name, female, ethnicity: Some(ethnicity) };
     }
 
     /// Choisit le mentor principal à la création de la partie : l'événement
@@ -453,6 +482,7 @@ impl GameState {
             self.close_month(content);
         }
         if self.day.is_multiple_of(7) {
+            self.crypto_week();
             self.finance.history.push((self.day, self.finance.cash, self.metrics.mrr));
             if self.week_new + self.week_churn > 0 {
                 let (new, churned) = (self.week_new, self.week_churn);
@@ -465,6 +495,44 @@ impl GameState {
         self.check_bankruptcy(content);
         self.evaluate_missions(content);
         true
+    }
+
+    /// Volatilité hebdomadaire de la trésorerie en cryptomonnaie : en moyenne
+    /// légèrement baissière, avec de fortes variations dans les deux sens.
+    fn crypto_week(&mut self) {
+        if self.crypto <= 0.0 {
+            return;
+        }
+        let r: f64 = self.rng.random_range(-0.13..0.13) + self.rng.random_range(-0.13..0.12);
+        let delta = self.crypto * r;
+        self.crypto += delta;
+        self.finance.cash += delta;
+        if r.abs() >= 0.06 {
+            let tone = if r > 0.0 { Tone::Good } else { Tone::Bad };
+            let pct = (r * 100.0).round();
+            self.log(
+                tone,
+                Msg::Text(format!(
+                    "Trésorerie crypto : {pct:+.0} % cette semaine ({}{:.1} M€). Encore {:.1} M€ en jetons.",
+                    if delta >= 0.0 { "+" } else { "" },
+                    delta / 1e6,
+                    self.crypto / 1e6
+                )),
+            );
+        }
+    }
+
+    /// Convertit la trésorerie crypto en euros (frais compris).
+    pub fn sell_crypto(&mut self, fee: f64) {
+        if self.crypto <= 0.0 {
+            return;
+        }
+        let cost = self.crypto * fee.clamp(0.0, 1.0);
+        self.finance.cash -= cost;
+        let kept = self.crypto - cost;
+        self.crypto = 0.0;
+        self.flags.remove("crypto_treasury");
+        self.log(Tone::Money, Msg::Text(format!("Trésorerie crypto convertie en euros : {:.1} M€ (frais {:.1} M€).", kept / 1e6, cost / 1e6)));
     }
 
     fn compute_work(&mut self, content: &Content, fx: &OfficeEffects, working: bool) -> Work {
@@ -765,13 +833,18 @@ impl GameState {
             }
             let pre = base * inv.valuation_mult * self.rng.random_range(0.9..1.12);
             let d = self.rng.random_range(rdef.dilution.0..=rdef.dilution.1) / 100.0;
-            let amount = (pre * d / (1.0 - d)).clamp(inv.ticket.0, inv.ticket.1);
+            let amount = if round == RoundKind::Crypto {
+                // Vente de jetons : le montant dépend surtout de l'humeur du marché.
+                self.rng.random_range(inv.ticket.0..=inv.ticket.1)
+            } else {
+                (pre * d / (1.0 - d)).clamp(inv.ticket.0, inv.ticket.1)
+            };
             let amount = (amount / 10_000.0).round().max(1.0) * 10_000.0;
             offers.push(Offer {
                 investor: inv.id.clone(),
                 amount,
                 pre_money: pre,
-                dilution: 100.0 * amount / (pre + amount),
+                dilution: if round == RoundKind::Crypto { 0.0 } else { 100.0 * amount / (pre + amount) },
                 expires_day: self.day + 21,
             });
         }
@@ -1810,8 +1883,14 @@ impl GameState {
             }
             Command::StartFundraising { round } => {
                 let def = content.round(round).ok_or(CmdError::NotFound)?;
+                if self.flags.contains("nvidia_owned") {
+                    return Err(CmdError::Invalid("Veridix appartient à NVIDIA : plus de levée de fonds possible"));
+                }
                 if def.requires_unlock.as_ref().is_some_and(|u| !self.is_unlocked(u)) {
                     return Err(CmdError::Locked);
+                }
+                if !def.requires.iter().all(|c| self.check(c)) {
+                    return Err(CmdError::Blocked(if def.requires_text.is_empty() { "Conditions non remplies".into() } else { def.requires_text.clone() }));
                 }
                 if self.funding.fundraising.is_some() {
                     return Err(CmdError::Invalid("Une levée est déjà en cours"));
@@ -1835,7 +1914,14 @@ impl GameState {
                 }
                 let round = fr.round;
                 let inv = content.investor(&offer.investor).ok_or(CmdError::NotFound)?;
-                let dilution = self.funding.cap.issue(&inv.name, offer.amount, offer.pre_money);
+                // Une levée en cryptomonnaie émet des jetons, pas des actions : pas de
+                // dilution, mais l'argent reste en crypto jusqu'à ce qu'on le convertisse.
+                let dilution = if round == RoundKind::Crypto {
+                    self.crypto += offer.amount;
+                    0.0
+                } else {
+                    self.funding.cap.issue(&inv.name, offer.amount, offer.pre_money)
+                };
                 self.finance.cash += offer.amount;
                 self.finance.month.equity_in += offer.amount;
                 self.finance.total_equity += offer.amount;
@@ -1856,6 +1942,13 @@ impl GameState {
                 self.log(Tone::Story, Msg::Text(inv.accept_line.clone()));
                 self.log(Tone::Money, Msg::RoundClosed { investor: inv.name.clone(), amount: offer.amount, dilution });
                 self.cues.push(Cue::Funding(offer.amount));
+                Ok(())
+            }
+            Command::SellCrypto => {
+                if self.crypto <= 0.0 {
+                    return Err(CmdError::Invalid("Aucune cryptomonnaie en trésorerie"));
+                }
+                self.sell_crypto(0.03);
                 Ok(())
             }
             Command::DeclineOffers => {

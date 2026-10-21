@@ -32,6 +32,11 @@ pub struct Placement {
     pub hover: Option<IVec2>,
     pub valid: bool,
     pub reason: String,
+    /// Un clic dans le bureau a commencé depuis la prise en main : seul un geste
+    /// complet (appui puis relâchement) pose l'objet, jamais le clic qui l'a saisi.
+    pub armed: bool,
+    /// Instant (secondes) où l'objet a été saisi d'un clic dans le bureau.
+    pub picked_at: f32,
 }
 
 /// Éléments actuellement sélectionnés (affichés en surbrillance).

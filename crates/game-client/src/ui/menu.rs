@@ -31,6 +31,7 @@ fn open_new_hero(c: &mut Ctx) {
     let k = (platform::clock::now_millis() % 8) as usize;
     c.ui.hero_female = platform::clock::now_millis().is_multiple_of(2);
     c.ui.hero_name = if c.ui.hero_female { NAMES_F[k] } else { NAMES_M[k] }.to_string();
+    c.ui.hero_ethnicity = (platform::clock::now_millis() / 3 % game_core::simulation::ETHNICITIES.len() as u64) as u8;
     // Le tutoriel est proposé d'office à la première partie.
     c.ui.hero_tutorial = !c.slots.0.iter().any(|(_, m)| m.is_ok());
     c.ui.menu_page = MenuPage::NewHero;
@@ -41,14 +42,15 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
     ui.add(egui::Label::new(RichText::new("Belleville, un salon, un ordinateur portable. Qui va créer Veridix ?").size(13.0).color(LIGHTGRAY)).wrap());
     ui.add_space(6.0);
     ui.horizontal(|ui| {
-        for (female, key, label) in [(false, "founder", "Fondateur"), (true, "founder_f", "Fondatrice")] {
+        let e = c.ui.hero_ethnicity;
+        for (female, key, label) in [(false, format!("hero_m{e}"), "Fondateur"), (true, format!("hero_f{e}"), "Fondatrice")] {
             let selected = c.ui.hero_female == female;
             let frame = if selected { card().stroke(egui::Stroke::new(2.0, GREEN)) } else { card() };
             let r = frame
                 .show(ui, |ui| {
                     ui.set_width(170.0);
                     ui.vertical_centered(|ui| {
-                        portrait(ui, c.tex, c.atlas, key, 88.0);
+                        portrait(ui, c.tex, c.atlas, &key, 72.0);
                         ui.label(RichText::new(label).font(pixel(13.0)).color(if selected { GREEN } else { LIGHTGRAY }));
                     });
                 })
@@ -63,6 +65,32 @@ fn new_hero_page(ui: &mut egui::Ui, c: &mut Ctx) {
                     let k = (platform::clock::now_millis() % 8) as usize;
                     c.ui.hero_name = if female { NAMES_F[k] } else { NAMES_M[k] }.to_string();
                 }
+            }
+        }
+    });
+    ui.add_space(4.0);
+    let (male_label, female_label) = game_core::simulation::ETHNICITIES[c.ui.hero_ethnicity as usize % 7];
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Origine").strong());
+        ui.label(RichText::new(if c.ui.hero_female { female_label } else { male_label }).color(GREEN));
+    });
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 4.0;
+        for (i, (m, f)) in game_core::simulation::ETHNICITIES.iter().enumerate() {
+            let selected = c.ui.hero_ethnicity as usize == i;
+            let key = if c.ui.hero_female { format!("hero_f{i}") } else { format!("hero_m{i}") };
+            let frame = egui::Frame::new()
+                .inner_margin(egui::Margin::same(2))
+                .stroke(egui::Stroke::new(2.0, if selected { GREEN } else { GRAPHITE_2 }));
+            let r = frame
+                .show(ui, |ui| portrait(ui, c.tex, c.atlas, &key, 46.0))
+                .response
+                .interact(egui::Sense::click())
+                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                .on_hover_text(if c.ui.hero_female { *f } else { *m });
+            if r.clicked() && !selected {
+                *c.click += 1;
+                c.ui.hero_ethnicity = i as u8;
             }
         }
     });
@@ -139,7 +167,7 @@ fn start_new(c: &mut Ctx) {
     let seed = platform::clock::now_millis();
     c.game.0 = game_core::GameState::new(&c.content.0, seed);
     let (name, female) = (c.ui.hero_name.clone(), c.ui.hero_female);
-    c.game.0.set_founder(&name, female);
+    c.game.0.set_founder(&name, female, c.ui.hero_ethnicity);
     let mentor = if c.ui.hero_mentor.is_empty() { "mehdi".to_string() } else { c.ui.hero_mentor.clone() };
     if let Err(e) = c.game.0.choose_starting_mentor(&c.content.0, &mentor) {
         c.toasts.push_bad(e.label());

@@ -82,6 +82,7 @@ pub struct UiState {
     pub hero_female: bool,
     pub hero_tutorial: bool,
     pub hero_mentor: String,
+    pub hero_ethnicity: u8,
 }
 
 /// Notifications éphémères dans le coin.
@@ -280,6 +281,7 @@ fn ui_root(
                 AppState::Playing => {
                     dialogs::in_game(&ctx, &mut c);
                     tutorial::show(&ctx, &mut c);
+                    tutorial::new_tasks(&ctx, &mut c);
                 }
                 AppState::Paused => menu::pause_menu(&ctx, &mut c),
                 AppState::MissionComplete => dialogs::mission_complete(&ctx, &mut c),

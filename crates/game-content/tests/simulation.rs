@@ -586,13 +586,15 @@ fn ipo_and_nvidia_endings_open_a_bonus_level() {
 fn the_hero_gets_a_name_and_a_look() {
     let c = content();
     let mut s = GameState::new(&c, 4);
-    s.set_founder("  Camille Dupont  ", true);
+    s.set_founder("  Camille Dupont  ", true, 3);
     assert_eq!(s.founder.name, "Camille Dupont");
     assert!(s.founder.female);
     let f = s.employees.iter().find(|e| e.role == Role::Founder).unwrap();
     assert_eq!(f.name, "Camille Dupont");
-    assert_eq!(f.look, 1);
-    s.set_founder("", false);
+    assert_eq!(f.look, 24 + 3);
+    assert_eq!(s.founder.ethnicity, Some(3));
+    s.set_founder("", false, 99);
+    assert_eq!(s.founder.ethnicity, Some(6), "type borné");
     assert_eq!(s.founder.name, "Camille");
     // Les anciennes sauvegardes, sans profil, se chargent avec un profil par défaut.
     let mut v = serde_json::to_value(&s).unwrap();
@@ -613,4 +615,60 @@ fn a_mentor_chosen_at_creation_replaces_the_mentor_event() {
     }
     assert!(s.events.history.iter().all(|e| e.event_id != "mentors_intro"));
     assert!(s.events.pending.as_ref().is_none_or(|p| p.event_id != "mentors_intro"));
+}
+
+#[test]
+fn series_d_needs_a_series_c_and_crypto_money_is_volatile() {
+    use game_core::content::RoundKind;
+    let c = content();
+    let mut s = GameState::new(&c, 21);
+    s.campaign.intro_pending = false;
+    s.events.pending = None;
+    s.campaign.unlocks.insert("late_stage".into());
+    // Série D : refusée sans Série C, acceptée ensuite.
+    assert!(s.apply(&c, Command::StartFundraising { round: RoundKind::SeriesD }).is_err());
+    s.flags.insert("series_c_done".into());
+    assert!(s.apply(&c, Command::StartFundraising { round: RoundKind::SeriesD }).is_ok());
+    let _ = s.apply(&c, Command::DeclineOffers);
+    // Levée crypto : pas de dilution, l'argent reste en jetons.
+    s.apply(&c, Command::StartFundraising { round: RoundKind::Crypto }).unwrap();
+    s.funding.fundraising.as_mut().unwrap().pitch_done = 1e9;
+    let founder_before = s.funding.cap.founder_pct();
+    // Forcer la génération des offres en avançant d'un jour.
+    for _ in 0..3 {
+        s.events.pending = None;
+        s.tick(&c);
+    }
+    let fr = s.funding.fundraising.as_ref().expect("levée en cours");
+    assert!(!fr.offers.is_empty(), "des investisseurs crypto font une offre");
+    let cash = s.finance.cash;
+    let amount = fr.offers[0].amount;
+    s.apply(&c, Command::AcceptOffer { index: 0 }).unwrap();
+    assert!((s.finance.cash - cash - amount).abs() < 1.0);
+    assert!((s.crypto - amount).abs() < 1.0);
+    assert!((s.funding.cap.founder_pct() - founder_before).abs() < 1e-9, "aucune dilution");
+    assert!(s.flags.contains("crypto_treasury"));
+    // La trésorerie crypto varie chaque semaine.
+    let before = s.crypto;
+    for _ in 0..35 {
+        s.events.pending = None;
+        s.tick(&c);
+    }
+    assert!((s.crypto - before).abs() > 1.0, "volatilité hebdomadaire");
+    // Conversion en euros : 3 % de frais, plus d'exposition.
+    let (cash, crypto) = (s.finance.cash, s.crypto);
+    s.apply(&c, Command::SellCrypto).unwrap();
+    assert_eq!(s.crypto, 0.0);
+    assert!((cash - s.finance.cash - crypto * 0.03).abs() < 1.0);
+    assert!(!s.flags.contains("crypto_treasury"));
+}
+
+#[test]
+fn no_fundraising_once_owned_by_nvidia() {
+    use game_core::content::RoundKind;
+    let c = content();
+    let mut s = GameState::new(&c, 22);
+    s.campaign.unlocks.insert("vc".into());
+    s.flags.insert("nvidia_owned".into());
+    assert!(s.apply(&c, Command::StartFundraising { round: RoundKind::SeriesA }).is_err());
 }

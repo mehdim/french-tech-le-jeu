@@ -103,13 +103,16 @@ déplacement se fait donc avec ZQSD.
 ## Contenu du jeu
 
 - **Votre héros ou votre héroïne** : à la création de la partie, choisissez
-  fondateur ou fondatrice (sprite, portrait et combat assortis) et un nom ;
+  fondateur ou fondatrice, son origine parmi sept types (blanc, arabe, indien,
+  métis, africain, asiatique, amérindien d'Amérique du Sud, chacun avec son
+  teint et sa coiffure ; sprite, portrait et combat assortis) et un nom ;
   les dialogues s'accordent (« la fondatrice », « {nom} sonne la cloche »…).
 - **Le choix du mentor** juste après celui du héros (Mehdi, Steeve ou
   Jean-Baptiste, avec leur bonus permanent).
 - **Un tutoriel guidé** sur les niveaux 1 et 2 (facultatif, désactivable à
   tout moment), présenté par votre mentor principal (photo et tutoiement
-  compris) : 15 bulles qui désignent l'élément à utiliser (onglet,
+  compris). Au niveau 1, il fait défiler jusqu'à la section MVP, désigne le
+  bouton « Lancer » puis le menu d'affectation sous votre nom : 15 bulles qui désignent l'élément à utiliser (onglet,
   chantier, dossier France Travail, menu d'affectation, recrutement…) et
   avancent dès que l'action est faite.
 - **Une campagne de 16 niveaux, plus un niveau bonus selon la fin choisie**, chacun avec une introduction, 2 à 5
@@ -152,6 +155,19 @@ déplacement se fait donc avec ZQSD.
   visas, pub du Super Bowl…) et Chine (registre des algorithmes, guerre des
   prix des tokens, clone sur la messagerie, contrôles à l'export des puces…).
   Chaque décision politique change les lois, les prix ou les coûts.
+- **La guerre des modèles** (niveau 6 et plus), en parodie : OpenAI lance un
+  détecteur gratuit puis un modèle qui écrit comme un élève de seconde,
+  Anthropic un modèle qui refuse les dissertations et un benchmark ouvert,
+  Google un filigrane et une guerre des prix… Ces sorties font bouger la
+  réputation, les prix et la précision de Veridix. Et quand Mistral sort un
+  modèle qui ne répond qu'en alexandrins ou que Microsoft ressuscite le
+  trombone, c'est Veridix qui récupère la réputation.
+- **Série D ou levée en cryptomonnaie** dès le niveau 16 : la Série D est
+  réservée aux entreprises qui ont fait une Série C ; la levée en jetons
+  « VRDX » ne dilue pas mais laisse la trésorerie en crypto, avec une
+  volatilité hebdomadaire et des incidents (faillite de plateforme façon
+  FTX, stablecoin qui décroche, emoji d'un milliardaire, clé privée sur un
+  post-it, AMF). Une fois racheté par NVIDIA (niveau 18), plus aucune levée.
 - **Des offres de rachat hostiles** aux niveaux 14 et 15 : Google, Microsoft,
   Amazon, Meta ou NVIDIA veulent racheter Veridix. Accepter met fin à la
   partie ; refuser lance une défense de 1 000 points de « Levée de fonds »
@@ -213,6 +229,10 @@ déplacement se fait donc avec ZQSD.
   à la vitesse 1× ; mois comptables de 28 jours) : leads → conversion → abonnements → churn par segment de
   clientèle, MRR/ARR, COGS (inférence + hébergement), marge brute, burn,
   runway, CAC, LTV, ARPA, valorisation et table de capitalisation.
+- **Un panneau Produit qui grandit avec vous** : les sections « Recherche IA »,
+  « Entreprise » et « Pivot IA native » n'apparaissent que lorsqu'un chantier
+  y est à lancer. À chaque nouveau niveau, une bulle de votre mentor présente
+  les chantiers débloqués, ouvre la bonne section et désigne le premier.
 - **Une R&D en IA qui ne « résout » jamais la détection** : 99 chantiers
   produit, recherche, entreprise et pivot IA native, avec dépendances, points
   d'ingénierie et de recherche, coût, risque de dette technique et approche
@@ -231,7 +251,7 @@ déplacement se fait donc avec ZQSD.
   versements échelonnés ; allègements façon JEI/CIR ; quatre business angels
   récurrents (Jean-Michel Exit 2001, Patrick Blockchain, Bernard EBITDA,
   Sophie Term Sheet) ; des VC du seed à la série C, avec dilution.
-- **149 événements pilotés par les données** (100 aléatoires, 49 scénarisés), avec conditions,
+- **167 événements pilotés par les données** (118 aléatoires, 49 scénarisés), avec conditions,
   pondérations, délais de carence et choix aux effets immédiats et différés
   (l'incident Kubernetes, le dilemme du modèle open-weight chinois,
   l'influenceur LinkedIn, la clé d'API publiée par le stagiaire…).
@@ -239,7 +259,8 @@ déplacement se fait donc avec ZQSD.
   l'appartement au siège européen. Les salariés animés marchent, s'assoient,
   tapent, prennent un café, se réunissent, paniquent et font des burn-out. Le
   mobilier se place sur une grille avec aperçu, vérification, rotation,
-  déplacement et rangement ; chaque meuble influe sur le moral, la capacité,
+  déplacement (un clic sur un meuble le prend, le clic suivant le repose) et
+  rangement ; chaque meuble influe sur le moral, la capacité,
   l'efficacité ou l'infrastructure.
 - **Sauvegardes** : sauvegarde auto chaque mois de jeu et à chaque changement
   de niveau, plus 3 emplacements manuels. Les sauvegardes portent une version

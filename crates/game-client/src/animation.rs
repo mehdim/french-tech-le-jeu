@@ -254,9 +254,7 @@ fn rebuild_nav(game: Res<Game>, content: Res<GameContent>, sig: Res<OfficeSignat
 }
 
 fn row_for(atlas: &Atlas, role: game_core::types::Role, look: u8) -> u32 {
-    let name = format!("{role:?}");
-    let idx = atlas.manifest.characters.roles.iter().position(|r| *r == name).unwrap_or(0) as u32;
-    idx * atlas.manifest.characters.looks + (look as u32 % atlas.manifest.characters.looks)
+    crate::assets::character_row(&atlas.manifest.characters, role, look)
 }
 
 fn sync_employees(

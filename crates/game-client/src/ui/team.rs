@@ -47,7 +47,7 @@ fn assignment_combo(ui: &mut egui::Ui, c: &mut Ctx, id: u32, role: Role, current
         options.insert(1, Assignment::Task(t.instance));
     }
     let mut chosen = None;
-    egui::ComboBox::from_id_salt(("assign", id))
+    let combo = egui::ComboBox::from_id_salt(("assign", id))
         .width(190.0)
         .selected_text(RichText::new(assignment_label(c, current)).size(12.5))
         .show_ui(ui, |ui| {
@@ -58,6 +58,7 @@ fn assignment_combo(ui: &mut egui::Ui, c: &mut Ctx, id: u32, role: Role, current
                 }
             }
         });
+    super::tutorial::mark(ui, &format!("assign_{id}"), combo.response.rect);
     if let Some(a) = chosen {
         c.run(Command::Assign { employee: id, assignment: a });
     }

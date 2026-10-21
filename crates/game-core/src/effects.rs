@@ -169,6 +169,12 @@ impl GameState {
                 let v = self.counters.entry(key.clone()).or_insert(0);
                 *v = (*v as i64 + *n as i64).max(0) as u32;
             }
+            Effect::CryptoMul(f) => {
+                let delta = self.crypto * (f - 1.0);
+                self.crypto += delta;
+                self.finance.cash += delta;
+            }
+            Effect::CryptoSell(fee) => self.sell_crypto(*fee),
             Effect::EnergyMul(f) => self.product.energy_per_k *= f.max(0.01),
             Effect::StartTakeover(company) => {
                 self.flags.insert(format!("takeover_by_{company}"));

@@ -299,6 +299,10 @@ pub enum Effect {
     StartTakeover(String),
     /// Accepte le rachat par cette entreprise : la partie s'arrête.
     SellTo(String),
+    /// Multiplie la trésorerie détenue en cryptomonnaie (krach, envolée, piratage…).
+    CryptoMul(f64),
+    /// Convertit toute la trésorerie crypto en euros, moyennant ces frais (0,03 = 3 %).
+    CryptoSell(f64),
 }
 
 /// Les niveaux d'ancienneté influent sur le salaire et la production.

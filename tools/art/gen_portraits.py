@@ -209,6 +209,32 @@ def alf_logo():
 
 
 
+def heroes():
+    """Un portrait par type de héros et par genre : hero_m0..6, hero_f0..6."""
+    import gen_characters as C
+    styles = {0: "short", 1: "long", 2: "bob", 3: "curly"}
+    out = {}
+    for i, (_, skin, hair, sm, sf, beard) in enumerate(C.HEROES):
+        m_extra = {"logo": GREEN, "mouth": "smile"}
+        if beard:
+            m_extra["beard"] = hair
+        out[f"hero_m{i}"] = bust(DEEP_GREEN, skin, hair, styles[sm] if sm != 1 else "long", GRAPHITE_2, m_extra)
+        f = bust(DEEP_GREEN, skin, hair, styles[sf] if sf != 3 else "curly", GRAPHITE_2, {"logo": GREEN, "mouth": "smile"})
+        if sf == 3:
+            # boucles volumineuses jusqu'aux épaules
+            for y in range(8, 27):
+                for x in range(9, 31):
+                    if (x - 20) ** 2 / 121 + (y - 16) ** 2 / 110 <= 1 and not ((x - 20) ** 2 / 64 + (y - 17) ** 2 / 100 <= 1 and y > 11):
+                        px(f, x, y, hair)
+        if sf == 2:
+            rect(f, 18, 3, 5, 4, hair)       # chignon
+        # rouge à lèvres et boucles d'oreilles
+        rect(f, 18, 23, 4, 1, (196, 70, 84, 255)); px(f, 17, 22, (196, 70, 84, 255)); px(f, 22, 22, (196, 70, 84, 255))
+        px(f, 12, 21, YELLOW); px(f, 12, 22, YELLOW); px(f, 28, 21, YELLOW); px(f, 28, 22, YELLOW)
+        out[f"hero_f{i}"] = f
+    return out
+
+
 def portraits():
     S, H = SKINS, HAIRS
     return {
@@ -230,6 +256,7 @@ def portraits():
         "steeve": host("steeve"),
         "jb": host("jb"),
         "alf": alf_logo(),
+        **heroes(),
         "kyle": bust((96, 150, 20, 255), S[0], H[2], "short", (36, 40, 36, 255), {"sunglasses_up": True, "mouth": "grin", "logo": (118, 185, 0, 255)}),
     }
 

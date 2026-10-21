@@ -9,7 +9,20 @@ from pixlib import *
 FW, FH = 16, 26
 FRAMES = 16
 ROLES = ["Founder", "Backend", "Frontend", "AiResearcher", "DevOps", "Sales", "Growth",
-         "ProductManager", "Hr", "Cfo", "Intern", "Consultant"]
+         "ProductManager", "Hr", "Cfo", "Intern", "Consultant", "HeroM", "HeroF"]
+
+# Le héros ou l'héroïne choisi·e à la création : 7 types, chacun avec son teint et ses cheveux.
+# (nom, teint, cheveux, coiffure homme, coiffure femme, barbe pour l'homme)
+# coiffures : 0 courts, 1 longs, 2 chignon, 3 bouclés
+HEROES = [
+    ("blanc", (244, 208, 178, 255), (112, 74, 42, 255), 0, 1, False),
+    ("arabe", (212, 164, 120, 255), (34, 26, 22, 255), 0, 1, True),
+    ("indien", (170, 114, 76, 255), (22, 20, 24, 255), 0, 2, False),
+    ("metis", (192, 140, 100, 255), (58, 38, 26, 255), 3, 3, False),
+    ("africain", (104, 68, 46, 255), (20, 18, 18, 255), 3, 3, False),
+    ("asiatique", (238, 204, 162, 255), (24, 22, 26, 255), 0, 1, False),
+    ("amerindien", (178, 120, 82, 255), (16, 16, 20, 255), 1, 1, False),
+]
 LOOKS = 8
 
 JEANS = (58, 74, 112, 255)
@@ -32,6 +45,8 @@ OUTFIT = {
     "Intern": (OFFWHITE, OFFWHITE, JEANS, {"stripes": NAVY}),
     "Consultant": ((40, 44, 56, 255), (30, 32, 42, 255), (40, 44, 56, 255), {"tie": BLUE, "collar": OFFWHITE, "strap": WOOD_D}),
 }
+OUTFIT["HeroM"] = OUTFIT["Founder"]
+OUTFIT["HeroF"] = OUTFIT["Founder"]
 
 
 def look_colors(look):
@@ -108,6 +123,19 @@ def draw_head(img, x0, y0, skin, hair, style, extras, eyes="open", mouth=None):
         c = extras["cap"]
         rect(img, x0, y0 - 1, 7, 2, c)
         rect(img, x0 - 3, y0 + 1, 3, 1, shade(c, 0.8))  # casquette à l'envers
+    if extras.get("heroine"):
+        # cheveux plus longs dans le dos, lèvres et boucle d'oreille
+        for y in range(y0 + 2, y0 + 12):
+            px(img, x0 - 1, y, hair)
+            px(img, x0, y, hair)
+        px(img, x0 + 1, y0 + 9, hair)
+        px(img, x0 + 4, y0 + 6, (190, 70, 84, 255))
+        px(img, x0 + 1, y0 + 5, YELLOW)
+    if extras.get("beard"):
+        b = extras["beard"]
+        for x in range(x0 + 1, x0 + 7):
+            px(img, x, y0 + 7, b)
+        px(img, x0 + 6, y0 + 6, b); px(img, x0 + 2, y0 + 6, b)
     if extras.get("hood"):
         px(img, x0 - 1, y0 + 6, GRAPHITE)
         px(img, x0 - 1, y0 + 7, GRAPHITE)
@@ -169,6 +197,10 @@ def draw_frame(role, look, pose):
     img = new(FW, FH)
     shirt, shirt_d, pants, extras = OUTFIT[role]
     skin, hair, style = look_colors(look)
+    if role in ("HeroM", "HeroF"):
+        _, skin, hair, sm, sf, beard = HEROES[look % len(HEROES)]
+        style = sm if role == "HeroM" else sf
+        extras = dict(extras, beard=hair if (beard and role == "HeroM") else None, heroine=(role == "HeroF"))
     by, hy, back_hand, front_hand, legs, eyes, mouth = POSES[pose]
     draw_legs(img, legs, pants, by if legs != "sit" else 1)
     # bras arrière (derrière le torse)

@@ -153,23 +153,31 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
             }
         }
     });
+    // Recherche IA, Entreprise et Pivot IA native n'apparaissent que lorsqu'un
+    // chantier y est à lancer (ou en cours) : moins de bruit en début de partie.
+    let visible: Vec<(TaskCategory, &str)> = CATEGORIES.into_iter().filter(|(cat, _)| category_visible(c, *cat)).collect();
+    if c.ui.product_filter.is_some_and(|f| !visible.iter().any(|(v, _)| *v == f)) {
+        c.ui.product_filter = None;
+    }
     ui.horizontal_wrapped(|ui| {
         if ui.selectable_label(c.ui.product_filter.is_none(), "Tout").clicked() {
             c.ui.product_filter = None;
         }
-        for (cat, label) in CATEGORIES {
+        for &(cat, label) in &visible {
             if ui.selectable_label(c.ui.product_filter == Some(cat), label).clicked() {
                 c.ui.product_filter = Some(cat);
             }
         }
     });
-    for (cat, label) in CATEGORIES {
+    for (cat, label) in visible {
         if c.ui.product_filter.is_some_and(|f| f != cat) {
             continue;
         }
         let tasks: Vec<_> = c.content.0.tasks.iter().filter(|t| t.category == cat).cloned().collect();
         let open = c.ui.product_filter == Some(cat) || matches!(cat, TaskCategory::Mvp | TaskCategory::AiResearch | TaskCategory::Engineering);
-        egui::CollapsingHeader::new(RichText::new(label).font(pixel(11.0)).color(GREEN)).id_salt(("cat", label)).default_open(open).show(ui, |ui| {
+        let cat_key = format!("cat_{cat:?}");
+        let force = super::tutorial::wants_open(ui.ctx(), &cat_key).then_some(true);
+        let header = egui::CollapsingHeader::new(RichText::new(label).font(pixel(11.0)).color(GREEN)).id_salt(("cat", label)).default_open(open).open(force).show(ui, |ui| {
             for def in tasks {
                 let status = task_availability(&def, &c.game.0.product, &c.game.0.campaign.unlocks, &c.game.0.tasks, c.game.0.finance.cash);
                 let shipped = c.game.0.product.has(&def.id);
@@ -186,7 +194,9 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| match &status {
                             Ok(()) => {
                                 let label = if def.cost > 0.0 { format!("Lancer ({})", money(def.cost)) } else { "Lancer".into() };
-                                if ui.button(RichText::new(label).color(GREEN)).clicked() {
+                                let b = ui.button(RichText::new(label).color(GREEN));
+                                super::tutorial::mark(ui, &format!("launch_{}", def.id), b.rect);
+                                if b.clicked() {
                                     c.run(Command::StartTask { task: def.id.clone(), approach });
                                 }
                             }
@@ -234,7 +244,29 @@ fn tree(ui: &mut egui::Ui, c: &mut Ctx) {
                     }
                 });
                 super::tutorial::mark(ui, &format!("task_{tid}"), resp.response.rect);
+                if super::tutorial::take_scroll(ui.ctx(), &format!("task_{tid}")) {
+                    resp.response.scroll_to_me(Some(egui::Align::Center));
+                }
             }
         });
+        super::tutorial::mark(ui, &cat_key, header.header_response.rect);
     }
+}
+
+/// Une catégorie « avancée » n'est affichée que si un chantier y est à lancer ou en cours.
+pub fn category_visible(c: &Ctx, cat: TaskCategory) -> bool {
+    if !matches!(cat, TaskCategory::AiResearch | TaskCategory::Enterprise | TaskCategory::AiNative) {
+        return true;
+    }
+    c.content.0.tasks.iter().filter(|t| t.category == cat).any(|t| {
+        matches!(
+            task_availability(t, &c.game.0.product, &c.game.0.campaign.unlocks, &c.game.0.tasks, c.game.0.finance.cash),
+            Ok(()) | Err(TaskBlock::NotEnoughCash) | Err(TaskBlock::AlreadyActive)
+        )
+    })
+}
+
+/// Libellé d'une catégorie de chantiers.
+pub fn category_label(cat: TaskCategory) -> &'static str {
+    CATEGORIES.iter().find(|(c, _)| *c == cat).map(|(_, l)| *l).unwrap_or("")
 }
